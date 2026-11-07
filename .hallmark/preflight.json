@@ -1,0 +1,12 @@
+{
+  "scanned": "2026-11-06",
+  "findings": {
+    "fonts": "Self-host Tajawal headings, Readex Pro (Reader Pro fallback) for body, and Noto Naskh Arabic for compact labels",
+    "palette": "Keep app hierarchy and data colors; use Sticker sheet warm paper, hot-pink and lime in light mode, Spore cellar coffee-brown, parchment and oyster pink in dark mode",
+    "motion": "Maintain low-motion timer transitions; physical sticker lift only on primary controls and honor reduced motion",
+    "spacing": "4px-based spacing scale retained",
+    "framework": "Next.js 15 App Router, React 19 and TypeScript"
+  },
+  "preserve": ["Arabic RTL copy and database-backed task, habit, calendar and focus behavior", "mobile-first navigation, existing task taxonomy, and route state"],
+  "introduce": ["persistent light/dark switch with system preference on first visit", "Sticker's tactile, die-cut primary cards and controls in light mode", "Spore's warm dark surfaces, soft paper steps and oyster-pink accents in dark mode"]
+}
