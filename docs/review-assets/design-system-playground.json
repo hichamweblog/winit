@@ -1,0 +1,272 @@
+{
+  "date": "2026-11-07T09:24:31.181Z",
+  "fonts": [
+    {
+      "family": "Readex Pro",
+      "weight": "400",
+      "status": "loaded"
+    },
+    {
+      "family": "Readex Pro",
+      "weight": "400",
+      "status": "loaded"
+    },
+    {
+      "family": "Readex Pro",
+      "weight": "500",
+      "status": "loaded"
+    },
+    {
+      "family": "Readex Pro",
+      "weight": "500",
+      "status": "loaded"
+    },
+    {
+      "family": "Readex Pro",
+      "weight": "600",
+      "status": "loaded"
+    },
+    {
+      "family": "Readex Pro",
+      "weight": "600",
+      "status": "loaded"
+    },
+    {
+      "family": "Noto Naskh Arabic",
+      "weight": "400",
+      "status": "loaded"
+    },
+    {
+      "family": "El Messiri",
+      "weight": "600",
+      "status": "loaded"
+    },
+    {
+      "family": "El Messiri",
+      "weight": "700",
+      "status": "loaded"
+    },
+    {
+      "family": "El Messiri",
+      "weight": "600",
+      "status": "loaded"
+    },
+    {
+      "family": "El Messiri",
+      "weight": "700",
+      "status": "loaded"
+    }
+  ],
+  "failedRequests": [],
+  "pageErrors": [],
+  "mobileOverflow": {
+    "doc": 390,
+    "win": 390
+  },
+  "results": [
+    {
+      "theme": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 4
+        }
+      ],
+      "liveRatios": [
+        {
+          "label": "نص/صفحة",
+          "ratio": "12.94:1",
+          "ok": true
+        },
+        {
+          "label": "نص/سطح",
+          "ratio": "14.33:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/صفحة",
+          "ratio": "5.01:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/سطح",
+          "ratio": "5.55:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/قائمة",
+          "ratio": "5.82:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/حقل",
+          "ratio": "4.58:1",
+          "ok": true
+        },
+        {
+          "label": "رابط/صفحة",
+          "ratio": "7.20:1",
+          "ok": true
+        },
+        {
+          "label": "نص/زر أساسي",
+          "ratio": "8.36:1",
+          "ok": true
+        },
+        {
+          "label": "زر ثانوي",
+          "ratio": "6.46:1",
+          "ok": true
+        },
+        {
+          "label": "نص/برتقالي",
+          "ratio": "5.45:1",
+          "ok": true
+        },
+        {
+          "label": "برتقالي كنص",
+          "ratio": "5.40:1",
+          "ok": true
+        },
+        {
+          "label": "نص/برتقالي ناعم C2",
+          "ratio": "4.86:1",
+          "ok": true
+        },
+        {
+          "label": "قوس برتقالي/صفحة C3",
+          "ratio": "4.10:1",
+          "ok": true
+        },
+        {
+          "label": "حدّ حقل/صفحة C4",
+          "ratio": "3.20:1",
+          "ok": true
+        },
+        {
+          "label": "حدّ حقل/سطح",
+          "ratio": "3.54:1",
+          "ok": true
+        },
+        {
+          "label": "إجراء التنبيه C1",
+          "ratio": "4.63:1",
+          "ok": true
+        },
+        {
+          "label": "نص التنبيه",
+          "ratio": "12.94:1",
+          "ok": true
+        },
+        {
+          "label": "متأخر",
+          "ratio": "6.23:1",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 4
+        }
+      ],
+      "liveRatios": [
+        {
+          "label": "نص/صفحة",
+          "ratio": "15.02:1",
+          "ok": true
+        },
+        {
+          "label": "نص/سطح",
+          "ratio": "13.23:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/صفحة",
+          "ratio": "6.43:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/سطح",
+          "ratio": "5.67:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/قائمة",
+          "ratio": "4.95:1",
+          "ok": true
+        },
+        {
+          "label": "ثانوي/حقل",
+          "ratio": "6.76:1",
+          "ok": true
+        },
+        {
+          "label": "رابط/صفحة",
+          "ratio": "7.28:1",
+          "ok": true
+        },
+        {
+          "label": "نص/زر أساسي",
+          "ratio": "6.78:1",
+          "ok": true
+        },
+        {
+          "label": "زر ثانوي",
+          "ratio": "5.13:1",
+          "ok": true
+        },
+        {
+          "label": "نص/برتقالي",
+          "ratio": "7.16:1",
+          "ok": true
+        },
+        {
+          "label": "برتقالي كنص",
+          "ratio": "6.33:1",
+          "ok": true
+        },
+        {
+          "label": "نص/برتقالي ناعم C2",
+          "ratio": "5.53:1",
+          "ok": true
+        },
+        {
+          "label": "قوس برتقالي/صفحة C3",
+          "ratio": "7.18:1",
+          "ok": true
+        },
+        {
+          "label": "حدّ حقل/صفحة C4",
+          "ratio": "3.61:1",
+          "ok": true
+        },
+        {
+          "label": "حدّ حقل/سطح",
+          "ratio": "3.18:1",
+          "ok": true
+        },
+        {
+          "label": "إجراء التنبيه C1",
+          "ratio": "5.75:1",
+          "ok": true
+        },
+        {
+          "label": "نص التنبيه",
+          "ratio": "15.02:1",
+          "ok": true
+        },
+        {
+          "label": "متأخر",
+          "ratio": "6.37:1",
+          "ok": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1823 @@
+{
+  "date": "2026-11-07T08:01:15.946Z",
+  "browser": "133.0.6943.0",
+  "layouts": [
+    {
+      "width": 320,
+      "view": "today",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 135,
+        "y": 80,
+        "w": 169,
+        "h": 89
+      },
+      "offenders": [
+        {
+          "tag": "SPAN",
+          "cls": "task-title",
+          "text": "مراجعة درس المتغيرات والدوال",
+          "x": 159,
+          "y": 401,
+          "w": 101,
+          "h": 22,
+          "client": 101,
+          "scroll": 195
+        },
+        {
+          "tag": "SPAN",
+          "cls": "task-title",
+          "text": "الاستماع إلى بودكاست باللغة الإنجليزية",
+          "x": 172,
+          "y": 487,
+          "w": 88,
+          "h": 22,
+          "client": 88,
+          "scroll": 236
+        },
+        {
+          "tag": "DIV",
+          "cls": "focus-copy",
+          "text": "مؤقت التركيزامنح هدفك انتباهك.جلسة واحدة هادئة قد تغيّر شكل ",
+          "x": 144,
+          "y": 1016,
+          "w": 140,
+          "h": 177,
+          "client": 140,
+          "scroll": 145
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1694,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 320,
+      "view": "upcoming",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 187,
+        "y": 84,
+        "w": 117,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1103,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 320,
+      "view": "inbox",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 171,
+        "y": 84,
+        "w": 133,
+        "h": 31
+      },
+      "offenders": [
+        {
+          "tag": "DIV",
+          "cls": "topbar-start",
+          "text": "مساحتيصندوق الوارد",
+          "x": 131,
+          "y": 4,
+          "w": 173,
+          "h": 48,
+          "client": 173,
+          "scroll": 179
+        },
+        {
+          "tag": "DIV",
+          "cls": "breadcrumbs",
+          "text": "مساحتيصندوق الوارد",
+          "x": 131,
+          "y": 19,
+          "w": 121,
+          "h": 17,
+          "client": 121,
+          "scroll": 127
+        },
+        {
+          "tag": "DIV",
+          "cls": "topbar-end",
+          "text": "السبت، 7 نوفمبرم",
+          "x": 16,
+          "y": 4,
+          "w": 111,
+          "h": 48,
+          "client": 111,
+          "scroll": 115
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 916,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 320,
+      "view": "all",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 188,
+        "y": 84,
+        "w": 116,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1481,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 320,
+      "view": "matrix",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 160,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [
+        {
+          "tag": "DIV",
+          "cls": "topbar-start",
+          "text": "مساحتيمصفوفة الأولويات",
+          "x": 123,
+          "y": 4,
+          "w": 181,
+          "h": 48,
+          "client": 181,
+          "scroll": 202
+        },
+        {
+          "tag": "DIV",
+          "cls": "breadcrumbs",
+          "text": "مساحتيمصفوفة الأولويات",
+          "x": 123,
+          "y": 19,
+          "w": 129,
+          "h": 17,
+          "client": 129,
+          "scroll": 150
+        },
+        {
+          "tag": "DIV",
+          "cls": "topbar-end",
+          "text": "السبت، 7 نوفمبرم",
+          "x": 16,
+          "y": 4,
+          "w": 103,
+          "h": 48,
+          "client": 103,
+          "scroll": 115
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1126,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 320,
+      "view": "calendar",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 160,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الثلاثاء30 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": -20,
+          "y": 354,
+          "w": 156,
+          "h": 330,
+          "client": 148,
+          "scroll": 148
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الثلاثاء30 مهام",
+          "x": -4,
+          "y": 370,
+          "w": 124,
+          "h": 48,
+          "client": 124,
+          "scroll": 126
+        },
+        {
+          "tag": "SPAN",
+          "cls": "calendar-day-count",
+          "text": "0 مهام",
+          "x": -6,
+          "y": 384,
+          "w": 42,
+          "h": 21,
+          "client": 42,
+          "scroll": 42
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-content",
+          "text": "مساحة مفتوحة",
+          "x": -4,
+          "y": 418,
+          "w": 124,
+          "h": 214,
+          "client": 124,
+          "scroll": 124
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-foot",
+          "text": "اترك وقتاً للراحة",
+          "x": -4,
+          "y": 632,
+          "w": 124,
+          "h": 36,
+          "client": 124,
+          "scroll": 124
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 916,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "156px 156px 156px 156px 156px 156px 156px"
+    },
+    {
+      "width": 320,
+      "view": "habits",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 160,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1453,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 320,
+      "view": "journal",
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "heading": {
+        "x": 160,
+        "y": 84,
+        "w": 144,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 320,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1045,
+        "w": 320,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 390,
+      "view": "today",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 205,
+        "y": 80,
+        "w": 169,
+        "h": 89
+      },
+      "offenders": [
+        {
+          "tag": "SPAN",
+          "cls": "task-title",
+          "text": "مراجعة درس المتغيرات والدوال",
+          "x": 159,
+          "y": 404,
+          "w": 171,
+          "h": 22,
+          "client": 171,
+          "scroll": 195
+        },
+        {
+          "tag": "SPAN",
+          "cls": "task-title",
+          "text": "الاستماع إلى بودكاست باللغة الإنجليزية",
+          "x": 172,
+          "y": 469,
+          "w": 158,
+          "h": 22,
+          "client": 158,
+          "scroll": 236
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1591,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 390,
+      "view": "upcoming",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 257,
+        "y": 84,
+        "w": 117,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 916,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 390,
+      "view": "inbox",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 241,
+        "y": 84,
+        "w": 133,
+        "h": 31
+      },
+      "offenders": [
+        {
+          "tag": "DIV",
+          "cls": "topbar-start",
+          "text": "مساحتيصندوق الوارد",
+          "x": 185,
+          "y": 4,
+          "w": 189,
+          "h": 48,
+          "client": 189,
+          "scroll": 193
+        },
+        {
+          "tag": "DIV",
+          "cls": "breadcrumbs",
+          "text": "مساحتيصندوق الوارد",
+          "x": 185,
+          "y": 18,
+          "w": 137,
+          "h": 19,
+          "client": 137,
+          "scroll": 141
+        },
+        {
+          "tag": "DIV",
+          "cls": "topbar-end",
+          "text": "السبت، 7 نوفمبرم",
+          "x": 16,
+          "y": 4,
+          "w": 157,
+          "h": 48,
+          "client": 157,
+          "scroll": 161
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 916,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 390,
+      "view": "all",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 258,
+        "y": 84,
+        "w": 116,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1130,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 390,
+      "view": "matrix",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 230,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [
+        {
+          "tag": "DIV",
+          "cls": "topbar-start",
+          "text": "مساحتيمصفوفة الأولويات",
+          "x": 175,
+          "y": 4,
+          "w": 199,
+          "h": 48,
+          "client": 199,
+          "scroll": 218
+        },
+        {
+          "tag": "DIV",
+          "cls": "breadcrumbs",
+          "text": "مساحتيمصفوفة الأولويات",
+          "x": 175,
+          "y": 18,
+          "w": 147,
+          "h": 19,
+          "client": 147,
+          "scroll": 166
+        },
+        {
+          "tag": "DIV",
+          "cls": "topbar-end",
+          "text": "السبت، 7 نوفمبرم",
+          "x": 16,
+          "y": 4,
+          "w": 147,
+          "h": 48,
+          "client": 147,
+          "scroll": 161
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1126,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 390,
+      "view": "calendar",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 230,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الأربعاء40 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": -118,
+          "y": 354,
+          "w": 156,
+          "h": 330,
+          "client": 148,
+          "scroll": 148
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الأربعاء40 مهام",
+          "x": -102,
+          "y": 370,
+          "w": 124,
+          "h": 48,
+          "client": 124,
+          "scroll": 126
+        },
+        {
+          "tag": "DIV",
+          "cls": "",
+          "text": "الأربعاء4",
+          "x": -54,
+          "y": 375,
+          "w": 76,
+          "h": 38,
+          "client": 76,
+          "scroll": 76
+        },
+        {
+          "tag": "SPAN",
+          "cls": "",
+          "text": "الأربعاء",
+          "x": -8,
+          "y": 385,
+          "w": 30,
+          "h": 19,
+          "client": 30,
+          "scroll": 30
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-content",
+          "text": "مساحة مفتوحة",
+          "x": -102,
+          "y": 418,
+          "w": 124,
+          "h": 214,
+          "client": 124,
+          "scroll": 124
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-foot",
+          "text": "اترك وقتاً للراحة",
+          "x": -102,
+          "y": 632,
+          "w": 124,
+          "h": 36,
+          "client": 124,
+          "scroll": 124
+        },
+        {
+          "tag": "SPAN",
+          "cls": "",
+          "text": "اترك وقتاً للراحة",
+          "x": -94,
+          "y": 641,
+          "w": 108,
+          "h": 17,
+          "client": 108,
+          "scroll": 108
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 916,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "156px 156px 156px 156px 156px 156px 156px"
+    },
+    {
+      "width": 390,
+      "view": "habits",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 230,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1442,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 390,
+      "view": "journal",
+      "viewport": 390,
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "heading": {
+        "x": 230,
+        "y": 84,
+        "w": 144,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 780,
+        "w": 390,
+        "h": 64
+      },
+      "contentPaddingBottom": "104px",
+      "footer": {
+        "x": 0,
+        "y": 1005,
+        "w": 390,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 768,
+      "view": "today",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 560,
+        "y": 80,
+        "w": 184,
+        "h": 97
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1477,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 768,
+      "view": "upcoming",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 627,
+        "y": 84,
+        "w": 117,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 992,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 768,
+      "view": "inbox",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 611,
+        "y": 84,
+        "w": 133,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 992,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 768,
+      "view": "all",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 628,
+        "y": 84,
+        "w": 116,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 992,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 768,
+      "view": "matrix",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 600,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 992,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 768,
+      "view": "calendar",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 600,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الخميس50 مهام",
+          "x": 100,
+          "y": 300,
+          "w": 124,
+          "h": 48,
+          "client": 124,
+          "scroll": 131
+        },
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الجمعة60 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": -84,
+          "y": 284,
+          "w": 156,
+          "h": 330,
+          "client": 148,
+          "scroll": 148
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الجمعة60 مهام",
+          "x": -68,
+          "y": 300,
+          "w": 124,
+          "h": 48,
+          "client": 124,
+          "scroll": 125
+        },
+        {
+          "tag": "DIV",
+          "cls": "",
+          "text": "الجمعة6",
+          "x": -19,
+          "y": 305,
+          "w": 75,
+          "h": 38,
+          "client": 75,
+          "scroll": 75
+        },
+        {
+          "tag": "B",
+          "cls": "",
+          "text": "6",
+          "x": -19,
+          "y": 305,
+          "w": 38,
+          "h": 38,
+          "client": 38,
+          "scroll": 38
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-content",
+          "text": "مساحة مفتوحة",
+          "x": -68,
+          "y": 348,
+          "w": 124,
+          "h": 214,
+          "client": 124,
+          "scroll": 124
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-empty",
+          "text": "مساحة مفتوحة",
+          "x": -39,
+          "y": 410,
+          "w": 65,
+          "h": 90,
+          "client": 65,
+          "scroll": 65
+        },
+        {
+          "tag": "SPAN",
+          "cls": "calendar-empty-mark",
+          "text": "",
+          "x": -21,
+          "y": 440,
+          "w": 30,
+          "h": 4,
+          "client": 30,
+          "scroll": 30
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-foot",
+          "text": "اترك وقتاً للراحة",
+          "x": -68,
+          "y": 562,
+          "w": 124,
+          "h": 36,
+          "client": 124,
+          "scroll": 124
+        },
+        {
+          "tag": "SPAN",
+          "cls": "",
+          "text": "اترك وقتاً للراحة",
+          "x": -60,
+          "y": 571,
+          "w": 108,
+          "h": 17,
+          "client": 108,
+          "scroll": 108
+        }
+      ],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 992,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "156px 156px 156px 156px 156px 156px 156px"
+    },
+    {
+      "width": 768,
+      "view": "habits",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 600,
+        "y": 84,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1246,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 768,
+      "view": "journal",
+      "viewport": 768,
+      "documentWidth": 768,
+      "bodyWidth": 768,
+      "heading": {
+        "x": 600,
+        "y": 84,
+        "w": 144,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": {
+        "x": 0,
+        "y": 936,
+        "w": 768,
+        "h": 64
+      },
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 992,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1024,
+      "view": "today",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 528,
+        "y": 88,
+        "w": 200,
+        "h": 105
+      },
+      "offenders": [
+        {
+          "tag": "SPAN",
+          "cls": "task-title",
+          "text": "الاستماع إلى بودكاست باللغة الإنجليزية",
+          "x": 496,
+          "y": 480,
+          "w": 188,
+          "h": 22,
+          "client": 188,
+          "scroll": 236
+        }
+      ],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 988,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1024,
+      "view": "upcoming",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 611,
+        "y": 92,
+        "w": 117,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1024,
+      "view": "inbox",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 595,
+        "y": 92,
+        "w": 133,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1024,
+      "view": "all",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 612,
+        "y": 92,
+        "w": 116,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1024,
+      "view": "matrix",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 584,
+        "y": 92,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1024,
+      "view": "calendar",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 584,
+        "y": 92,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الاثنين20 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": 641,
+          "y": 292,
+          "w": 87,
+          "h": 507,
+          "client": 79,
+          "scroll": 136
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الاثنين20 مهام",
+          "x": 657,
+          "y": 308,
+          "w": 55,
+          "h": 48,
+          "client": 55,
+          "scroll": 124
+        },
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الثلاثاء30 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": 542,
+          "y": 292,
+          "w": 87,
+          "h": 507,
+          "client": 79,
+          "scroll": 138
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الثلاثاء30 مهام",
+          "x": 558,
+          "y": 308,
+          "w": 55,
+          "h": 48,
+          "client": 55,
+          "scroll": 126
+        },
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الأربعاء40 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": 443,
+          "y": 292,
+          "w": 87,
+          "h": 507,
+          "client": 79,
+          "scroll": 138
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الأربعاء40 مهام",
+          "x": 459,
+          "y": 308,
+          "w": 55,
+          "h": 48,
+          "client": 55,
+          "scroll": 126
+        },
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الخميس50 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": 345,
+          "y": 292,
+          "w": 87,
+          "h": 507,
+          "client": 79,
+          "scroll": 143
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الخميس50 مهام",
+          "x": 361,
+          "y": 308,
+          "w": 55,
+          "h": 48,
+          "client": 55,
+          "scroll": 131
+        },
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الجمعة60 مهاممساحة مفتوحةاترك وقتاً للراحة",
+          "x": 246,
+          "y": 292,
+          "w": 87,
+          "h": 507,
+          "client": 79,
+          "scroll": 137
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الجمعة60 مهام",
+          "x": 262,
+          "y": 308,
+          "w": 55,
+          "h": 48,
+          "client": 55,
+          "scroll": 125
+        },
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day calendar-today",
+          "text": "السبت7اليوممراجعة درس المتغيرات والدوالالاستماع إلى بودكاست ",
+          "x": 147,
+          "y": 292,
+          "w": 87,
+          "h": 507,
+          "client": 79,
+          "scroll": 128
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "السبت7اليوم",
+          "x": 163,
+          "y": 308,
+          "w": 55,
+          "h": 48,
+          "client": 55,
+          "scroll": 116
+        },
+        {
+          "tag": "SECTION",
+          "cls": "calendar-day ",
+          "text": "الأحد81 مهامقراءة عشر صفحات من كتابخطوة بخطوة",
+          "x": 48,
+          "y": 292,
+          "w": 87,
+          "h": 507,
+          "client": 79,
+          "scroll": 131
+        },
+        {
+          "tag": "DIV",
+          "cls": "calendar-day-head",
+          "text": "الأحد81 مهام",
+          "x": 64,
+          "y": 308,
+          "w": 55,
+          "h": 48,
+          "client": 55,
+          "scroll": 119
+        }
+      ],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "86.8438px 86.8594px 86.8594px 86.8594px 86.8594px 86.8594px 86.8438px"
+    },
+    {
+      "width": 1024,
+      "view": "habits",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 584,
+        "y": 92,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1024,
+      "view": "journal",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "bodyWidth": 1024,
+      "heading": {
+        "x": 584,
+        "y": 92,
+        "w": 144,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 768,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1440,
+      "view": "today",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 944,
+        "y": 88,
+        "w": 200,
+        "h": 105
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 988,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1440,
+      "view": "upcoming",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 1027,
+        "y": 92,
+        "w": 117,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1440,
+      "view": "inbox",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 1011,
+        "y": 92,
+        "w": 133,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1440,
+      "view": "all",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 1028,
+        "y": 92,
+        "w": 116,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1440,
+      "view": "matrix",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 1000,
+        "y": 92,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1440,
+      "view": "calendar",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 1000,
+        "y": 92,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "146.281px 146.281px 146.281px 146.297px 146.281px 146.281px 146.297px"
+    },
+    {
+      "width": 1440,
+      "view": "habits",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 1000,
+        "y": 92,
+        "w": 144,
+        "h": 62
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    },
+    {
+      "width": 1440,
+      "view": "journal",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "heading": {
+        "x": 1000,
+        "y": 92,
+        "w": 144,
+        "h": 31
+      },
+      "offenders": [],
+      "smallTargets": [],
+      "tabs": null,
+      "contentPaddingBottom": "24px",
+      "footer": {
+        "x": 0,
+        "y": 1000,
+        "w": 1184,
+        "h": 48
+      },
+      "calendarColumns": "none"
+    }
+  ],
+  "accessibility": [
+    {
+      "label": "390-today",
+      "url": "http://127.0.0.1:3000/?view=today",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "390-calendar",
+      "url": "http://127.0.0.1:3000/?view=calendar",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "label": "390-habits",
+      "url": "http://127.0.0.1:3000/?view=habits",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "390-journal",
+      "url": "http://127.0.0.1:3000/?view=journal",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "390-drawer-open",
+      "url": "http://127.0.0.1:3000/?view=today",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "390-project-modal-from-drawer",
+      "url": "http://127.0.0.1:3000/?view=today",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "390-task-editor",
+      "url": "http://127.0.0.1:3000/?view=today",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "390-today-dark",
+      "url": "http://127.0.0.1:3000/?view=today",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "1440-today",
+      "url": "http://127.0.0.1:3000/?view=today",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "1440-calendar",
+      "url": "http://127.0.0.1:3000/?view=calendar",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "label": "1440-habits",
+      "url": "http://127.0.0.1:3000/?view=habits",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "1440-journal",
+      "url": "http://127.0.0.1:3000/?view=journal",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "1440-today-dark",
+      "url": "http://127.0.0.1:3000/?view=today",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "label": "1440-journal-editor",
+      "url": "http://127.0.0.1:3000/?view=journal",
+      "violations": [],
+      "incomplete": []
+    }
+  ],
+  "interactions": [
+    {
+      "id": "closed-drawer-keyboard",
+      "active": {
+        "class": "icon-button sidebar-close",
+        "label": "إغلاق القائمة",
+        "x": 419.79998779296875,
+        "viewport": 390
+      }
+    },
+    {
+      "id": "drawer-open-focus",
+      "active": {
+        "class": "icon-button mobile-menu-button",
+        "label": "فتح القائمة"
+      },
+      "backgroundInteractive": true
+    },
+    {
+      "id": "drawer-project-modal",
+      "modalZ": "400",
+      "sidebarZ": "600",
+      "sidebarOpen": true,
+      "focus": "إغلاق",
+      "topAtModalCenter": "app-sidebar"
+    },
+    {
+      "id": "task-editor-initial-focus",
+      "active": {
+        "tag": "BUTTON",
+        "label": "إغلاق",
+        "name": null
+      }
+    }
+  ],
+  "pageErrors": []
+}

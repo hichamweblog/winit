@@ -1,0 +1,287 @@
+{
+  "date": "2026-11-08T16:56:50.379Z",
+  "results": [
+    {
+      "tag": "desktop",
+      "view": "today",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "today",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "upcoming",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "upcoming",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "inbox",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "inbox",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "all",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "all",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "journal",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "journal",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "stats",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "stats",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "settings",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "settings",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "calendar",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "calendar",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "habits",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "habits",
+      "mode": "dark",
+      "violations": [],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      }
+    },
+    {
+      "tag": "desktop",
+      "view": "focus-modal",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "tag": "phone",
+      "view": "today",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "upcoming",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "inbox",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "all",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "journal",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "stats",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "settings",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "calendar",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "habits",
+      "mode": "light",
+      "violations": [],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      }
+    },
+    {
+      "tag": "phone",
+      "view": "focus-modal",
+      "mode": "light",
+      "violations": []
+    }
+  ]
+}

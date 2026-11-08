@@ -1,0 +1,214 @@
+/* ============================================================================
+   تركيز / Tarkeez — "Calm Sea" tokens
+   Version 1.0.1 — audited corrections to the v1.0 specification.
+
+   Source spec: design-system.md (v1.0)
+   Implemented in: src/app/tokens.css (kept in sync by scripts/design-system-gate.mjs)
+   Audit:       docs/design-system-audit.md
+   Method:      WCAG 2.x relative luminance (sRGB), 139 pairs measured.
+
+   EVERY deviation from v1.0 is listed here. Nothing is changed silently.
+
+   [C1] --toast-action added (per theme).
+        v1.0 §8.11 says the toast action uses --accent-2 / --accent-2-strong.
+        The toast inverts (bg = --text), so in dark mode the background is
+        LIGHT (#E3EEF1) and both oranges fail: 2.09:1.
+        Light #E8683A on #0E2A33 = 4.63 PASS (kept).
+        Dark  #9C3D14 on #E3EEF1 = 5.75 PASS (new).
+
+   [C2] --accent-2-on-soft added.
+        --accent-2-strong (#B04518) on --accent-2-soft (#F6E1D8) = 4.4955:1,
+        which rounds to 4.5 but FAILS AA. #A84116 = 4.86 PASS.
+
+   [C3] --accent-2-line added (non-text orange on page background).
+        --accent-2 (#E8683A) on --bg (#E9EFF1) = 2.79:1 < 3:1.
+        On --surface it is 3.09:1 and remains legal. Use --accent-2-line
+        (#C24E22 = 4.10:1 on --bg) for arcs/rings drawn on the page background.
+
+   [C4] --line-strong light: #76919A -> #6E8992.  ** value change **
+        #76919A on --surface = 3.18 PASS, but on --bg = 2.88 FAIL.
+        An input sitting on the page has its border adjacent to --bg, and the
+        fill-vs-page difference is only 1.11:1, so the border is the sole
+        boundary and must clear 3:1 against the page.
+        #6E8992 = 3.20 on --bg, 3.54 on --surface. Dark value unchanged.
+
+   [C5] --font-heading fallback: dropped explicit "Noto Naskh Arabic".
+        v1.0 §3.3 forbids Naskh in UI chrome, but §3.1 names it as the heading
+        fallback — so a failed font load violates the rule.
+
+   [C6] Added missing tokens referenced by the spec but absent from §11.2:
+        --text-reading-lg / --lh-reading-lg (§3.2, §8.9 size toggle)
+        --text-h1-compact (§3.2 "mobile: 28")
+        --tap-min, --row-gap-*, --screen-pad-*, --sidebar-*, --bottom-bar-h,
+        --content-max-* (§5.1, §6.1, §6.2, §6.3)
+        --goal-neutral-1..6 + bg/fg (§4.3 "6 extra slots" had no values)
+        --on-success/--on-warning/--on-info (only --on-danger existed)
+
+   [C8] --on-goal added (per theme): light #FFFFFF, dark #0B1A20.
+        §4.3 verifies --goal-X against --surface, but §8.7 puts a WHITE CHECK
+        inside a dot filled with --goal-X. In dark mode every one of the 7 goal
+        solids is a light pastel, so white fails: 2.14-2.64:1 (needs 3:1 for a
+        meaningful glyph). One token covers all 13 goal colours:
+        light min 3.85 (arabic), dark min 6.58 (neutral-3).
+
+   [C7] Reduced motion now disables movement explicitly. Setting --dur-* to
+        80ms alone still animates transforms; §5.4 asks for movement off,
+        opacity fades kept.
+
+   NOT CHANGED (verified accurate in v1.0): all 18 ratios in §4.5, all three
+   §0 changelog values, all 14 goal tint values (14%/20% over surface matches
+   the published hex to within 1 channel), and every goal text-on-soft pair.
+   ========================================================================= */
+
+:root {
+  /* ---- fonts ---- */
+  --font-heading: "El Messiri", Tahoma, "Segoe UI", serif;            /* [C5] */
+  --font-ui: "Readex Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-reading: "Noto Naskh Arabic", "Amiri", Tahoma, serif;
+
+  /* ---- type scale ---- */
+  --text-timer: 4rem;        --lh-timer: 1;
+  --text-stat: 2.5rem;       --lh-stat: 1.1;
+  --text-h1: 2rem;           --lh-h1: 1.3;
+  --text-h1-compact: 1.75rem;                                        /* [C6] 28px */
+  --text-h2: 1.5rem;         --lh-h2: 1.4;
+  --text-h3: 1.125rem;       --lh-h3: 1.5;
+  --text-body-lg: 1.0625rem; --lh-body-lg: 1.7;
+  --text-body: 0.9375rem;    --lh-body: 1.7;
+  --text-ui: 0.875rem;       --lh-ui: 1.5;
+  --text-small: 0.78125rem; --lh-small: 1.6;   /* exactly 12.5px */
+  --text-micro: 0.71875rem; --lh-micro: 1.2;   /* exactly 11.5px — chips + mobile tab labels only */
+  --text-reading: 1.125rem;  --lh-reading: 1.95;
+  --text-reading-lg: 1.25rem; --lh-reading-lg: 2;                    /* [C6] */
+
+  /* ---- space (4px base) ---- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px;
+  --row-gap-compact: 6px; --row-gap-comfortable: 8px;                 /* [C6] */
+  --screen-pad: var(--space-4);                                      /* [C6] mobile default */
+
+  /* ---- shape ---- */
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+  --radius-xl: 20px; --radius-full: 999px;
+
+  /* ---- interaction ---- */
+  --tap-min: 44px;                                                   /* [C6] */
+  --focus-width: 2px; --focus-offset: 2px;                           /* [C6] */
+
+  /* ---- layout ---- */
+  --sidebar-collapsed: 72px; --sidebar-expanded: 240px;              /* [C6] */
+  --bottom-bar-h: 56px;
+  --content-max-list: 720px; --content-max-dashboard: 1040px; --content-max-reading: 36rem;
+  /* Breakpoints are documented for JS; CSS media queries cannot read var().
+     compact < 768px · medium 768–1099px · expanded >= 1100px */
+  --bp-medium: 768px; --bp-expanded: 1100px;
+
+  /* ---- motion ---- */
+  --dur-fast: 120ms; --dur-base: 200ms; --dur-slow: 320ms;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(.4, 0, .2, 1);
+
+  /* ---- z ---- */
+  --z-base: 0; --z-sticky: 10; --z-dropdown: 20;
+  --z-sheet: 30; --z-modal: 40; --z-toast: 50;
+
+  /* ===== light theme (default) ===== */
+  color-scheme: light;
+  --bg: #E9EFF1;  --surface: #F7FAFB;  --surface-raised: #FFFFFF;  --surface-sunken: #DCE6E9;
+  --text: #0E2A33;  --text-muted: #52696F;  --text-disabled: #8AA2AA;
+  --line: #CCDADF;  --line-strong: #6E8992;                          /* [C4] */
+  --accent: #0F5566;  --accent-hover: #0B4553;  --accent-pressed: #08343F;
+  --accent-soft: #D5E5E9;  --on-accent: #FFFFFF;
+  --accent-2: #E8683A;  --accent-2-strong: #B04518;  --accent-2-soft: #F6E1D8;  --on-accent-2: #2A1206;
+  --accent-2-on-soft: #A84116;                                       /* [C2] */
+  --accent-2-line: #C24E22;                                          /* [C3] */
+  --toast-action: #E8683A;                                           /* [C1] */
+  --on-goal: #FFFFFF;                                                /* [C8] */
+
+  --success: #2E7D4F;  --success-bg: #DFEBE6;  --success-text: #297047;  --on-success: #FFFFFF;
+  --warning: #9A6700;  --warning-bg: #ECE8DD;  --warning-text: #8B5D00;  --on-warning: #FFFFFF;
+  --danger:  #B3261E;  --danger-bg:  #EFE1E0;  --danger-text:  #B3261E;  --on-danger: #FFFFFF;
+  --info:    #2F6FB0;  --info-bg:    #DFE9F2;  --info-text:    #2D69A7;  --on-info: #FFFFFF;
+
+  --goal-code: #3B6EA8;     --goal-code-bg: #DDE6EF;     --goal-code-fg: #3868A0;
+  --goal-english: #8B5A8C;  --goal-english-bg: #E8E4EB;  --goal-english-fg: #845685;
+  --goal-sharia: #5E7A3A;   --goal-sharia-bg: #E2E8E0;   --goal-sharia-fg: #556E34;
+  --goal-arabic: #A9792B;   --goal-arabic-bg: #ECE8DE;   --goal-arabic-fg: #876122;
+  --goal-culture: #B8577A;  --goal-culture-bg: #EEE3E9;  --goal-culture-fg: #9C4A68;
+  --goal-quran: #2A7A55;    --goal-quran-bg: #DAE8E4;    --goal-quran-fg: #266E4C;
+  --goal-sport: #CF5C36;    --goal-sport-bg: #F1E4DF;    --goal-sport-fg: #A64A2B;
+
+  /* [C6] six neutral slots for custom goals — never free colour pickers */
+  --goal-neutral-1: #5A6B75; --goal-neutral-1-bg: #E4E8EA; --goal-neutral-1-fg: #4F5F69; /* slate */
+  --goal-neutral-2: #4A6B6E; --goal-neutral-2-bg: #E0E8E8; --goal-neutral-2-fg: #416063; /* teal-gray */
+  --goal-neutral-3: #7A5C46; --goal-neutral-3-bg: #EBE5E1; --goal-neutral-3-fg: #6B503C; /* brown */
+  --goal-neutral-4: #5C6383; --goal-neutral-4-bg: #E4E5EC; --goal-neutral-4-fg: #535A78; /* indigo-gray */
+  --goal-neutral-5: #8A7448; --goal-neutral-5-bg: #EDE9E1; --goal-neutral-5-fg: #6F5D39; /* sand */
+  --goal-neutral-6: #55595C; --goal-neutral-6-bg: #E3E4E5; --goal-neutral-6-fg: #4C5053; /* graphite */
+
+  --shadow-1: 0 1px 2px rgba(14, 42, 51, .06);
+  --shadow-2: 0 6px 20px rgba(14, 42, 51, .10);
+  --shadow-3: 0 16px 48px rgba(14, 42, 51, .16);
+  --scrim: rgba(8, 20, 26, .5);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B1A20;  --surface: #12262E;  --surface-raised: #183139;  --surface-sunken: #08141A;
+  --text: #E3EEF1;  --text-muted: #86A0A8;  --text-disabled: #4B6670;
+  --line: #223A44;  --line-strong: #527682;
+  --accent: #4FB3C8;  --accent-hover: #6CC3D5;  --accent-pressed: #8AD0DF;
+  --accent-soft: #153843;  --on-accent: #06222A;
+  --accent-2: #F08A5D;  --accent-2-strong: #F08A5D;  --accent-2-soft: #3A2A24;  --on-accent-2: #2A1206;
+  --accent-2-on-soft: #F08A5D;                                       /* [C2] dark: 5.53 on soft */
+  --accent-2-line: #F08A5D;                                          /* [C3] dark already passes */
+  --toast-action: #9C3D14;                                           /* [C1] toast bg is LIGHT in dark */
+  --on-goal: #0B1A20;                                                /* [C8] */
+
+  --success: #5FC48B;  --success-bg: #20423F;  --success-text: #5FC48B;  --on-success: #06231A;
+  --warning: #E0B14A;  --warning-bg: #373F33;  --warning-text: #E0B14A;  --on-warning: #2A1F06;
+  --danger:  #F2877F;  --danger-bg:  #3A373D;  --danger-text:  #F2877F;  --on-danger: #2A0A08;
+  --info:    #7FB2E8;  --info-bg:    #263F4F;  --info-text:    #7FB2E8;  --on-info: #0A2038;
+
+  --goal-code: #6FA3DE;     --goal-code-bg: #253F51;     --goal-code-fg: #7DACE1;
+  --goal-english: #C093C2;  --goal-english-bg: #353C4C;  --goal-english-fg: #C398C5;
+  --goal-sharia: #9DBB75;   --goal-sharia-bg: #2E443C;   --goal-sharia-fg: #9DBB75;
+  --goal-arabic: #D9A857;   --goal-arabic-bg: #3A4036;   --goal-arabic-fg: #D9A857;
+  --goal-culture: #E38AA9;  --goal-culture-bg: #3C3A47;  --goal-culture-fg: #E490AD;
+  --goal-quran: #5FBF93;    --goal-quran-bg: #214542;    --goal-quran-fg: #5FBF93;
+  --goal-sport: #F2906B;    --goal-sport-bg: #3F3B3A;    --goal-sport-fg: #F2906B;
+
+  --goal-neutral-1: #9AAAB4; --goal-neutral-1-bg: #333C42; --goal-neutral-1-fg: #A6B5BE;
+  --goal-neutral-2: #86A9AC; --goal-neutral-2-bg: #2C3C3E; --goal-neutral-2-fg: #93B4B7;
+  --goal-neutral-3: #B9977D; --goal-neutral-3-bg: #3B342F; --goal-neutral-3-fg: #C4A289;
+  --goal-neutral-4: #9AA1C4; --goal-neutral-4-bg: #333747; --goal-neutral-4-fg: #A7ADD0;
+  --goal-neutral-5: #C1AC7E; --goal-neutral-5-bg: #3B3830; --goal-neutral-5-fg: #CBB78B;
+  --goal-neutral-6: #9B9FA3; --goal-neutral-6-bg: #323436; --goal-neutral-6-fg: #A8ACAF;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-2: 0 6px 20px rgba(0, 0, 0, .45);
+  --shadow-3: 0 16px 48px rgba(0, 0, 0, .55);
+}
+
+@media (min-width: 768px)  { :root { --screen-pad: var(--space-6); } }
+@media (min-width: 1100px) { :root { --screen-pad: var(--space-8); } }
+
+/* [C7] movement off, opacity fades kept at 80ms */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 80ms; --dur-slow: 80ms; }
+  *, *::before, *::after {
+    animation-duration: 80ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, color, background-color, border-color !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html { font-family: var(--font-ui); color: var(--text); background: var(--bg); }
+
+/* ---- focus: one rule, never removed ---- */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: var(--focus-width) solid var(--accent);
+  outline-offset: var(--focus-offset);
+}

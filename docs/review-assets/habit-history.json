@@ -1,0 +1,157 @@
+[
+  {
+    "name": "7 weekday rows",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "26-27 week columns for 6 months",
+    "ok": true,
+    "detail": "27 columns"
+  },
+  {
+    "name": "every in-range cell has an exact text label",
+    "ok": true,
+    "detail": "182/182"
+  },
+  {
+    "name": "all five intensity levels render",
+    "ok": true,
+    "detail": "0,1,2,3,4"
+  },
+  {
+    "name": "five-step legend",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "month labels present and unique",
+    "ok": true,
+    "detail": "يونيو · يوليو · أغسطس · سبتمبر · أكتوبر · نوفمبر"
+  },
+  {
+    "name": "weekday labels present",
+    "ok": true,
+    "detail": "س ن ر ج"
+  },
+  {
+    "name": "RTL time axis: oldest week on the right",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "exactly one today marker",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "roving tabindex: one tab stop",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "cells are square",
+    "ok": true,
+    "detail": "12×12"
+  },
+  {
+    "name": "grid has a descriptive summary",
+    "ok": true,
+    "detail": "سجل ورد القرآن الكريم: 93 يوماً مكتملاً من 182 يوماً، بنسبة 51%، وأطول سلسلة 8 يوماً."
+  },
+  {
+    "name": "stats are Western-digit",
+    "ok": true,
+    "detail": "93 | 51% | 1 | 8"
+  },
+  {
+    "name": "the five levels are five distinct colours",
+    "ok": true,
+    "detail": "rgb(220, 230, 233) → oklab(0.853517 -0.0275792 0.00787462) → oklab(0.742472 -0.0489634 0.0165003) → oklab(0.631427 -0.0703475 0.025126) → rgb(42, 122, 85)"
+  },
+  {
+    "name": "ArrowDown moves one weekday",
+    "ok": true,
+    "detail": "0,26 → 1,26"
+  },
+  {
+    "name": "ArrowRight walks back to an older week (RTL)",
+    "ok": true,
+    "detail": "26 → 25"
+  },
+  {
+    "name": "Home jumps to the oldest week",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "End jumps to the newest week",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "focus shows a tooltip with the date and value",
+    "ok": true,
+    "detail": "8 نوفمبر · 5/5"
+  },
+  {
+    "name": "live readout mirrors the focused cell",
+    "ok": true,
+    "detail": "8 نوفمبر · 5/5"
+  },
+  {
+    "name": "switching to a year widens the grid",
+    "ok": true,
+    "detail": "53 columns"
+  },
+  {
+    "name": "a year of weeks scrolls instead of overflowing the card",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "the card itself does not overflow",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "switching to 3 months narrows the grid",
+    "ok": true,
+    "detail": "14 columns"
+  },
+  {
+    "name": "dark mode keeps five distinct levels",
+    "ok": true,
+    "detail": "rgb(8, 20, 26) → oklab(0.389524 -0.0449941 -0.00568114) → oklab(0.504326 -0.0656828 0.00786475) → oklab(0.619128 -0.0863715 0.0214106) → rgb(95, 191, 147)"
+  },
+  {
+    "name": "no axe violations on the habits view",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "project actions are hidden at rest",
+    "ok": true,
+    "detail": "opacity 0"
+  },
+  {
+    "name": "project actions appear on row hover",
+    "ok": true,
+    "detail": "opacity 1"
+  },
+  {
+    "name": "project actions appear on keyboard focus",
+    "ok": true,
+    "detail": "opacity 1"
+  },
+  {
+    "name": "hidden actions stay in the tab order",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

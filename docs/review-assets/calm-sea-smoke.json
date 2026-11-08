@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-08T13:20:26.205Z",
+  "checks": [
+    {
+      "name": "task create",
+      "pass": true,
+      "detail": "ecfac0dc-7435-4a5b-a8dd-ebe3a61843e9"
+    },
+    {
+      "name": "bidi isolation on titles",
+      "pass": true,
+      "detail": "3 bdi nodes"
+    },
+    {
+      "name": "checkbox aria-checked=false before",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "task complete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "habit toggle changes state",
+      "pass": true,
+      "detail": "true -> false"
+    },
+    {
+      "name": "habit fill uses a goal token",
+      "pass": true,
+      "detail": "--goal-fill: var(--goal-quran);"
+    },
+    {
+      "name": "journal renders as a reading card",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reading body uses Naskh",
+      "pass": true,
+      "detail": "\"Noto Naskh Arabic\", Amiri, Tahoma, serif"
+    },
+    {
+      "name": "reading size toggle 18 -> 20",
+      "pass": true,
+      "detail": "18px -> 20px"
+    },
+    {
+      "name": "no Arabic-Indic digits rendered",
+      "pass": true,
+      "detail": "0 found"
+    },
+    {
+      "name": "timer progress ring present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timer digits wide + El Messiri",
+      "pass": true,
+      "detail": "{\"w\":232.704,\"f\":\"\\\"El Messiri\\\", Tahoma, \\\"Segoe UI\\\", serif\"}"
+    },
+    {
+      "name": "duration label matches selection",
+      "pass": true,
+      "detail": "بومودورو، 90 دقيقة"
+    },
+    {
+      "name": "theme persists",
+      "pass": true,
+      "detail": "dark -> dark"
+    },
+    {
+      "name": "cleanup restored baseline",
+      "pass": true,
+      "detail": "91 -> 91"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

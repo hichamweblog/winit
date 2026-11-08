@@ -20,10 +20,37 @@ export function addDays(date: Date, amount: number): Date {
   return next;
 }
 
-export function getWeekStart(date = new Date()): Date {
+/**
+ * Start of the week. Calm Sea §8.7 defaults to Saturday (was Monday).
+ * getDay(): Sunday=0 … Saturday=6, so the offset to the previous Saturday is
+ * (getDay() + 1) % 7.
+ */
+export function getWeekStart(date = new Date(), weekStartsOn = 6): Date {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  start.setDate(start.getDate() - ((start.getDay() - weekStartsOn + 7) % 7));
   return start;
+}
+
+/**
+ * §2.3: Western digits everywhere, never mixed with Arabic-Indic on one screen.
+ * Bare 'ar' is implementation-dependent (CLDR defaults it to the `arab`
+ * numbering system, some ICU builds resolve `latn`), so the numbering system is
+ * pinned explicitly rather than inherited from the runtime.
+ */
+export const AR_LOCALE = 'ar-u-nu-latn';
+
+export function formatArDate(
+  value: Date | string,
+  options: Intl.DateTimeFormatOptions,
+): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat(AR_LOCALE, options).format(date);
+}
+
+/** Locale-aware count formatting with Western digits (1,234 not ١٬٣٤). */
+export function formatArNumber(value: number): string {
+  return new Intl.NumberFormat(AR_LOCALE).format(value);
 }
 
 export function getRemainingSeconds(
@@ -51,15 +78,6 @@ export function getHabitStreak(values: Array<number | null | undefined>, target:
   let streak = 0;
   while (index >= 0 && completed[index]) { streak += 1; index -= 1; }
   return streak;
-}
-
-export function getTaskQuadrant(task: Pick<Task, 'priority' | 'dueDate'>, today = localDateKey()) {
-  const important = task.priority === 'high' || task.priority === 'medium';
-  const urgent = task.priority === 'high' || Boolean(task.dueDate && task.dueDate <= today);
-  if (important && urgent) return 'do' as const;
-  if (important) return 'schedule' as const;
-  if (urgent) return 'delegate' as const;
-  return 'later' as const;
 }
 
 export function filterTaskIds<T extends Pick<Task, 'status' | 'dueDate' | 'priority' | 'projectId'>>(
