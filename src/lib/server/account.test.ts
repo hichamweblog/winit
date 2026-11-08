@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { hashPassword } from './password';
 import { deleteUserAccount, exportUserData, registerUser } from './auth';
 import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME, SESSION_COOKIE_NAME } from '@/lib/types';
+
+// Ensure tables are migrated before testing database interactions (e.g. in fresh CI runners)
+migrate(db, { migrationsFolder: './drizzle' });
 
 test('shared security constants match expected names', () => {
   assert.equal(CSRF_COOKIE_NAME, 'winit_csrf');
