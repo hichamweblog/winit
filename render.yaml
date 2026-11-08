@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: winit
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: starter # Persistent disks for SQLite require Starter plan ($7/mo)
+    region: frankfurt
+    healthCheckPath: /api/health
+    disk:
+      name: winit-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: /app/data/winit.db
+      - key: WINIT_TRUST_PROXY
+        value: "1"
+      - key: PORT
+        value: "3000"
