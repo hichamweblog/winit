@@ -131,6 +131,7 @@ export const tasks = sqliteTable(
   },
   (table) => [
     index('tasks_workspace_status_idx').on(table.workspaceId, table.status),
+    index('tasks_workspace_completed_idx').on(table.workspaceId, table.completedAt),
     index('tasks_project_idx').on(table.projectId),
     index('tasks_due_idx').on(table.workspaceId, table.dueDate),
     index('tasks_parent_idx').on(table.parentTaskId),

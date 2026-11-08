@@ -89,3 +89,20 @@ jobs:
           WINIT_INSECURE_COOKIES: '1'
           WINIT_TRUST_PROXY: '1'
           DATABASE_URL: ./data/ci.db
+
+  docker:
+    name: Build Docker container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [verify, smoke]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build container image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: winit:latest
+

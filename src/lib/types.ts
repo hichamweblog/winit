@@ -12,3 +12,8 @@ export type Log = { id: string; habitId: string; logDate: string; value: number 
 export type FocusSession = { id: string; projectId: string | null; taskId: string | null; mode: 'pomodoro' | 'stopwatch'; plannedSeconds: number; actualSeconds: number; startedAt: string; endedAt: string | null; isCompleted: boolean };
 export type JournalMood = 'grateful' | 'calm' | 'energized' | 'tired' | 'anxious' | 'reflective';
 export type JournalEntry = { id: string; entryDate: string; title: string | null; content: string; mood: JournalMood | null; createdAt: string; updatedAt: string };
+
+export const CSRF_COOKIE_NAME = 'winit_csrf';
+export const CSRF_HEADER_NAME = 'x-csrf-token';
+export const SESSION_COOKIE_NAME = 'winit_session';
+

@@ -26,8 +26,10 @@ function readCookie(name: string): string | null {
   return null;
 }
 
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from './types';
+
 export function csrfToken(): string | null {
-  return readCookie('winit_csrf');
+  return readCookie(CSRF_COOKIE_NAME);
 }
 
 type Options = { method?: string; body?: unknown; signal?: AbortSignal };
@@ -39,7 +41,7 @@ export async function api<T = unknown>(url: string, options: Options = {}): Prom
   if (options.body !== undefined) headers['content-type'] = 'application/json';
   if (mutating) {
     const token = csrfToken();
-    if (token) headers['x-csrf-token'] = token;
+    if (token) headers[CSRF_HEADER_NAME] = token;
   }
   const response = await fetch(url, {
     method,

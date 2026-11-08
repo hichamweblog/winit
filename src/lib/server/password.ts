@@ -64,7 +64,9 @@ export function hashSessionToken(token: string): string {
   return createHash('sha256').update(token).digest('base64url');
 }
 
-export const SESSION_COOKIE = 'winit_session';
+import { SESSION_COOKIE_NAME } from '@/lib/types';
+
+export const SESSION_COOKIE = SESSION_COOKIE_NAME;
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 /** Constant-time-ish comparison for the CSRF double-submit token. */

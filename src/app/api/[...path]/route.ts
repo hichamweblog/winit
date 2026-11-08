@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, ne, or, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { focusSessions, habitLogs, habits, journalEntries, projects, tasks } from '@/db/schema';
 import {
@@ -11,7 +11,14 @@ import {
   readJson,
   withApi,
 } from '@/lib/server/http';
-import { requireIdentity, type Identity } from '@/lib/server/auth';
+import {
+  clearSessionCookies,
+  deleteUserAccount,
+  exportUserData,
+  requireIdentity,
+  type Identity,
+} from '@/lib/server/auth';
+import { localDateKey } from '@/lib/core';
 import {
   dateKey,
   focusFinishInput,
@@ -48,11 +55,6 @@ const is = (path: string[], ...pattern: Array<string | null>) =>
 const stamp = () => new Date();
 const newId = () => crypto.randomUUID();
 
-function localToday(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 /** Query-string date, validated — an invalid value is a 400, never a silent fallback. */
 function queryDate(request: NextRequest, name: string, fallback: string): string {
   const raw = request.nextUrl.searchParams.get(name);
@@ -87,17 +89,52 @@ export const GET = withApi('data.get', async (request: NextRequest) => {
   const identity = await requireIdentity(request);
   const ws = identity.workspaceId;
   const path = segments(request);
-  const today = queryDate(request, 'date', localToday());
+  const today = queryDate(request, 'date', localDateKey());
   const fromDate = queryDate(request, 'from', `${today.slice(0, 7)}-01`);
   enforceRateLimit(request, 'read', 600, 60 * 1000);
 
+  if (is(path, 'account', 'export')) {
+    if (identity.demo) throw new ApiError(403, 'غير متاح للحساب التجريبي', 'forbidden');
+    const exportData = await exportUserData(identity.userId, ws);
+    return json(exportData);
+  }
+
   if (is(path, 'overview')) {
+    const cutoffDate = shiftDays(today, -90);
+    const cutoffTimestamp = new Date(`${cutoffDate}T00:00:00Z`).getTime();
     const [projectRows, taskRows, habitRows, logRows, focusRows] = await Promise.all([
       db.select().from(projects).where(and(eq(projects.workspaceId, ws), eq(projects.isArchived, false))).orderBy(projects.sortOrder),
-      db.select().from(tasks).where(eq(tasks.workspaceId, ws)).orderBy(tasks.sortOrder, desc(tasks.createdAt)),
+      db
+        .select()
+        .from(tasks)
+        .where(
+          and(
+            eq(tasks.workspaceId, ws),
+            or(
+              ne(tasks.status, 'completed'),
+              gte(tasks.dueDate, cutoffDate),
+              sql`${tasks.completedAt} >= ${cutoffTimestamp}`,
+              sql`${tasks.completedAt} IS NULL`,
+            ),
+          ),
+        )
+        .orderBy(tasks.sortOrder, desc(tasks.createdAt)),
       db.select().from(habits).where(and(eq(habits.workspaceId, ws), eq(habits.isArchived, false))).orderBy(habits.sortOrder),
       db.select().from(habitLogs).where(and(eq(habitLogs.workspaceId, ws), gte(habitLogs.logDate, fromDate), lte(habitLogs.logDate, today))),
-      db.select().from(focusSessions).where(eq(focusSessions.workspaceId, ws)).orderBy(desc(focusSessions.startedAt)).limit(200),
+      db
+        .select()
+        .from(focusSessions)
+        .where(
+          and(
+            eq(focusSessions.workspaceId, ws),
+            or(
+              eq(focusSessions.isCompleted, false),
+              gte(focusSessions.startedAt, new Date(`${cutoffDate}T00:00:00Z`)),
+            ),
+          ),
+        )
+        .orderBy(desc(focusSessions.startedAt))
+        .limit(300),
     ]);
     return json({ projects: projectRows, tasks: taskRows, habits: habitRows, logs: logRows, focusSessions: focusRows, today });
   }
@@ -393,6 +430,14 @@ export const DELETE = withApi('data.delete', async (request: NextRequest) => {
       .returning({ id: journalEntries.id });
     if (!deleted.length) throw notFound('التدوينة');
     return json({ ok: true });
+  }
+
+  if (is(path, 'account')) {
+    if (identity.demo) throw new ApiError(403, 'لا يمكن حذف الحساب التجريبي', 'forbidden');
+    await deleteUserAccount(identity.userId);
+    const response = json({ ok: true, deleted: true });
+    clearSessionCookies(response);
+    return response;
   }
 
   throw new ApiError(404, 'المسار غير موجود', 'no_route');

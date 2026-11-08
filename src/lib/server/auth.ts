@@ -13,7 +13,18 @@
 import { and, eq, gt, lt } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { memberships, sessions, users, workspaces } from '@/db/schema';
+import {
+  focusSessions,
+  habitLogs,
+  habits,
+  journalEntries,
+  memberships,
+  projects,
+  sessions,
+  tasks,
+  users,
+  workspaces,
+} from '@/db/schema';
 import { ApiError, CSRF_COOKIE } from './http';
 import {
   hashSessionToken,
@@ -158,3 +169,49 @@ export async function findUserByEmail(email: string) {
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
   return user ?? null;
 }
+
+export async function deleteUserAccount(userId: string) {
+  await db.delete(users).where(eq(users.id, userId));
+}
+
+export async function exportUserData(userId: string, workspaceId: string) {
+  const [user] = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      dailyFocusGoalMinutes: users.dailyFocusGoalMinutes,
+      theme: users.theme,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  const [workspace] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
+
+  const [projectRows, taskRows, habitRows, logRows, focusRows, journalRows] = await Promise.all([
+    db.select().from(projects).where(eq(projects.workspaceId, workspaceId)),
+    db.select().from(tasks).where(eq(tasks.workspaceId, workspaceId)),
+    db.select().from(habits).where(eq(habits.workspaceId, workspaceId)),
+    db.select().from(habitLogs).where(eq(habitLogs.workspaceId, workspaceId)),
+    db.select().from(focusSessions).where(eq(focusSessions.workspaceId, workspaceId)),
+    db
+      .select()
+      .from(journalEntries)
+      .where(and(eq(journalEntries.workspaceId, workspaceId), eq(journalEntries.userId, userId))),
+  ]);
+
+  return {
+    exportedAt: new Date().toISOString(),
+    user,
+    workspace,
+    projects: projectRows,
+    tasks: taskRows,
+    habits: habitRows,
+    habitLogs: logRows,
+    focusSessions: focusRows,
+    journalEntries: journalRows,
+  };
+}
+

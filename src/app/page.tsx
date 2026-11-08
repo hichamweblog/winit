@@ -275,9 +275,62 @@ function WinitApp() {
     setMobileViews(nextViews);
     try { window.localStorage.setItem('winit-mobile-views', JSON.stringify(nextViews)); } catch { /* keep this session's selection */ }
   };
+  const completeTask = async (taskId: string) => {
+    setData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? { ...t, status: t.status === 'completed' ? 'todo' : 'completed', completedAt: t.status === 'completed' ? null : new Date().toISOString() }
+            : t,
+        ),
+      };
+    });
+    const ok = await mutate(`/api/tasks/${taskId}/complete`, 'POST');
+    if (!ok) void refresh();
+  };
   const toggleHabit = async (habit: Habit, existing?: Log) => {
-    const value = existing ? 0 : (habit.recordType === 'check' ? 1 : habit.targetValue);
-    await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value });
+    const value = existing && existing.value >= habit.targetValue ? 0 : (habit.recordType === 'check' ? 1 : habit.targetValue);
+    setData((prev) => {
+      if (!prev) return prev;
+      const filtered = prev.logs.filter((l) => !(l.habitId === habit.id && l.logDate === today));
+      return {
+        ...prev,
+        logs: [...filtered, { id: existing?.id ?? 'optimistic', habitId: habit.id, logDate: today, value }],
+      };
+    });
+    const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value });
+    if (!ok) void refresh();
+  };
+  const exportAccountData = async () => {
+    try {
+      const payload = await api('/api/account/export');
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `winit-export-${today}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      notify('تم تنزيل نسخة كاملة من بياناتك بنجاح');
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر تصدير البيانات', 'error');
+    }
+  };
+  const deleteAccount = async () => {
+    const okToDelete = await confirm({
+      title: 'حذف الحساب نهائياً',
+      message: 'هل أنت متأكد من رغبتك في حذف حسابك نهائياً؟ سيتم مسح كافة البيانات والمشاريع فوراً دون إمكانية استرجاع.',
+      confirmLabel: 'حذف الحساب نهائياً',
+    });
+    if (!okToDelete) return;
+    try {
+      await api('/api/account', { method: 'DELETE' });
+      window.location.reload();
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر حذف الحساب', 'error');
+    }
   };
   const startFocus = async (taskId?: string) => {
     const task = tasks.find((item) => item.id === (taskId || focusTaskId));
@@ -356,9 +409,9 @@ function WinitApp() {
       <main className="main-area">
         <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="فتح القائمة" aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><span>مساحتي</span><ChevronLeft size={14} /><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date">{new Intl.DateTimeFormat(AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${today}T12:00:00`))}</span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar">م</div></div></header>
         <div className="page-content">
-          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} />}
+          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalEntries.length, true)} />}
-          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} onToggle={toggleHabit} onSetValue={(habit, value) => void mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value })} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void mutate(`/api/tasks/${id}/complete`, 'POST')} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
+          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} onToggle={toggleHabit} onSetValue={(habit, value) => void mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value })} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
         </div>
         <footer className="app-footer"><span>مصمّم لأيامك، لا لمزيد من الضجيج.</span><span>أنجز ما يهمّك</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
@@ -390,12 +443,12 @@ type DashboardProps = {
   activeSession?: FocusSession; focusTick: number; startFocus: (id?: string) => Promise<void>; finishFocus: (completed: boolean) => Promise<void>;
   setShowFocus: (show: boolean) => void; setShowAdd: (show: boolean) => void; setFocusTaskId: (id: string) => void; setView: (view: View) => void;
   switchView: (view: View, projectId?: string | null) => void; mutate: (url: string, method: string, body?: unknown) => Promise<boolean>;
-  toggleHabit: (habit: Habit, log?: Log) => Promise<void>; logs: Log[]; sessions: FocusSession[];
+  toggleHabit: (habit: Habit, log?: Log) => Promise<void>; completeTask: (taskId: string) => Promise<void>; logs: Log[]; sessions: FocusSession[];
   onEditTask: (task: Task) => void;
 };
 
 function TodayDashboard(props: DashboardProps) {
-  const { today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, logs, sessions, onEditTask } = props;
+  const { today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, onEditTask } = props;
   const sorted = [...todayTasks].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
   const doneHabits = todayLogs.filter(({ habit, log }) => log && log.value >= habit.targetValue).length;
   const weekStartDate = getWeekStart(new Date(`${today}T12:00:00`));
@@ -410,7 +463,7 @@ function TodayDashboard(props: DashboardProps) {
     </section>
     <div className="dashboard-grid">
       <section className="panel tasks-panel"><div className="panel-heading"><div><h2>مهام اليوم <CountBadge count={todayTasks.length} /></h2></div><div className="panel-heading-actions"><button className="text-link" onClick={() => setView('all')}>كل المهام</button><button className="icon-button soft-button add-task-compact" onClick={() => { setFocusTaskId(''); setShowAdd(true); }} aria-label="أضف مهمة جديدة"><Plus size={16} /></button></div></div>
-        {sorted.length ? <div className="task-list">{sorted.slice(0, 6).map((task) => <TaskRow key={task.id} task={task} project={currentProject(task.projectId)} today={today} onComplete={() => void mutate(`/api/tasks/${task.id}/complete`, 'POST')} onStart={() => { setFocusTaskId(task.id); void startFocus(task.id); }} onEdit={() => onEditTask(task)} />)}</div> : <div className="empty-state"><b>قائمتك هادئة الآن</b><span>لحظة جميلة لتضيف مهمة تخدم أهدافك.</span></div>}
+        {sorted.length ? <div className="task-list">{sorted.slice(0, 6).map((task) => <TaskRow key={task.id} task={task} project={currentProject(task.projectId)} today={today} onComplete={() => void completeTask(task.id)} onStart={() => { setFocusTaskId(task.id); void startFocus(task.id); }} onEdit={() => onEditTask(task)} />)}</div> : <div className="empty-state"><b>قائمتك هادئة الآن</b><span>لحظة جميلة لتضيف مهمة تخدم أهدافك.</span></div>}
       </section>
       <section className="panel habits-panel"><div className="panel-heading"><div><h2>عادات اليوم <span className="heading-count">{doneHabits}/{habits.length}</span></h2></div><button className="icon-button soft-button" onClick={() => setView('habits')} aria-label="عرض العادات"><ArrowLeft size={16} /></button></div>
         <div className="habit-list">{todayLogs.map(({ habit, log }) => <HabitRow key={habit.id} habit={habit} log={log} onToggle={() => void toggleHabit(habit, log)} />)}</div>

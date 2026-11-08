@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { useAuth } from './AuthGate';
 import {
-  Check, DeviceMobile, Logout, Moon, Stopwatch, Sun, User,
+  Check, DeviceMobile, Download, Logout, Moon, Stopwatch, Sun, Trash, User,
 } from '../icons';
 import type { AppIcon } from '../icons';
 import { formatArNumber } from '@/lib/core';
@@ -39,11 +39,14 @@ function SettingRow({ icon, title, description, children }: {
 export default function SettingsView({
   darkMode, onToggleTheme, pomodoroMinutes, onPomodoroChange,
   mobileViews, mobileViewOptions, onMobileViewsChange,
+  onExportData, onDeleteAccount,
 }: {
   darkMode: boolean; onToggleTheme: () => void;
   pomodoroMinutes: number; onPomodoroChange: (minutes: number) => void;
   mobileViews: string[]; mobileViewOptions: SettingsViewOption[];
   onMobileViewsChange: (next: string[]) => void;
+  onExportData?: () => void;
+  onDeleteAccount?: () => void;
 }) {
   const { user, signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
@@ -146,6 +149,24 @@ export default function SettingsView({
                   disabled={signingOut}
                   onClick={async () => { setSigningOut(true); try { await signOut(); } finally { setSigningOut(false); } }}
                 >{signingOut ? 'جارٍ الخروج…' : 'خروج'}</button>
+              </SettingRow>
+            )}
+            {!user.demo && onExportData && (
+              <SettingRow icon={<Download size={17} />} title="تصدير البيانات" description="تنزيل نسخة كاملة من بياناتك بصيغة JSON (متوافق مع GDPR).">
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={onExportData}
+                >تصدير JSON</button>
+              </SettingRow>
+            )}
+            {!user.demo && onDeleteAccount && (
+              <SettingRow icon={<Trash size={17} />} title="حذف الحساب" description="حذف حسابك نهائياً وكافة بياناتك ومساحتك دون إمكانية استرجاع.">
+                <button
+                  type="button"
+                  className="ghost-button danger-button"
+                  onClick={onDeleteAccount}
+                >حذف الحساب</button>
               </SettingRow>
             )}
           </>

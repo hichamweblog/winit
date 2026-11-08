@@ -110,9 +110,11 @@ export function assertSameOrigin(request: NextRequest) {
   }
 }
 
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '@/lib/types';
+
 /** Double-submit CSRF token for cookie-authenticated mutations. */
-export const CSRF_COOKIE = 'winit_csrf';
-export const CSRF_HEADER = 'x-csrf-token';
+export const CSRF_COOKIE = CSRF_COOKIE_NAME;
+export const CSRF_HEADER = CSRF_HEADER_NAME;
 
 export function assertCsrf(request: NextRequest) {
   const cookie = request.cookies.get(CSRF_COOKIE)?.value;

@@ -25,7 +25,11 @@ if (!fs.existsSync(path.join(process.cwd(), 'drizzle', '0000_init.sql'))) {
 }
 
 console.log(`Applying migrations to ${url}`);
-execFileSync(process.execPath, ['--import', 'tsx', 'src/db/migrate.ts'], { stdio: 'inherit' });
+if (fs.existsSync(path.join(process.cwd(), 'scripts', 'migrate.mjs'))) {
+  execFileSync(process.execPath, ['scripts/migrate.mjs'], { stdio: 'inherit' });
+} else {
+  execFileSync(process.execPath, ['--import', 'tsx', 'src/db/migrate.ts'], { stdio: 'inherit' });
+}
 
 if (process.env.WINIT_DEMO_MODE === '1') {
   console.warn('\n*** WINIT_DEMO_MODE=1 — anonymous visitors share one public workspace.');
