@@ -1,0 +1,908 @@
+{
+  "date": "2026-11-07T08:47:27.448Z",
+  "spec": "v1.0.1",
+  "checks": 100,
+  "failures": 0,
+  "rows": [
+    {
+      "theme": "light",
+      "name": "C4 line-strong on bg",
+      "fg": "#6E8992",
+      "bg": "#E9EFF1",
+      "ratio": 3.1967,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C4 line-strong on surface",
+      "fg": "#6E8992",
+      "bg": "#F7FAFB",
+      "ratio": 3.5398,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C2 accent-2-on-soft",
+      "fg": "#A84116",
+      "bg": "#F6E1D8",
+      "ratio": 4.8593,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C3 accent-2-line on bg",
+      "fg": "#C24E22",
+      "bg": "#E9EFF1",
+      "ratio": 4.1032,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C3 accent-2-line on surface",
+      "fg": "#C24E22",
+      "bg": "#F7FAFB",
+      "ratio": 4.5435,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C1 toast action",
+      "fg": "#E8683A",
+      "bg": "#0E2A33",
+      "ratio": 4.6309,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C1 toast body",
+      "fg": "#E9EFF1",
+      "bg": "#0E2A33",
+      "ratio": 12.937,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C6 on-success",
+      "fg": "#FFFFFF",
+      "bg": "#2E7D4F",
+      "ratio": 5.045,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C6 on-warning",
+      "fg": "#FFFFFF",
+      "bg": "#9A6700",
+      "ratio": 4.8678,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C6 on-danger",
+      "fg": "#FFFFFF",
+      "bg": "#B3261E",
+      "ratio": 6.5365,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C6 on-info",
+      "fg": "#FFFFFF",
+      "bg": "#2F6FB0",
+      "ratio": 5.2219,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / code",
+      "fg": "#FFFFFF",
+      "bg": "#3B6EA8",
+      "ratio": 5.274,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal code text on soft",
+      "fg": "#3868A0",
+      "bg": "#DDE6EF",
+      "ratio": 4.5514,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal code solid on surface",
+      "fg": "#3B6EA8",
+      "bg": "#F7FAFB",
+      "ratio": 5.0284,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / english",
+      "fg": "#FFFFFF",
+      "bg": "#8B5A8C",
+      "ratio": 5.3314,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal english text on soft",
+      "fg": "#845685",
+      "bg": "#E8E4EB",
+      "ratio": 4.5819,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal english solid on surface",
+      "fg": "#8B5A8C",
+      "bg": "#F7FAFB",
+      "ratio": 5.0831,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / sharia",
+      "fg": "#FFFFFF",
+      "bg": "#5E7A3A",
+      "ratio": 4.8602,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal sharia text on soft",
+      "fg": "#556E34",
+      "bg": "#E2E8E0",
+      "ratio": 4.5968,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal sharia solid on surface",
+      "fg": "#5E7A3A",
+      "bg": "#F7FAFB",
+      "ratio": 4.6338,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / arabic",
+      "fg": "#FFFFFF",
+      "bg": "#A9792B",
+      "ratio": 3.8484,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal arabic text on soft",
+      "fg": "#876122",
+      "bg": "#ECE8DE",
+      "ratio": 4.5611,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal arabic solid on surface",
+      "fg": "#A9792B",
+      "bg": "#F7FAFB",
+      "ratio": 3.6692,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / culture",
+      "fg": "#FFFFFF",
+      "bg": "#B8577A",
+      "ratio": 4.4849,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal culture text on soft",
+      "fg": "#9C4A68",
+      "bg": "#EEE3E9",
+      "ratio": 4.6757,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal culture solid on surface",
+      "fg": "#B8577A",
+      "bg": "#F7FAFB",
+      "ratio": 4.2761,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / quran",
+      "fg": "#FFFFFF",
+      "bg": "#2A7A55",
+      "ratio": 5.2324,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal quran text on soft",
+      "fg": "#266E4C",
+      "bg": "#DAE8E4",
+      "ratio": 4.8707,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal quran solid on surface",
+      "fg": "#2A7A55",
+      "bg": "#F7FAFB",
+      "ratio": 4.9888,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / sport",
+      "fg": "#FFFFFF",
+      "bg": "#CF5C36",
+      "ratio": 4.0098,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal sport text on soft",
+      "fg": "#A64A2B",
+      "bg": "#F1E4DF",
+      "ratio": 4.6491,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal sport solid on surface",
+      "fg": "#CF5C36",
+      "bg": "#F7FAFB",
+      "ratio": 3.823,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / neutral-1",
+      "fg": "#FFFFFF",
+      "bg": "#5A6B75",
+      "ratio": 5.5341,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-1 text on soft",
+      "fg": "#4F5F69",
+      "bg": "#E4E8EA",
+      "ratio": 5.3665,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-1 solid on surface",
+      "fg": "#5A6B75",
+      "bg": "#F7FAFB",
+      "ratio": 5.2764,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / neutral-2",
+      "fg": "#FFFFFF",
+      "bg": "#4A6B6E",
+      "ratio": 5.8021,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-2 text on soft",
+      "fg": "#416063",
+      "bg": "#E0E8E8",
+      "ratio": 5.4831,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-2 solid on surface",
+      "fg": "#4A6B6E",
+      "bg": "#F7FAFB",
+      "ratio": 5.5319,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / neutral-3",
+      "fg": "#FFFFFF",
+      "bg": "#7A5C46",
+      "ratio": 6.0926,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-3 text on soft",
+      "fg": "#6B503C",
+      "bg": "#EBE5E1",
+      "ratio": 5.9296,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-3 solid on surface",
+      "fg": "#7A5C46",
+      "bg": "#F7FAFB",
+      "ratio": 5.8089,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / neutral-4",
+      "fg": "#FFFFFF",
+      "bg": "#5C6383",
+      "ratio": 5.8864,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-4 text on soft",
+      "fg": "#535A78",
+      "bg": "#E4E5EC",
+      "ratio": 5.3902,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-4 solid on surface",
+      "fg": "#5C6383",
+      "bg": "#F7FAFB",
+      "ratio": 5.6123,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / neutral-5",
+      "fg": "#FFFFFF",
+      "bg": "#8A7448",
+      "ratio": 4.4945,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-5 text on soft",
+      "fg": "#6F5D39",
+      "bg": "#EDE9E1",
+      "ratio": 5.2545,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-5 solid on surface",
+      "fg": "#8A7448",
+      "bg": "#F7FAFB",
+      "ratio": 4.2852,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "C8 on-goal / neutral-6",
+      "fg": "#FFFFFF",
+      "bg": "#55595C",
+      "ratio": 7.0713,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-6 text on soft",
+      "fg": "#4C5053",
+      "bg": "#E3E4E5",
+      "ratio": 6.3942,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "light",
+      "name": "goal neutral-6 solid on surface",
+      "fg": "#55595C",
+      "bg": "#F7FAFB",
+      "ratio": 6.742,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C4 line-strong on bg",
+      "fg": "#527682",
+      "bg": "#0B1A20",
+      "ratio": 3.612,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C4 line-strong on surface",
+      "fg": "#527682",
+      "bg": "#12262E",
+      "ratio": 3.1827,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C2 accent-2-on-soft",
+      "fg": "#F08A5D",
+      "bg": "#3A2A24",
+      "ratio": 5.5308,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C3 accent-2-line on bg",
+      "fg": "#F08A5D",
+      "bg": "#0B1A20",
+      "ratio": 7.1848,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C3 accent-2-line on surface",
+      "fg": "#F08A5D",
+      "bg": "#12262E",
+      "ratio": 6.3308,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C1 toast action",
+      "fg": "#9C3D14",
+      "bg": "#E3EEF1",
+      "ratio": 5.7474,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C1 toast body",
+      "fg": "#0B1A20",
+      "bg": "#E3EEF1",
+      "ratio": 15.0199,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C6 on-success",
+      "fg": "#06231A",
+      "bg": "#5FC48B",
+      "ratio": 7.7235,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C6 on-warning",
+      "fg": "#2A1F06",
+      "bg": "#E0B14A",
+      "ratio": 8.1393,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C6 on-danger",
+      "fg": "#2A0A08",
+      "bg": "#F2877F",
+      "ratio": 7.4626,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C6 on-info",
+      "fg": "#0A2038",
+      "bg": "#7FB2E8",
+      "ratio": 7.3913,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / code",
+      "fg": "#0B1A20",
+      "bg": "#6FA3DE",
+      "ratio": 6.7376,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal code text on soft",
+      "fg": "#7DACE1",
+      "bg": "#253F51",
+      "ratio": 4.6426,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal code solid on surface",
+      "fg": "#6FA3DE",
+      "bg": "#12262E",
+      "ratio": 5.9367,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / english",
+      "fg": "#0B1A20",
+      "bg": "#C093C2",
+      "ratio": 6.9272,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal english text on soft",
+      "fg": "#C398C5",
+      "bg": "#353C4C",
+      "ratio": 4.5308,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal english solid on surface",
+      "fg": "#C093C2",
+      "bg": "#12262E",
+      "ratio": 6.1038,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / sharia",
+      "fg": "#0B1A20",
+      "bg": "#9DBB75",
+      "ratio": 8.2839,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal sharia text on soft",
+      "fg": "#9DBB75",
+      "bg": "#2E443C",
+      "ratio": 4.8791,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal sharia solid on surface",
+      "fg": "#9DBB75",
+      "bg": "#12262E",
+      "ratio": 7.2992,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / arabic",
+      "fg": "#0B1A20",
+      "bg": "#D9A857",
+      "ratio": 8.1913,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal arabic text on soft",
+      "fg": "#D9A857",
+      "bg": "#3A4036",
+      "ratio": 4.927,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal arabic solid on surface",
+      "fg": "#D9A857",
+      "bg": "#12262E",
+      "ratio": 7.2176,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / culture",
+      "fg": "#0B1A20",
+      "bg": "#E38AA9",
+      "ratio": 7.1645,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal culture text on soft",
+      "fg": "#E490AD",
+      "bg": "#3C3A47",
+      "ratio": 4.7086,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal culture solid on surface",
+      "fg": "#E38AA9",
+      "bg": "#12262E",
+      "ratio": 6.3129,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / quran",
+      "fg": "#0B1A20",
+      "bg": "#5FBF93",
+      "ratio": 7.9133,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal quran text on soft",
+      "fg": "#5FBF93",
+      "bg": "#214542",
+      "ratio": 4.6928,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal quran solid on surface",
+      "fg": "#5FBF93",
+      "bg": "#12262E",
+      "ratio": 6.9727,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / sport",
+      "fg": "#0B1A20",
+      "bg": "#F2906B",
+      "ratio": 7.5894,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal sport text on soft",
+      "fg": "#F2906B",
+      "bg": "#3F3B3A",
+      "ratio": 4.7297,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal sport solid on surface",
+      "fg": "#F2906B",
+      "bg": "#12262E",
+      "ratio": 6.6872,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / neutral-1",
+      "fg": "#0B1A20",
+      "bg": "#9AAAB4",
+      "ratio": 7.4253,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-1 text on soft",
+      "fg": "#A6B5BE",
+      "bg": "#333C42",
+      "ratio": 5.346,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-1 solid on surface",
+      "fg": "#9AAAB4",
+      "bg": "#12262E",
+      "ratio": 6.5426,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / neutral-2",
+      "fg": "#0B1A20",
+      "bg": "#86A9AC",
+      "ratio": 7.0039,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-2 text on soft",
+      "fg": "#93B4B7",
+      "bg": "#2C3C3E",
+      "ratio": 5.1854,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-2 solid on surface",
+      "fg": "#86A9AC",
+      "bg": "#12262E",
+      "ratio": 6.1714,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / neutral-3",
+      "fg": "#0B1A20",
+      "bg": "#B9977D",
+      "ratio": 6.5821,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-3 text on soft",
+      "fg": "#C4A289",
+      "bg": "#3B342F",
+      "ratio": 5.1662,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-3 solid on surface",
+      "fg": "#B9977D",
+      "bg": "#12262E",
+      "ratio": 5.7997,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / neutral-4",
+      "fg": "#0B1A20",
+      "bg": "#9AA1C4",
+      "ratio": 6.9908,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-4 text on soft",
+      "fg": "#A7ADD0",
+      "bg": "#333747",
+      "ratio": 5.36,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-4 solid on surface",
+      "fg": "#9AA1C4",
+      "bg": "#12262E",
+      "ratio": 6.1598,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / neutral-5",
+      "fg": "#0B1A20",
+      "bg": "#C1AC7E",
+      "ratio": 8.0059,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-5 text on soft",
+      "fg": "#CBB78B",
+      "bg": "#3B3830",
+      "ratio": 5.9552,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-5 solid on surface",
+      "fg": "#C1AC7E",
+      "bg": "#12262E",
+      "ratio": 7.0543,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "C8 on-goal / neutral-6",
+      "fg": "#0B1A20",
+      "bg": "#9B9FA3",
+      "ratio": 6.6635,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-6 text on soft",
+      "fg": "#A8ACAF",
+      "bg": "#323436",
+      "ratio": 5.467,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "theme": "dark",
+      "name": "goal neutral-6 solid on surface",
+      "fg": "#9B9FA3",
+      "bg": "#12262E",
+      "ratio": 5.8714,
+      "min": 3,
+      "pass": true
+    }
+  ]
+}

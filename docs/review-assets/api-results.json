@@ -1,0 +1,183 @@
+{
+  "date": "2026-11-07T08:03:42.849Z",
+  "results": [
+    {
+      "id": "unauthenticated-read",
+      "pass": true,
+      "observed": {
+        "status": 200,
+        "tasks": 7,
+        "cacheControl": null
+      },
+      "expected": "Authenticated, authorized, private response"
+    },
+    {
+      "id": "unauthenticated-journal-read-write",
+      "pass": true,
+      "observed": {
+        "create": 201,
+        "searchFound": true
+      },
+      "expected": "401 without a valid session"
+    },
+    {
+      "id": "task-date-validation",
+      "pass": true,
+      "observed": {
+        "status": 201,
+        "dueDate": "not-a-date"
+      },
+      "expected": "400 for an invalid calendar date"
+    },
+    {
+      "id": "overview-date-validation",
+      "pass": true,
+      "observed": {
+        "status": 200,
+        "today": "banana"
+      },
+      "expected": "400 for invalid date range"
+    },
+    {
+      "id": "completion-idempotency",
+      "pass": true,
+      "observed": {
+        "first": "2026-11-07T08:03:41.168Z",
+        "second": "2026-11-07T08:03:41.206Z"
+      },
+      "expected": "Repeated completion preserves original completion time"
+    },
+    {
+      "id": "ui-save-preserves-completion-time",
+      "pass": true,
+      "observed": {
+        "before": "2026-11-07T08:03:41.206Z",
+        "afterEdit": "2026-11-07T08:03:41.232Z"
+      },
+      "expected": "Editing notes does not move completion to today"
+    },
+    {
+      "id": "strict-route-matching",
+      "pass": true,
+      "observed": {
+        "status": 200,
+        "path": "/api/tasks/:id/restore/extra"
+      },
+      "expected": "404 for unsupported route shape"
+    },
+    {
+      "id": "habit-date-validation",
+      "pass": true,
+      "observed": {
+        "status": 200,
+        "body": {
+          "id": "395ee7e3-0e77-4be4-90a2-3013aefe0f71",
+          "habitId": "42de8011-468a-47a8-abb8-465b4ba79e31",
+          "workspaceId": "workspace_personal",
+          "userId": "user_personal",
+          "logDate": "2026-99-99",
+          "value": 2,
+          "note": null,
+          "createdAt": "2026-11-07T08:03:41.000Z"
+        }
+      },
+      "expected": "400 for impossible calendar date"
+    },
+    {
+      "id": "journal-date-validation",
+      "pass": true,
+      "observed": {
+        "status": 400,
+        "error": "تاريخ التدوينة غير صالح"
+      },
+      "expected": "400 (already implemented correctly)"
+    },
+    {
+      "id": "localized-validation-errors",
+      "pass": true,
+      "observed": {
+        "status": 400,
+        "error": "Too small: expected string to have >=1 characters"
+      },
+      "expected": "Stable Arabic error code/message"
+    },
+    {
+      "id": "write-origin-and-content-type",
+      "pass": true,
+      "observed": {
+        "status": 201,
+        "contentType": "text/plain",
+        "origin": "https://untrusted.example"
+      },
+      "expected": "Reject unsupported media type; enforce origin/CSRF policy before cookie auth"
+    },
+    {
+      "id": "project-delete-preserves-task",
+      "pass": true,
+      "observed": {
+        "status": 200,
+        "projectId": null
+      },
+      "expected": "Task survives in Inbox (already implemented correctly)"
+    },
+    {
+      "id": "starting-replaces-session-silently",
+      "pass": "2026-11-07T08:03:42.381Z",
+      "observed": {
+        "oldCompleted": true,
+        "oldActualSeconds": 1,
+        "newStatus": 201
+      },
+      "expected": "Explicit conflict/confirmation; abandoned session not counted as completed"
+    },
+    {
+      "id": "server-authoritative-focus-time",
+      "pass": true,
+      "observed": {
+        "status": 200,
+        "claimedSeconds": 14400,
+        "wallSecondsApprox": 1
+      },
+      "expected": "Server validates elapsed time and completion"
+    },
+    {
+      "id": "journal-pagination-after-insert",
+      "pass": true,
+      "observed": {
+        "inserted": 201,
+        "duplicateIds": [
+          "81c32f22-0f31-406d-ad3a-f403963f3f07",
+          "86975570-9385-4344-8c8e-45405a7570a5"
+        ],
+        "duplicateTitles": [
+          "AUDIT page 06",
+          "AUDIT page 05"
+        ]
+      },
+      "expected": "Cursor/stable pagination does not duplicate or skip entries after concurrent writes"
+    },
+    {
+      "id": "journal-search-wildcards",
+      "pass": true,
+      "observed": {
+        "query": "%",
+        "matchingTotal": 47,
+        "allTotal": 47
+      },
+      "expected": "Define literal search semantics or escape LIKE metacharacters"
+    },
+    {
+      "id": "journal-strict-route-matching",
+      "pass": true,
+      "observed": {
+        "status": 200,
+        "path": "/api/journal/:id/extra"
+      },
+      "expected": "404 for unsupported route shape"
+    }
+  ],
+  "cleanup": {
+    "leftovers": [],
+    "focusRowsRemoved": 2
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "date": "2026-11-07T08:05:18.323Z",
+  "results": [
+    {
+      "id": "task-create-edit",
+      "observed": {
+        "created": true,
+        "notes": "Edited note"
+      },
+      "expected": "Task persists and edits save"
+    },
+    {
+      "id": "task-delete-confirmation",
+      "observed": {
+        "stillExists": false,
+        "dialogs": [
+          {
+            "type": "confirm",
+            "message": "حذف المهمة «AUDIT-UI-1794038705325 task»؟ لا يمكن التراجع عن هذا الإجراء."
+          }
+        ]
+      },
+      "expected": "Confirmed deletion removes task"
+    },
+    {
+      "id": "task-dirty-close",
+      "observed": {
+        "open": 0,
+        "confirmations": 0
+      },
+      "expected": "Warn before discarding edits, consistently with Journal"
+    },
+    {
+      "id": "mutation-success-refresh-failure",
+      "observed": {
+        "modalOpen": 0,
+        "visibleTask": 0,
+        "toast": "AUDIT simulated refresh failure",
+        "committedToServer": true,
+        "visibleAfterReload": 1
+      },
+      "expected": "Distinguish committed write from failed refresh; reconcile without misleading success"
+    },
+    {
+      "id": "today-partial-habit-toggle",
+      "observed": {
+        "before": "2 of 5 pages",
+        "after": 0
+      },
+      "expected": "Preserve partial progress or explicitly confirm replacing/resetting it"
+    },
+    {
+      "id": "timer-duration-copy",
+      "observed": {
+        "selected": "90",
+        "modeLabel": "بومودورو، 25 دقيقة",
+        "dashboardIdle": "25:00"
+      },
+      "expected": "All visible duration labels reflect the selected duration"
+    },
+    {
+      "id": "auto-finish-failure-retry",
+      "observed": {
+        "attempts": 1,
+        "remaining": "00:00",
+        "stillActive": true
+      },
+      "expected": "Retryable completion with visible pending/retry state"
+    },
+    {
+      "id": "focus-start-finish",
+      "observed": {
+        "started": true,
+        "dockGone": true
+      },
+      "expected": "Normal focus start/finish works"
+    },
+    {
+      "id": "journal-crud-search",
+      "observed": {
+        "created": true,
+        "editedContent": "Edited reflection.",
+        "searchCount": 1,
+        "remaining": 0
+      },
+      "expected": "Create/edit/search/delete works"
+    },
+    {
+      "id": "invalid-project-deep-link",
+      "observed": {
+        "heading": "المشروع",
+        "empty": "لا توجد مهام هنا بعد"
+      },
+      "expected": "Recognize missing project and offer navigation/recovery"
+    },
+    {
+      "id": "completed-habit-colors",
+      "observed": {
+        "accessibility": []
+      },
+      "expected": "Manually verify non-text/icon contrast for every selectable color"
+    },
+    {
+      "id": "tablet-bottom-navigation",
+      "observed": {
+        "footer": {
+          "top": 952.03125,
+          "bottom": 1000.03125
+        },
+        "nav": {
+          "top": 936,
+          "bottom": 1000
+        },
+        "overlap": 47.96875,
+        "contentPaddingBottom": "24px"
+      },
+      "expected": "Reserve space for fixed navigation at every width where it is displayed"
+    }
+  ],
+  "dialogs": [
+    {
+      "type": "confirm",
+      "message": "حذف المهمة «AUDIT-UI-1794038705325 task»؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    {
+      "type": "confirm",
+      "message": "حذف هذه التدوينة نهائياً؟"
+    }
+  ],
+  "completedHabitScans": [
+    {
+      "label": "390-habits-completed",
+      "url": "http://127.0.0.1:3000/?view=habits",
+      "violations": [],
+      "incomplete": []
+    }
+  ]
+}

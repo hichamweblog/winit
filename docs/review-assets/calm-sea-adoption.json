@@ -1,0 +1,475 @@
+{
+  "date": "2026-11-08T16:57:04.523Z",
+  "results": [
+    {
+      "viewport": "390",
+      "mode": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ],
+      "overflow": {
+        "doc": 390,
+        "win": 390
+      },
+      "fonts": {
+        "heading": "\"El Messiri\", Tahoma, \"Segoe UI\", serif",
+        "nav": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "caption": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "body": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "loaded": [
+          "El Messiri:600",
+          "El Messiri:600",
+          "El Messiri:700",
+          "El Messiri:700",
+          "Readex Pro:400",
+          "Readex Pro:400",
+          "Readex Pro:500",
+          "Readex Pro:500",
+          "Readex Pro:600",
+          "Readex Pro:600",
+          "Readex Pro:700",
+          "Readex Pro:700"
+        ]
+      },
+      "smallText": [
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "1"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "5"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "القادم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "العادات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوميات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "المزيد"
+        }
+      ],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "viewport": "768",
+      "mode": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ],
+      "overflow": {
+        "doc": 768,
+        "win": 768
+      },
+      "fonts": {
+        "heading": "\"El Messiri\", Tahoma, \"Segoe UI\", serif",
+        "nav": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "caption": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "body": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "loaded": [
+          "El Messiri:600",
+          "El Messiri:600",
+          "El Messiri:700",
+          "El Messiri:700",
+          "Readex Pro:400",
+          "Readex Pro:400",
+          "Readex Pro:500",
+          "Readex Pro:500",
+          "Readex Pro:600",
+          "Readex Pro:600",
+          "Readex Pro:700",
+          "Readex Pro:700"
+        ]
+      },
+      "smallText": [
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "1"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "5"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "القادم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "العادات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوميات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "المزيد"
+        }
+      ],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "viewport": "1100",
+      "mode": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ],
+      "overflow": {
+        "doc": 1100,
+        "win": 1100
+      },
+      "fonts": {
+        "heading": "\"El Messiri\", Tahoma, \"Segoe UI\", serif",
+        "nav": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "caption": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "body": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "loaded": [
+          "El Messiri:600",
+          "El Messiri:600",
+          "El Messiri:700",
+          "El Messiri:700",
+          "Readex Pro:400",
+          "Readex Pro:400",
+          "Readex Pro:500",
+          "Readex Pro:500",
+          "Readex Pro:600",
+          "Readex Pro:600",
+          "Readex Pro:700",
+          "Readex Pro:700"
+        ]
+      },
+      "smallText": [
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "1"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "5"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "القادم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "العادات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوميات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "المزيد"
+        }
+      ],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "viewport": "1440",
+      "mode": "light",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      },
+      "fonts": {
+        "heading": "\"El Messiri\", Tahoma, \"Segoe UI\", serif",
+        "nav": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "caption": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "body": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "loaded": [
+          "El Messiri:600",
+          "El Messiri:600",
+          "El Messiri:700",
+          "El Messiri:700",
+          "Readex Pro:400",
+          "Readex Pro:400",
+          "Readex Pro:500",
+          "Readex Pro:500",
+          "Readex Pro:600",
+          "Readex Pro:600",
+          "Readex Pro:700",
+          "Readex Pro:700"
+        ]
+      },
+      "smallText": [
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "1"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "5"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "القادم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "العادات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوميات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "المزيد"
+        }
+      ],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "viewport": "1440",
+      "mode": "dark",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ],
+      "overflow": {
+        "doc": 1440,
+        "win": 1440
+      },
+      "fonts": {
+        "heading": "\"El Messiri\", Tahoma, \"Segoe UI\", serif",
+        "nav": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "caption": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "body": "\"Readex Pro\", \"Segoe UI\", Tahoma, system-ui, sans-serif",
+        "loaded": [
+          "El Messiri:600",
+          "El Messiri:600",
+          "El Messiri:700",
+          "El Messiri:700",
+          "Readex Pro:400",
+          "Readex Pro:400",
+          "Readex Pro:500",
+          "Readex Pro:500",
+          "Readex Pro:600",
+          "Readex Pro:600",
+          "Readex Pro:700",
+          "Readex Pro:700"
+        ]
+      },
+      "smallText": [
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "2"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "1"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "5"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "القادم"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "العادات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "اليوميات"
+        },
+        {
+          "cls": "",
+          "fs": 11.5,
+          "text": "المزيد"
+        }
+      ],
+      "pageErrors": [],
+      "failedRequests": []
+    }
+  ]
+}

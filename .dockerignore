@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+data
+docs/review-assets
+docs/design-system/fonts
+*.log
+.env
+.env.local
+.DS_Store
+coverage
+.review-browser

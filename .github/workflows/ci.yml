@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, tests, design gate, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Design-system gate
+        run: npm run test:design
+
+      - name: Migrations are committed and current
+        run: |
+          npm run db:generate
+          if [ -n "$(git status --porcelain drizzle)" ]; then
+            echo "::error::Schema changed without a committed migration. Run 'npm run db:generate' and commit drizzle/."
+            git status --porcelain drizzle
+            exit 1
+          fi
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+  smoke:
+    name: API smoke test against a real server
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+      - name: Start, migrate and probe
+        run: |
+          npm run bootstrap
+          npm run start &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+          # Fail loudly rather than letting the probe report confusing 401s
+          # against a server that never came up.
+          curl -fsS http://127.0.0.1:3000/api/health > /dev/null || {
+            echo "::error::Server did not become healthy within 60s."
+            exit 1
+          }
+          node scripts/api-smoke.mjs
+        env:
+          NODE_ENV: production
+          WINIT_INSECURE_COOKIES: '1'
+          WINIT_TRUST_PROXY: '1'
+          DATABASE_URL: ./data/ci.db

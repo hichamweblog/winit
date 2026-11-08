@@ -1,146 +1,260 @@
-/* Hallmark: sticker sheet in light mode, spore cellar in dark mode; modes: light+dark. */
-@theme static {
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-md: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
-  --text-display-s: 1.25rem;
-  --text-display: 1.5rem;
-  --text-section: 1.125rem;
-  --text-title: 1rem;
-  --text-lead: 1rem;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --color-error: oklch(50% 0.15 25);
-  --color-success: oklch(48% 0.12 151);
-  --color-paper: oklch(95.7% 0.013 82);
-  --color-paper-2: oklch(92.8% 0.021 79);
-  --color-paper-3: oklch(99.4% 0.007 89);
-  --color-white: oklch(99.5% 0.003 82);
-  --color-ink: oklch(21% 0.011 81);
-  --color-ink-2: oklch(30% 0.013 78);
-  --color-muted: oklch(50% 0.017 64);
-  --color-rule: oklch(83% 0.02 80);
-  --color-edge: oklch(58% 0.025 74);
-  --color-accent: oklch(56% 0.225 2);
-  --color-accent-deep: oklch(48% 0.2 2);
-  --color-accent-strong: oklch(43% 0.17 2);
-  --color-accent-2: oklch(87.6% 0.179 119);
-  --color-accent-ink: oklch(99.5% 0.003 82);
-  --color-accent-2-ink: oklch(21% 0.011 81);
-  --color-focus: oklch(43% 0.17 2);
-  --color-card-edge: oklch(99.5% 0.003 82);
-  --color-priority-high: oklch(48% 0.17 25);
-  --color-priority-medium: oklch(47% 0.13 65);
-  --color-priority-low: oklch(43% 0.12 150);
-  --font-display: "Tajawal", sans-serif;
-  --font-body: "Readex Pro", sans-serif;
-  --font-small: "Noto Naskh Arabic", serif;
-  --font-ui: "Readex Pro", sans-serif;
-  --radius-card: 18px;
-  --radius-pill: 999px;
-  --shadow-card: 5px 6px 0 oklch(21% 0.011 81);
-  --shadow-press: 1px 1px 0 oklch(21% 0.011 81);
-  --tracking-display: 0;
-}
+/* ============================================================================
+   Winit — "Calm Sea" / بحر هادئ · design tokens v1.0.1
+   Adopted from docs/design-system/design-system-v1.0.md with the eight
+   corrections from docs/design-system-audit.md (C1–C8).
+
+   Structure:
+     1. Calm Sea semantic tokens (:root = light, [data-mode="dark"] = dark)
+     2. Legacy aliases (--color-*, --font-display, …) so the existing
+        component layer resolves to Calm Sea without a rewrite. Aliases use
+        var() and are declared once: they pick up dark values automatically.
+   ========================================================================= */
+
 :root {
+  /* ---- fonts ---- */
+  --font-heading: "El Messiri", Tahoma, "Segoe UI", serif;            /* C5: no Naskh fallback in chrome */
+  --font-ui: "Readex Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-reading: "Noto Naskh Arabic", "Amiri", Tahoma, serif;
+
+  /* ---- type scale ---- */
+  --text-timer: 4rem;         --lh-timer: 1;
+  --text-stat: 2.5rem;        --lh-stat: 1.1;
+  --text-h1: 2rem;            --lh-h1: 1.3;
+  --text-h1-compact: 1.75rem;                                       /* C6: 28px mobile */
+  --text-h2: 1.5rem;          --lh-h2: 1.4;
+  --text-h3: 1.125rem;        --lh-h3: 1.5;
+  --text-body-lg: 1.0625rem;  --lh-body-lg: 1.7;
+  --text-body: 0.9375rem;     --lh-body: 1.7;
+  --text-ui: 0.875rem;        --lh-ui: 1.5;
+  --text-small: 0.78125rem;   --lh-small: 1.6;   /* 12.5px — caption floor */
+  --text-micro: 0.71875rem;   --lh-micro: 1.2;   /* 11.5px — chips + mobile tab labels only */
+  --text-reading: 1.125rem;   --lh-reading: 1.95;
+  --text-reading-lg: 1.25rem; --lh-reading-lg: 2;                    /* C6 */
+
+  /* ---- space (4px base) ---- */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-10: 40px;
+  --space-12: 48px; --space-16: 64px;
+  --row-gap-compact: 6px; --row-gap-comfortable: 8px;                /* C6 */
+  --screen-pad: var(--space-4);
+
+  /* ---- shape ---- */
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+  --radius-xl: 20px; --radius-full: 999px;
+
+  /* ---- interaction ---- */
+  --tap-min: 44px;                                                   /* C6 */
+  --focus-width: 2px; --focus-offset: 2px;
+
+  /* ---- layout ---- */
+  --sidebar-collapsed: 72px; --sidebar-expanded: 240px;              /* C6 */
+  --bottom-bar-h: 56px;
+  --content-max-list: 720px; --content-max-dashboard: 1040px; --content-max-reading: 36rem;
+  /* Media queries cannot read var(): compact <768 · medium 768–1099 · expanded >=1100 */
+  --bp-medium: 768px; --bp-expanded: 1100px;
+
+  /* ---- motion ---- */
+  --dur-fast: 120ms; --dur-base: 200ms; --dur-slow: 320ms;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(.4, 0, .2, 1);
+
+  /* ---- z (§5.5: sheet below modal — retires the drawer-over-modal bug) ---- */
+  --z-base: 0; --z-sticky: 10; --z-dropdown: 20;
+  --z-sheet: 30; --z-modal: 40; --z-toast: 50;
+
+  /* ===== light theme ===== */
   color-scheme: light;
+  --bg: #E9EFF1;  --surface: #F7FAFB;  --surface-raised: #FFFFFF;  --surface-sunken: #DCE6E9;
+  --text: #0E2A33;  --text-muted: #52696F;  --text-disabled: #8AA2AA;
+  --line: #CCDADF;  --line-strong: #6E8992;                          /* C4 */
+  --accent: #0F5566;  --accent-hover: #0B4553;  --accent-pressed: #08343F;
+  --accent-soft: #D5E5E9;  --on-accent: #FFFFFF;
+  --accent-2: #E8683A;  --accent-2-strong: #B04518;  --accent-2-soft: #F6E1D8;  --on-accent-2: #2A1206;
+  --accent-2-on-soft: #A84116;                                       /* C2 */
+  --accent-2-line: #C24E22;                                          /* C3 */
+  --toast-action: #E8683A;                                           /* C1 */
+  --on-goal: #FFFFFF;                                                /* C8 */
+
+  --success: #2E7D4F;  --success-bg: #DFEBE6;  --success-text: #297047;  --on-success: #FFFFFF;
+  --warning: #9A6700;  --warning-bg: #ECE8DD;  --warning-text: #8B5D00;  --on-warning: #FFFFFF;
+  --danger:  #B3261E;  --danger-bg:  #EFE1E0;  --danger-text:  #B3261E;  --on-danger:  #FFFFFF;
+  --info:    #2F6FB0;  --info-bg:    #DFE9F2;  --info-text:    #2D69A7;  --on-info:    #FFFFFF;
+
+  --goal-code: #3B6EA8;     --goal-code-bg: #DDE6EF;     --goal-code-fg: #3868A0;
+  --goal-english: #8B5A8C;  --goal-english-bg: #E8E4EB;  --goal-english-fg: #845685;
+  --goal-sharia: #5E7A3A;   --goal-sharia-bg: #E2E8E0;   --goal-sharia-fg: #556E34;
+  --goal-arabic: #A9792B;   --goal-arabic-bg: #ECE8DE;   --goal-arabic-fg: #876122;
+  --goal-culture: #B8577A;  --goal-culture-bg: #EEE3E9;  --goal-culture-fg: #9C4A68;
+  --goal-quran: #2A7A55;    --goal-quran-bg: #DAE8E4;    --goal-quran-fg: #266E4C;
+  --goal-sport: #CF5C36;    --goal-sport-bg: #F1E4DF;    --goal-sport-fg: #A64A2B;
+
+  --goal-neutral-1: #5A6B75; --goal-neutral-1-bg: #E4E8EA; --goal-neutral-1-fg: #4F5F69;
+  --goal-neutral-2: #4A6B6E; --goal-neutral-2-bg: #E0E8E8; --goal-neutral-2-fg: #416063;
+  --goal-neutral-3: #7A5C46; --goal-neutral-3-bg: #EBE5E1; --goal-neutral-3-fg: #6B503C;
+  --goal-neutral-4: #5C6383; --goal-neutral-4-bg: #E4E5EC; --goal-neutral-4-fg: #535A78;
+  --goal-neutral-5: #8A7448; --goal-neutral-5-bg: #EDE9E1; --goal-neutral-5-fg: #6F5D39;
+  --goal-neutral-6: #55595C; --goal-neutral-6-bg: #E3E4E5; --goal-neutral-6-fg: #4C5053;
+
+  /* App extension beyond Calm Sea v1.0.1 §4.3: six extra fixed slots so the
+     project picker covers hues the original 13 left out. Still a fixed
+     palette, never a free colour picker. Derived and contrast-proved by
+     scripts/derive-goal-colors.mjs. */
+--goal-teal: #0F7480; --goal-teal-bg: #DDECED; --goal-teal-fg: #0F727D;
+  --goal-violet: #6A4CA3; --goal-violet-bg: #EAE6F2; --goal-violet-fg: #6A4CA3;
+  --goal-crimson: #A62F45; --goal-crimson-bg: #F3E2E5; --goal-crimson-fg: #A62F45;
+  --goal-copper: #9C5228; --goal-copper-bg: #F1E7E1; --goal-copper-fg: #9C5228;
+  --goal-magenta: #A32E93; --goal-magenta-bg: #F2E2F0; --goal-magenta-fg: #A32E93;
+  --goal-lime: #6E8C10; --goal-lime-bg: #EBEFDE; --goal-lime-fg: #5A730D;
+
+  --shadow-1: 0 1px 2px rgba(14, 42, 51, .06);
+  --shadow-2: 0 6px 20px rgba(14, 42, 51, .10);
+  --shadow-3: 0 16px 48px rgba(14, 42, 51, .16);
+  --scrim: rgba(8, 20, 26, .5);
+}
+
+:root[data-mode="dark"], :root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B1A20;  --surface: #12262E;  --surface-raised: #183139;  --surface-sunken: #08141A;
+  --text: #E3EEF1;  --text-muted: #86A0A8;  --text-disabled: #4B6670;
+  --line: #223A44;  --line-strong: #527682;
+  --accent: #4FB3C8;  --accent-hover: #6CC3D5;  --accent-pressed: #8AD0DF;
+  --accent-soft: #153843;  --on-accent: #06222A;
+  --accent-2: #F08A5D;  --accent-2-strong: #F08A5D;  --accent-2-soft: #3A2A24;  --on-accent-2: #2A1206;
+  --accent-2-on-soft: #F08A5D;                                       /* C2 */
+  --accent-2-line: #F08A5D;                                          /* C3 */
+  --toast-action: #9C3D14;                                           /* C1: toast bg is LIGHT in dark */
+  --on-goal: #0B1A20;                                                /* C8 */
+
+  --success: #5FC48B;  --success-bg: #20423F;  --success-text: #5FC48B;  --on-success: #06231A;
+  --warning: #E0B14A;  --warning-bg: #373F33;  --warning-text: #E0B14A;  --on-warning: #2A1F06;
+  --danger:  #F2877F;  --danger-bg:  #3A373D;  --danger-text:  #F2877F;  --on-danger:  #2A0A08;
+  --info:    #7FB2E8;  --info-bg:    #263F4F;  --info-text:    #7FB2E8;  --on-info:    #0A2038;
+
+  --goal-code: #6FA3DE;     --goal-code-bg: #253F51;     --goal-code-fg: #7DACE1;
+  --goal-english: #C093C2;  --goal-english-bg: #353C4C;  --goal-english-fg: #C398C5;
+  --goal-sharia: #9DBB75;   --goal-sharia-bg: #2E443C;   --goal-sharia-fg: #9DBB75;
+  --goal-arabic: #D9A857;   --goal-arabic-bg: #3A4036;   --goal-arabic-fg: #D9A857;
+  --goal-culture: #E38AA9;  --goal-culture-bg: #3C3A47;  --goal-culture-fg: #E490AD;
+  --goal-quran: #5FBF93;    --goal-quran-bg: #214542;    --goal-quran-fg: #5FBF93;
+  --goal-sport: #F2906B;    --goal-sport-bg: #3F3B3A;    --goal-sport-fg: #F2906B;
+
+  --goal-neutral-1: #9AAAB4; --goal-neutral-1-bg: #333C42; --goal-neutral-1-fg: #A6B5BE;
+  --goal-neutral-2: #86A9AC; --goal-neutral-2-bg: #2C3C3E; --goal-neutral-2-fg: #93B4B7;
+  --goal-neutral-3: #B9977D; --goal-neutral-3-bg: #3B342F; --goal-neutral-3-fg: #C4A289;
+  --goal-neutral-4: #9AA1C4; --goal-neutral-4-bg: #333747; --goal-neutral-4-fg: #A7ADD0;
+  --goal-neutral-5: #C1AC7E; --goal-neutral-5-bg: #3B3830; --goal-neutral-5-fg: #CBB78B;
+  --goal-neutral-6: #9B9FA3; --goal-neutral-6-bg: #323436; --goal-neutral-6-fg: #A8ACAF;
+
+  /* App extension beyond Calm Sea v1.0.1 §4.3: six extra fixed slots so the
+     project picker covers hues the original 13 left out. Still a fixed
+     palette, never a free colour picker. Derived and contrast-proved by
+     scripts/derive-goal-colors.mjs. */
+--goal-teal: #74AEB5; --goal-teal-bg: #264149; --goal-teal-fg: #7BB2B9;
+  --goal-violet: #A997CA; --goal-violet-bg: #303D4D; --goal-violet-fg: #B1A0CF;
+  --goal-crimson: #CB8693; --goal-crimson-bg: #373942; --goal-crimson-fg: #D195A0;
+  --goal-copper: #C69B82; --goal-copper-bg: #363D3F; --goal-copper-fg: #C89F87;
+  --goal-magenta: #CA86C0; --goal-magenta-bg: #37394B; --goal-magenta-fg: #CF91C6;
+  --goal-lime: #ABBC74; --goal-lime-bg: #31443C; --goal-lime-fg: #ABBC74;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-2: 0 6px 20px rgba(0, 0, 0, .45);
+  --shadow-3: 0 16px 48px rgba(0, 0, 0, .55);
+}
+
+/* The pre-paint bootstrap always sets data-mode, so this is only a no-JS hint. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode]):not([data-theme]) { color-scheme: dark; }
+}
+
+/* ============================================================================
+   Legacy aliases — the pre-existing component layer keeps working.
+   Declared once; var() resolves against the active theme.
+   ========================================================================= */
+:root {
+  --color-paper: var(--bg);
+  --color-paper-2: var(--surface-sunken);
+  --color-paper-3: var(--surface);
+  --color-white: var(--surface-raised);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-muted);
+  --color-muted: var(--text-muted);
+  --color-rule: var(--line);
+  --color-edge: var(--line-strong);
+  --color-card-edge: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-hover);
+  --color-accent-strong: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-ink: var(--on-accent);
+  --color-accent-2-ink: var(--on-accent-2);
+  --color-focus: var(--accent);
+  --color-success: var(--success);
+  --color-error: var(--danger);
+  /* §4.4: priority is weight + icon, not a separate colour family */
+  --color-priority-high: var(--accent-2-strong);
+  --color-priority-medium: var(--accent);
+  --color-priority-low: var(--text-muted);
+
+  /* §3.3 rule 3: Naskh never in chrome. --font-small now means "small UI text". */
+  --font-display: var(--font-heading);
+  --font-body: var(--font-ui);
+  --font-small: var(--font-ui);
+  --font-ar: var(--font-ui);
+
+  --text-display: var(--text-h1);
+  --text-section: var(--text-h2);
+  --text-title: var(--text-h3);
+  --text-lead: var(--text-body-lg);
+
+  --radius-card: var(--radius-lg);
+  --radius-pill: var(--radius-full);
+  /* §5.3: level 0 = border only. Cards no longer carry a shadow. */
+  --shadow-card: none;
+  --shadow-press: none;
+  --tracking-display: 0;
+
   --space-3xs: 2px;
-  --space-2xs: 4px;
-  --space-xs: 8px;
-  --space-sm: 12px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 40px;
-  --space-2xl: 64px;
+  --space-2xs: var(--space-1);
+  --space-xs: var(--space-2);
+  --space-sm: var(--space-3);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-10);
+  --space-2xl: var(--space-16);
   --space-3xl: 96px;
   --space-4xl: 144px;
-  --dur-micro: 120ms;
-  --dur-short: 220ms;
-  --dur-long: 420ms;
-  --container: 1280px;
-  --gutter: 16px;
-  --sidebar-width: 256px;
-  --gap-columns: 16px;
-  --z-base: 1;
-  --z-raised: 10;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-sticky-nav: 300;
-  --z-modal: 400;
-  --z-toast: 500;
-  --z-tooltip: 600;
+
+  --dur-micro: var(--dur-fast);
+  --dur-short: var(--dur-base);
+  --dur-long: var(--dur-slow);
+  --ease-out: var(--ease);
+  --ease-in: cubic-bezier(.7, 0, .84, 0);
+
+  --container: var(--content-max-dashboard);
+  --gutter: var(--screen-pad);
+  --sidebar-width: var(--sidebar-expanded);
+  --gap-columns: var(--space-4);
   --rule-hair: 1px;
-  --row-rule-style: dashed;
-  --body-weight: 400;
-}
-:root[data-mode="dark"] {
-  color-scheme: dark;
-  --color-paper: oklch(15% 0.025 255);
-  --color-paper-2: oklch(19% 0.028 255);
-  --color-paper-3: oklch(24% 0.035 250);
-  --color-white: oklch(24% 0.035 250);
-  --color-ink: oklch(94% 0.018 235);
-  --color-ink-2: oklch(84% 0.025 235);
-  --color-muted: oklch(68% 0.025 235);
-  --color-rule: oklch(31% 0.03 250);
-  --color-edge: oklch(51% 0.035 245);
-  --color-accent: oklch(77% 0.12 235);
-  --color-accent-deep: oklch(83% 0.12 235);
-  --color-accent-strong: oklch(85% 0.10 235);
-  --color-accent-2: oklch(84% 0.10 225);
-  --color-accent-ink: oklch(15% 0.025 255);
-  --color-accent-2-ink: oklch(15% 0.025 255);
-  --color-focus: oklch(84% 0.11 225);
-  --color-card-edge: oklch(32% 0.03 250);
-  --color-success: oklch(76% 0.13 155);
-  --color-error: oklch(73% 0.15 25);
-  --color-priority-high: oklch(73% 0.15 25);
-  --color-priority-medium: oklch(80% 0.11 75);
-  --color-priority-low: oklch(76% 0.13 155);
-  --shadow-card: 4px 5px 0 oklch(9% 0.035 255);
-  --shadow-press: 1px 1px 0 oklch(9% 0.035 255);
   --row-rule-style: solid;
-  --body-weight: 350;
+  --body-weight: 400;
+
+  /* Legacy z names mapped onto the §5.5 scale. Sidebar is a sheet, so it sits
+     BELOW modals — this is the fix for the confirmed drawer-over-modal bug. */
+  --z-raised: var(--z-base);
+  --z-sticky-nav: var(--z-sticky);
+  --z-tooltip: var(--z-sheet);
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-mode]) {
-    color-scheme: dark;
-    --color-paper: oklch(15% 0.025 255);
-    --color-paper-2: oklch(19% 0.028 255);
-    --color-paper-3: oklch(24% 0.035 250);
-    --color-white: oklch(24% 0.035 250);
-    --color-ink: oklch(94% 0.018 235);
-    --color-ink-2: oklch(84% 0.025 235);
-    --color-muted: oklch(68% 0.025 235);
-    --color-rule: oklch(31% 0.03 250);
-    --color-edge: oklch(51% 0.035 245);
-    --color-accent: oklch(77% 0.12 235);
-    --color-accent-deep: oklch(83% 0.12 235);
-    --color-accent-strong: oklch(85% 0.10 235);
-    --color-accent-2: oklch(84% 0.10 225);
-    --color-accent-ink: oklch(15% 0.025 255);
-    --color-accent-2-ink: oklch(15% 0.025 255);
-    --color-focus: oklch(84% 0.11 225);
-    --color-card-edge: oklch(32% 0.03 250);
-    --color-success: oklch(76% 0.13 155);
-    --color-error: oklch(73% 0.15 25);
-    --color-priority-high: oklch(73% 0.15 25);
-    --color-priority-medium: oklch(80% 0.11 75);
-    --color-priority-low: oklch(76% 0.13 155);
-    --shadow-card: 4px 5px 0 oklch(9% 0.035 255);
-    --shadow-press: 1px 1px 0 oklch(9% 0.035 255);
-    --row-rule-style: solid;
-    --body-weight: 350;
+
+@media (min-width: 768px)  { :root { --screen-pad: var(--space-6); --gap-columns: var(--space-6); } }
+@media (min-width: 1100px) { :root { --screen-pad: var(--space-8); --gap-columns: var(--space-8); } }
+
+/* C7: movement off, opacity/colour fades kept at 80ms */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 80ms; --dur-slow: 80ms; }
+  *, *::before, *::after {
+    animation-duration: 80ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, color, background-color, border-color !important;
+    scroll-behavior: auto !important;
   }
-}
-@media (min-width: 40rem) {
-  :root { --gutter: 24px; --gap-columns: 24px; }
-}
-@media (min-width: 60rem) {
-  :root { --gutter: 40px; --gap-columns: 32px; }
 }

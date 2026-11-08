@@ -1,0 +1,175 @@
+{
+  "date": "2026-11-07T08:42:41.948Z",
+  "rows": [
+    {
+      "theme": "LIGHT",
+      "goal": "code",
+      "solid": "#3B6EA8",
+      "white": 5.27,
+      "whitePass": true,
+      "ink": 2.85
+    },
+    {
+      "theme": "LIGHT",
+      "goal": "english",
+      "solid": "#8B5A8C",
+      "white": 5.33,
+      "whitePass": true,
+      "ink": 2.82
+    },
+    {
+      "theme": "LIGHT",
+      "goal": "sharia",
+      "solid": "#5E7A3A",
+      "white": 4.86,
+      "whitePass": true,
+      "ink": 3.09
+    },
+    {
+      "theme": "LIGHT",
+      "goal": "arabic",
+      "solid": "#A9792B",
+      "white": 3.85,
+      "whitePass": true,
+      "ink": 3.9
+    },
+    {
+      "theme": "LIGHT",
+      "goal": "culture",
+      "solid": "#B8577A",
+      "white": 4.48,
+      "whitePass": true,
+      "ink": 3.35
+    },
+    {
+      "theme": "LIGHT",
+      "goal": "quran",
+      "solid": "#2A7A55",
+      "white": 5.23,
+      "whitePass": true,
+      "ink": 2.87
+    },
+    {
+      "theme": "LIGHT",
+      "goal": "sport",
+      "solid": "#CF5C36",
+      "white": 4.01,
+      "whitePass": true,
+      "ink": 3.75
+    },
+    {
+      "theme": "DARK",
+      "goal": "code",
+      "solid": "#6FA3DE",
+      "white": 2.64,
+      "whitePass": false,
+      "ink": 5.7
+    },
+    {
+      "theme": "DARK",
+      "goal": "english",
+      "solid": "#C093C2",
+      "white": 2.56,
+      "whitePass": false,
+      "ink": 5.86
+    },
+    {
+      "theme": "DARK",
+      "goal": "sharia",
+      "solid": "#9DBB75",
+      "white": 2.14,
+      "whitePass": false,
+      "ink": 7.01
+    },
+    {
+      "theme": "DARK",
+      "goal": "arabic",
+      "solid": "#D9A857",
+      "white": 2.17,
+      "whitePass": false,
+      "ink": 6.93
+    },
+    {
+      "theme": "DARK",
+      "goal": "culture",
+      "solid": "#E38AA9",
+      "white": 2.48,
+      "whitePass": false,
+      "ink": 6.06
+    },
+    {
+      "theme": "DARK",
+      "goal": "quran",
+      "solid": "#5FBF93",
+      "white": 2.24,
+      "whitePass": false,
+      "ink": 6.7
+    },
+    {
+      "theme": "DARK",
+      "goal": "sport",
+      "solid": "#F2906B",
+      "white": 2.34,
+      "whitePass": false,
+      "ink": 6.42
+    }
+  ],
+  "failures": [
+    {
+      "theme": "DARK",
+      "goal": "code",
+      "solid": "#6FA3DE",
+      "white": 2.64,
+      "whitePass": false,
+      "ink": 5.7
+    },
+    {
+      "theme": "DARK",
+      "goal": "english",
+      "solid": "#C093C2",
+      "white": 2.56,
+      "whitePass": false,
+      "ink": 5.86
+    },
+    {
+      "theme": "DARK",
+      "goal": "sharia",
+      "solid": "#9DBB75",
+      "white": 2.14,
+      "whitePass": false,
+      "ink": 7.01
+    },
+    {
+      "theme": "DARK",
+      "goal": "arabic",
+      "solid": "#D9A857",
+      "white": 2.17,
+      "whitePass": false,
+      "ink": 6.93
+    },
+    {
+      "theme": "DARK",
+      "goal": "culture",
+      "solid": "#E38AA9",
+      "white": 2.48,
+      "whitePass": false,
+      "ink": 6.06
+    },
+    {
+      "theme": "DARK",
+      "goal": "quran",
+      "solid": "#5FBF93",
+      "white": 2.24,
+      "whitePass": false,
+      "ink": 6.7
+    },
+    {
+      "theme": "DARK",
+      "goal": "sport",
+      "solid": "#F2906B",
+      "white": 2.34,
+      "whitePass": false,
+      "ink": 6.42
+    }
+  ]
+}
