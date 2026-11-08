@@ -77,6 +77,12 @@ jobs:
             if curl -fsS http://127.0.0.1:3000/api/health > /dev/null; then break; fi
             sleep 1
           done
+          # Fail loudly rather than letting the probe report confusing 401s
+          # against a server that never came up.
+          curl -fsS http://127.0.0.1:3000/api/health > /dev/null || {
+            echo "::error::Server did not become healthy within 60s."
+            exit 1
+          }
           node scripts/api-smoke.mjs
         env:
           NODE_ENV: production

@@ -12,6 +12,10 @@
  * Usage: node scripts/api-smoke.mjs [base-url]
  */
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3000';
+// Derive the origin from the server under test. Hardcoding a port made the
+// TLS-proxy checks pass only when the probe happened to run on that port and
+// fail in CI, which serves on 3000.
+const HOST = new URL(BASE).host;
 // Private range, randomised per run so rate-limit buckets do not carry over.
 const octet = () => Math.floor(Math.random() * 254) + 1;
 const RUN_IP = `10.${octet()}.${octet()}.${octet()}`;
@@ -129,10 +133,10 @@ check('cross-origin mutation is 403', crossOrigin.status === 403, `status ${cros
 const nullOrigin = await alice.call('/api/tasks', { method: 'POST', body: { title: 'null origin' }, headers: { origin: 'null' } });
 check('null Origin is rejected', nullOrigin.status === 403);
 // TLS-terminating proxy: browser Origin is https, Next may see http internally.
-const tlsOrigin = await alice.call('/api/tasks', { method: 'POST', body: { title: 'proxied' }, headers: { origin: 'https://127.0.0.1:3002' } });
+const tlsOrigin = await alice.call('/api/tasks', { method: 'POST', body: { title: 'proxied' }, headers: { origin: `https://${HOST}` } });
 check('same host over https is accepted behind a TLS proxy', tlsOrigin.status === 201, `status ${tlsOrigin.status}`);
 if (tlsOrigin.json?.id) await alice.call(`/api/tasks/${tlsOrigin.json.id}`, { method: 'DELETE' });
-const evilSubdomain = await alice.call('/api/tasks', { method: 'POST', body: { title: 'x' }, headers: { origin: 'https://127.0.0.1:3002.evil.example' } });
+const evilSubdomain = await alice.call('/api/tasks', { method: 'POST', body: { title: 'x' }, headers: { origin: `https://${HOST}.evil.example` } });
 check('a look-alike host is still rejected', evilSubdomain.status === 403, `status ${evilSubdomain.status}`);
 const textPlain = await alice.call('/api/tasks', { method: 'POST', raw: JSON.stringify({ title: 'text plain' }), headers: { 'content-type': 'text/plain' } });
 check('text/plain body is 415 (blocks simple form posts)', textPlain.status === 415, `status ${textPlain.status}`);
