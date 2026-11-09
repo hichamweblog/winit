@@ -12,7 +12,8 @@
  */
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { api, ApiClientError, UNAUTHENTICATED_EVENT } from '@/lib/client-api';
-import { AlertTriangle, ArrowNarrowLeft, Bolt, Eye, EyeOff, Loader, Lock, Logout, Mail, User } from '../icons';
+import { AlertTriangle, ArrowNarrowLeft, Eye, EyeOff, Loader, Lock, Logout, Mail, User } from '../icons';
+import { WinItLogo } from './Logo';
 
 type SessionUser = {
   id: string;
@@ -117,7 +118,7 @@ function AuthScreen({ onSignedIn }: { demoMode: boolean; onSignedIn: () => void 
   return (
     <div className="auth-screen">
       <main className="auth-card" aria-labelledby="auth-heading">
-        <div className="auth-brand"><Bolt size={22} /></div>
+        <div className="auth-brand"><WinItLogo height={36} /></div>
         <h1 id="auth-heading">{mode === 'login' ? 'أهلاً بعودتك' : 'أنشئ حسابك'}</h1>
         <p className="auth-lede">
           {mode === 'login' ? 'سجّل الدخول لتصل إلى مهامك وعاداتك ويومياتك.' : 'مساحة خاصة لك، مرتبطة بحسابك وحدك.'}

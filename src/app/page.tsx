@@ -6,6 +6,7 @@ import {
 import type { AppIcon } from './icons';
 import HabitHistory from './components/HabitHistory';
 import CalendarView from './components/CalendarView';
+import { WinItLogo } from './components/Logo';
 import { useConfirm } from './components/ConfirmDialog';
 import useDialogFocus from './components/useDialogFocus';
 import StatsView from './components/StatsView';
@@ -388,9 +389,8 @@ function WinitApp() {
   return (
     <div className="app-shell">
       <aside id="app-sidebar" className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`} aria-label="القائمة الرئيسية">
-        <div className="brand-row"><div className="brand-mark"><Sparkles size={18} strokeWidth={2.2} /></div><span className="brand-name">winit<span className="brand-dot">.</span></span><button className="icon-button sidebar-close" onClick={() => setMobileMenu(false)} aria-label="إغلاق القائمة"><X size={18} /></button></div>
-        <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? 'مساحة تجريبية' : auth.user?.name ?? 'مساحتي الشخصية'}</bdi></b><small><bdi>{auth.user?.demo ? 'مشتركة، غير خاصة' : auth.user?.email ?? 'نسخة خاصة بك'}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => void auth.signOut()} aria-label="تسجيل الخروج" title="تسجيل الخروج"><Logout size={16} /></button>}</div>
-        <div className="nav-label">مساحتي</div>
+        <div className="brand-row"><WinItLogo height={32} /><button className="icon-button sidebar-close" onClick={() => setMobileMenu(false)} aria-label="إغلاق القائمة"><X size={18} /></button></div>
+        <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? 'مساحة تجريبية' : auth.user?.name ?? 'حسابي'}</bdi></b><small><bdi>{auth.user?.demo ? 'مشتركة، غير خاصة' : auth.user?.email ?? 'نسخة خاصة بك'}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => void auth.signOut()} aria-label="تسجيل الخروج" title="تسجيل الخروج"><Logout size={16} /></button>}</div>
         <nav className="main-nav" aria-label="التنقل بين الصفحات">
           {views.map((item, index) => {
             const Icon = item.icon; const active = view === item.id && !selectedProject;
@@ -402,12 +402,12 @@ function WinitApp() {
         <nav className="project-nav">
           {projects.map((project) => { const Icon = projectIconFor(project.icon); const active = selectedProject === project.id; const count = tasks.filter((t) => t.projectId === project.id && t.status !== 'completed').length; return <div key={project.id} className="project-item-row"><button className={`project-item ${active ? 'project-active' : ''}`} onClick={() => switchView('all', project.id)}><span className="project-icon" style={{ color: goalStyle(project.color).onSoft, backgroundColor: goalStyle(project.color).soft }}><Icon size={14} /></span><span className="project-item-name" title={project.name}><bdi aria-hidden="true">{truncateWords(project.name)}</bdi><span className="sr-only">{project.name}</span></span><span className="project-count">{count}</span></button><button className="project-manage" aria-label={`تعديل ${project.name}`} title="تعديل المشروع" onClick={() => { setEditingProject(project); setShowProjectAdd(true); }}><Pencil size={14} /></button><button className="project-manage project-remove" aria-label={`حذف ${project.name}`} title="حذف المشروع" onClick={() => void deleteProject(project)}><Trash2 size={14} /></button></div>; })}
         </nav>
-        <div className="sidebar-bottom"><div className="sidebar-quote"><p>خطوة صغيرة كل يوم<br />تصنع طريقاً عظيماً.</p><span>استمر، أنت في الطريق الصحيح</span></div><div className="profile-row"><div className="profile-avatar">م</div><div className="profile-info"><b>مساحتي</b><span>مساحة شخصية</span></div></div></div>
+        <div className="sidebar-bottom"><div className="sidebar-quote"><p>خطوة صغيرة كل يوم<br />تصنع طريقاً عظيماً.</p><span>استمر، أنت في الطريق الصحيح</span></div></div>
       </aside>
       {mobileMenu && <button className="mobile-scrim" aria-label="إغلاق القائمة" onClick={() => setMobileMenu(false)} />}
 
       <main className="main-area">
-        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="فتح القائمة" aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><span>مساحتي</span><ChevronLeft size={14} /><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date">{new Intl.DateTimeFormat(AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${today}T12:00:00`))}</span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar">م</div></div></header>
+        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="فتح القائمة" aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date">{new Intl.DateTimeFormat(AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${today}T12:00:00`))}</span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
         <div className="page-content">
           {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalEntries.length, true)} />}

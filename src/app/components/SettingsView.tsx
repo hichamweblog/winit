@@ -145,10 +145,10 @@ export default function SettingsView({
             {!user.demo && (
               <SettingRow icon={<Logout size={17} />} title="تسجيل الخروج" description="سيُطلب منك تسجيل الدخول في المرة القادمة.">
                 <button
-                  className="ghost-button danger-button"
+                  className="danger-button"
                   disabled={signingOut}
                   onClick={async () => { setSigningOut(true); try { await signOut(); } finally { setSigningOut(false); } }}
-                >{signingOut ? 'جارٍ الخروج…' : 'خروج'}</button>
+                >{signingOut ? 'جارٍ الخروج…' : 'تسجيل الخروج'}</button>
               </SettingRow>
             )}
             {!user.demo && onExportData && (
@@ -164,7 +164,7 @@ export default function SettingsView({
               <SettingRow icon={<Trash size={17} />} title="حذف الحساب" description="حذف حسابك نهائياً وكافة بياناتك ومساحتك دون إمكانية استرجاع.">
                 <button
                   type="button"
-                  className="ghost-button danger-button"
+                  className="danger-button"
                   onClick={onDeleteAccount}
                 >حذف الحساب</button>
               </SettingRow>

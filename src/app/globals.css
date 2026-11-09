@@ -733,11 +733,9 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   box-shadow: var(--shadow-2);
 }
 .auth-brand {
-  inline-size: 44px; block-size: 44px;
-  display: grid; place-items: center;
+  display: flex;
+  align-items: center;
   margin-block-end: var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--accent-soft); color: var(--accent);
 }
 .auth-card h1 { margin: 0 0 var(--space-2); font: 700 var(--text-h1)/var(--lh-h1) var(--font-display); color: var(--text); }
 .auth-lede { margin: 0 0 var(--space-5); color: var(--text-muted); font-size: var(--text-ui); line-height: var(--lh-body); }
@@ -1014,8 +1012,9 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .setting-control { flex: none; margin-inline-start: auto; }
 .setting-note { margin: 0; color: var(--text-muted); font-size: var(--text-small); }
 .account-badge { padding: var(--space-3xs) var(--space-xs); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--color-accent-ink); font-size: var(--text-micro); }
-.danger-button { color: var(--danger); }
-.danger-button:hover { background: var(--danger-bg); }
+.danger-button { color: var(--on-danger); background: var(--danger); }
+.ghost-button.danger-button { color: var(--danger-text); background: var(--danger-bg); }
+.ghost-button.danger-button:hover:not(:disabled) { background: var(--danger); color: var(--on-danger); }
 
 .switch { inline-size: 48px; block-size: 28px; padding: 3px; display: inline-flex; align-items: center; border-radius: var(--radius-pill); background: var(--color-rule); transition: background var(--dur-fast) var(--ease-out); }
 .switch i { inline-size: 22px; block-size: 22px; border-radius: var(--radius-pill); background: var(--color-paper); box-shadow: var(--shadow-1); transition: transform var(--dur-fast) var(--ease-out); }
