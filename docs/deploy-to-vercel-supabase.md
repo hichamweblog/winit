@@ -6,7 +6,7 @@
 
 ## روابط المشروع الحالية (Live Links)
 
-- **رابط تطبيق Vercel المباشر:** [https://winit-gray.vercel.app](https://winit-gray.vercel.app)
+- **رابط تطبيق Vercel المباشر:** [https://winit-dz.vercel.app](https://winit-dz.vercel.app)
 - **مشروع Supabase:** `winit` (Ref: `pyglcotzjpfspxzonzrh`, المنطقة: `eu-west-3 - باريس`)
 - **لوحة تحكم Supabase:** [https://supabase.com/dashboard/project/pyglcotzjpfspxzonzrh](https://supabase.com/dashboard/project/pyglcotzjpfspxzonzrh)
 
@@ -47,5 +47,5 @@
    - أضف المتغيرات التالية:
      - `DATABASE_URL` = رابط الاتصال مع كلمة المرور التي اخترتها.
      - `WINIT_TRUST_PROXY` = `1`
-     - `WINIT_PUBLIC_ORIGIN` = `https://winit-gray.vercel.app`
+     - `WINIT_PUBLIC_ORIGIN` = `https://winit-dz.vercel.app`
    - اضغط **Save** ثم اضغط **Redeploy** في Vercel.
