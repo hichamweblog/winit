@@ -1,1 +1,0 @@
-CREATE INDEX `tasks_workspace_completed_idx` ON `tasks` (`workspace_id`,`completed_at`);

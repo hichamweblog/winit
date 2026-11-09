@@ -1,6 +1,6 @@
-import { db, sqlite, DEMO_USER_ID, DEMO_WORKSPACE_ID } from './index';
-import { habits, memberships, projects, users, workspaces } from './schema';
-import { eq } from 'drizzle-orm';
+import { db, client, DEMO_USER_ID, DEMO_WORKSPACE_ID } from './index';
+import { habits, memberships, projects, users, workspaces, tasks, habitLogs, focusSessions } from './schema';
+import { eq, sql } from 'drizzle-orm';
 
 /**
  * Demo data for local development and previews.
@@ -23,7 +23,6 @@ const projectsSeed = [
 ];
 
 const main = async () => {
-  sqlite.pragma('foreign_keys = ON');
   await db.insert(users).values({ id: DEMO_USER_ID, email: 'you@winit.local', name: 'مرحباً بك', passwordHash: 'local-demo', dailyFocusGoalMinutes: 120 }).onConflictDoNothing();
   await db.insert(workspaces).values({ id: DEMO_WORKSPACE_ID, name: 'مساحتي الشخصية', slug: 'personal', ownerId: DEMO_USER_ID, plan: 'personal' }).onConflictDoNothing();
   await db.insert(memberships).values({ id: 'membership-owner', workspaceId: DEMO_WORKSPACE_ID, userId: DEMO_USER_ID, role: 'owner' }).onConflictDoNothing();
@@ -39,9 +38,8 @@ const main = async () => {
     await db.insert(habits).values({ ...habit, workspaceId: DEMO_WORKSPACE_ID, createdBy: DEMO_USER_ID, sortOrder }).onConflictDoNothing();
   }
   // Give the first visit a lively board without blocking the user from starting fresh.
-  const existing = sqlite.prepare('SELECT COUNT(*) AS count FROM tasks').get() as { count: number };
-  if (existing.count === 0) {
-    const { tasks } = await import('./schema');
+  const [taskCountRow] = await db.select({ count: sql<number>`count(*)` }).from(tasks);
+  if (Number(taskCountRow?.count ?? 0) === 0) {
     const today = new Date();
     const key = (offset: number) => { const d = new Date(today); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
     const samples = [
@@ -58,9 +56,8 @@ const main = async () => {
   // A year of plausible habit history so the contribution graph is meaningful
   // on a fresh install instead of an empty grid. Deterministic, and skipped
   // entirely if any log already exists so re-seeding never overwrites real data.
-  const logCount = sqlite.prepare('SELECT COUNT(*) AS count FROM habit_logs').get() as { count: number };
-  if (logCount.count === 0) {
-    const { habitLogs } = await import('./schema');
+  const [logCountRow] = await db.select({ count: sql<number>`count(*)` }).from(habitLogs);
+  if (Number(logCountRow?.count ?? 0) === 0) {
     let seed = 42;
     const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
     const today = new Date();
@@ -90,9 +87,8 @@ const main = async () => {
   // Focus history and completed tasks, so the statistics section has something
   // truthful to chart on a fresh install. Deterministic, and skipped if any
   // session already exists so re-seeding never overwrites real work.
-  const sessionCount = sqlite.prepare('SELECT COUNT(*) AS count FROM focus_sessions').get() as { count: number };
-  if (sessionCount.count === 0) {
-    const { focusSessions, tasks } = await import('./schema');
+  const [sessionCountRow] = await db.select({ count: sql<number>`count(*)` }).from(focusSessions);
+  if (Number(sessionCountRow?.count ?? 0) === 0) {
     let seed = 1337;
     const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
     const base = new Date();

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { and, desc, eq, gte, lte, ne, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte, ne, or, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { focusSessions, habitLogs, habits, journalEntries, projects, tasks } from '@/db/schema';
 import {
@@ -101,7 +101,7 @@ export const GET = withApi('data.get', async (request: NextRequest) => {
 
   if (is(path, 'overview')) {
     const cutoffDate = shiftDays(today, -90);
-    const cutoffTimestamp = new Date(`${cutoffDate}T00:00:00Z`).getTime();
+    const cutoffDateObj = new Date(`${cutoffDate}T00:00:00Z`);
     const [projectRows, taskRows, habitRows, logRows, focusRows] = await Promise.all([
       db.select().from(projects).where(and(eq(projects.workspaceId, ws), eq(projects.isArchived, false))).orderBy(projects.sortOrder),
       db
@@ -113,8 +113,8 @@ export const GET = withApi('data.get', async (request: NextRequest) => {
             or(
               ne(tasks.status, 'completed'),
               gte(tasks.dueDate, cutoffDate),
-              sql`${tasks.completedAt} >= ${cutoffTimestamp}`,
-              sql`${tasks.completedAt} IS NULL`,
+              gte(tasks.completedAt, cutoffDateObj),
+              isNull(tasks.completedAt),
             ),
           ),
         )
@@ -227,7 +227,7 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
     // completion timestamp instead of resetting it on every retry.
     const now = stamp();
     const [task] = await db.update(tasks)
-      .set({ status: 'completed', completedAt: sql`COALESCE(${tasks.completedAt}, ${now.getTime()})`, updatedAt: now })
+      .set({ status: 'completed', completedAt: sql`COALESCE(${tasks.completedAt}, ${now})`, updatedAt: now })
       .where(and(eq(tasks.id, path[1]), eq(tasks.workspaceId, ws)))
       .returning();
     if (!task) throw notFound('المهمة');
@@ -355,7 +355,7 @@ export const PATCH = withApi('data.patch', async (request: NextRequest) => {
       ...input,
       updatedAt: now,
       // Preserve the first completion time when the status does not change.
-      ...(input.status === 'completed' ? { completedAt: sql`COALESCE(${tasks.completedAt}, ${now.getTime()})` } : {}),
+      ...(input.status === 'completed' ? { completedAt: sql`COALESCE(${tasks.completedAt}, ${now})` } : {}),
       ...(input.status !== undefined && input.status !== 'completed' ? { completedAt: null } : {}),
     }).where(and(eq(tasks.id, path[1]), eq(tasks.workspaceId, ws))).returning();
     if (!task) throw notFound('المهمة');
@@ -411,9 +411,9 @@ export const DELETE = withApi('data.delete', async (request: NextRequest) => {
     const [project] = await db.select({ id: projects.id }).from(projects).where(and(eq(projects.id, path[1]), eq(projects.workspaceId, ws)));
     if (!project) throw notFound('المشروع');
     // Preserve tasks when removing their parent project by moving them to Inbox.
-    db.transaction((tx) => {
-      tx.update(tasks).set({ projectId: null }).where(and(eq(tasks.projectId, project.id), eq(tasks.workspaceId, ws))).run();
-      tx.delete(projects).where(and(eq(projects.id, project.id), eq(projects.workspaceId, ws))).run();
+    await db.transaction(async (tx) => {
+      await tx.update(tasks).set({ projectId: null }).where(and(eq(tasks.projectId, project.id), eq(tasks.workspaceId, ws)));
+      await tx.delete(projects).where(and(eq(projects.id, project.id), eq(projects.workspaceId, ws)));
     });
     return json({ ok: true, tasksMovedToInbox: true });
   }

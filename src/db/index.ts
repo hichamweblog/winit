@@ -1,19 +1,25 @@
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from './schema';
-import fs from 'node:fs';
-import path from 'node:path';
 
-const file = process.env.DATABASE_URL?.replace(/^file:/, '') ?? path.join(process.cwd(), 'data', 'winit.db');
-fs.mkdirSync(path.dirname(file), { recursive: true });
+const connectionString =
+  process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/winit';
 
-const globalForDb = globalThis as unknown as { sqlite?: Database.Database };
-const sqlite = globalForDb.sqlite ?? new Database(file);
-sqlite.pragma('journal_mode = WAL');
-sqlite.pragma('foreign_keys = ON');
-if (process.env.NODE_ENV !== 'production') globalForDb.sqlite = sqlite;
+// In serverless environments (Vercel / Next.js API routes), preserve client across hot reloads in dev
+const globalForDb = globalThis as unknown as { client?: postgres.Sql };
 
-export const db = drizzle(sqlite, { schema });
-export { sqlite };
+export const client =
+  globalForDb.client ??
+  postgres(connectionString, {
+    // prepare: false is required for Supabase / PgBouncer / Supavisor transaction pooler (port 6543)
+    prepare: false,
+    max: process.env.NODE_ENV === 'production' ? 10 : 1,
+    idle_timeout: 20,
+    connect_timeout: 10,
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForDb.client = client;
+
+export const db = drizzle(client, { schema });
 export const DEMO_USER_ID = 'user_personal';
 export const DEMO_WORKSPACE_ID = 'workspace_personal';

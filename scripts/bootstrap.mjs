@@ -16,15 +16,19 @@ if (major < 22) {
   process.exit(1);
 }
 
-const url = process.env.DATABASE_URL?.replace(/^file:/, '') ?? path.join(process.cwd(), 'data', 'winit.db');
-fs.mkdirSync(path.dirname(path.resolve(url)), { recursive: true });
+const url = process.env.DATABASE_URL || '';
+if (url.startsWith('/') || url.startsWith('.')) {
+  fs.mkdirSync(path.dirname(path.resolve(url)), { recursive: true });
+}
 
-if (!fs.existsSync(path.join(process.cwd(), 'drizzle', '0000_init.sql'))) {
+const drizzleDir = path.join(process.cwd(), 'drizzle');
+const hasMigrations = fs.existsSync(drizzleDir) && fs.readdirSync(drizzleDir).some((f) => f.endsWith('.sql'));
+if (!hasMigrations) {
   console.error('No committed migrations found. Run `npm run db:generate` and commit the result.');
   process.exit(1);
 }
 
-console.log(`Applying migrations to ${url}`);
+console.log('Applying database migrations...');
 if (fs.existsSync(path.join(process.cwd(), 'scripts', 'migrate.mjs'))) {
   execFileSync(process.execPath, ['scripts/migrate.mjs'], { stdio: 'inherit' });
 } else {

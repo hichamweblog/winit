@@ -1,13 +1,14 @@
 import { relations } from 'drizzle-orm';
 import {
+  boolean,
   index,
   integer,
-  sqliteTable,
+  pgTable,
   text,
+  timestamp,
   uniqueIndex,
-  type AnySQLiteColumn,
-} from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
+  type AnyPgColumn,
+} from 'drizzle-orm/pg-core';
 
 /* ------------------------------------------------------------------ */
 /*  Domain types                                                       */
@@ -26,17 +27,17 @@ export type JournalMood = 'grateful' | 'calm' | 'energized' | 'tired' | 'anxious
 /*  powers a single-user personal workspace and a multi-tenant SaaS.   */
 /* ------------------------------------------------------------------ */
 
-export const users = sqliteTable('users', {
+export const users = pgTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
   passwordHash: text('password_hash').notNull(),
   dailyFocusGoalMinutes: integer('daily_focus_goal_minutes').notNull().default(120),
   theme: text('theme').notNull().default('light'),
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
-export const sessions = sqliteTable(
+export const sessions = pgTable(
   'sessions',
   {
     id: text('id').primaryKey(),
@@ -44,13 +45,13 @@ export const sessions = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     token: text('token').notNull().unique(),
-    expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+    expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [index('sessions_user_idx').on(table.userId)],
 );
 
-export const workspaces = sqliteTable('workspaces', {
+export const workspaces = pgTable('workspaces', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
@@ -58,10 +59,10 @@ export const workspaces = sqliteTable('workspaces', {
   ownerId: text('owner_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
-export const memberships = sqliteTable(
+export const memberships = pgTable(
   'memberships',
   {
     id: text('id').primaryKey(),
@@ -72,7 +73,7 @@ export const memberships = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     role: text('role').$type<MemberRole>().notNull().default('member'),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [uniqueIndex('memberships_workspace_user_idx').on(table.workspaceId, table.userId)],
 );
@@ -81,7 +82,7 @@ export const memberships = sqliteTable(
 /*  Projects & tasks                                                   */
 /* ------------------------------------------------------------------ */
 
-export const projects = sqliteTable(
+export const projects = pgTable(
   'projects',
   {
     id: text('id').primaryKey(),
@@ -96,14 +97,14 @@ export const projects = sqliteTable(
     color: text('color').notNull().default('#0f766e'),
     icon: text('icon').notNull().default('folder'),
     targetWeeklyMinutes: integer('target_weekly_minutes').notNull().default(0),
-    isArchived: integer('is_archived', { mode: 'boolean' }).notNull().default(false),
+    isArchived: boolean('is_archived').notNull().default(false),
     sortOrder: integer('sort_order').notNull().default(0),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [index('projects_workspace_idx').on(table.workspaceId)],
 );
 
-export const tasks = sqliteTable(
+export const tasks = pgTable(
   'tasks',
   {
     id: text('id').primaryKey(),
@@ -111,7 +112,7 @@ export const tasks = sqliteTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: 'cascade' }),
     projectId: text('project_id').references(() => projects.id, { onDelete: 'cascade' }),
-    parentTaskId: text('parent_task_id').references((): AnySQLiteColumn => tasks.id, {
+    parentTaskId: text('parent_task_id').references((): AnyPgColumn => tasks.id, {
       onDelete: 'cascade',
     }),
     title: text('title').notNull(),
@@ -119,15 +120,15 @@ export const tasks = sqliteTable(
     priority: text('priority').$type<Priority>().notNull().default('none'),
     status: text('status').$type<TaskStatus>().notNull().default('todo'),
     dueDate: text('due_date'), // YYYY-MM-DD in the user's timezone
-    scheduledStart: integer('scheduled_start', { mode: 'timestamp_ms' }),
-    scheduledEnd: integer('scheduled_end', { mode: 'timestamp_ms' }),
+    scheduledStart: timestamp('scheduled_start', { withTimezone: true, mode: 'date' }),
+    scheduledEnd: timestamp('scheduled_end', { withTimezone: true, mode: 'date' }),
     estimatedPomodoros: integer('estimated_pomodoros').notNull().default(1),
     tags: text('tags').notNull().default(''),
     recurrence: text('recurrence'),
-    completedAt: integer('completed_at', { mode: 'timestamp_ms' }),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'date' }),
     sortOrder: integer('sort_order').notNull().default(0),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
-    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     index('tasks_workspace_status_idx').on(table.workspaceId, table.status),
@@ -142,7 +143,7 @@ export const tasks = sqliteTable(
 /*  Focus sessions (pomodoro + stopwatch)                              */
 /* ------------------------------------------------------------------ */
 
-export const focusSessions = sqliteTable(
+export const focusSessions = pgTable(
   'focus_sessions',
   {
     id: text('id').primaryKey(),
@@ -157,9 +158,9 @@ export const focusSessions = sqliteTable(
     mode: text('mode').$type<FocusMode>().notNull().default('pomodoro'),
     plannedSeconds: integer('planned_seconds').notNull().default(1500),
     actualSeconds: integer('actual_seconds').notNull().default(0),
-    startedAt: integer('started_at', { mode: 'timestamp_ms' }).notNull(),
-    endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
-    isCompleted: integer('is_completed', { mode: 'boolean' }).notNull().default(false),
+    startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }).notNull(),
+    endedAt: timestamp('ended_at', { withTimezone: true, mode: 'date' }),
+    isCompleted: boolean('is_completed').notNull().default(false),
     note: text('note'),
   },
   (table) => [
@@ -172,7 +173,7 @@ export const focusSessions = sqliteTable(
 /*  Habits & habit logs                                                */
 /* ------------------------------------------------------------------ */
 
-export const habits = sqliteTable(
+export const habits = pgTable(
   'habits',
   {
     id: text('id').primaryKey(),
@@ -191,15 +192,15 @@ export const habits = sqliteTable(
     unit: text('unit').notNull().default('مرة'),
     frequencyDays: text('frequency_days').notNull().default('1,2,3,4,5,6,7'),
     reminderTime: text('reminder_time'),
-    showInCalendar: integer('show_in_calendar', { mode: 'boolean' }).notNull().default(true),
-    isArchived: integer('is_archived', { mode: 'boolean' }).notNull().default(false),
+    showInCalendar: boolean('show_in_calendar').notNull().default(true),
+    isArchived: boolean('is_archived').notNull().default(false),
     sortOrder: integer('sort_order').notNull().default(0),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [index('habits_workspace_idx').on(table.workspaceId)],
 );
 
-export const habitLogs = sqliteTable(
+export const habitLogs = pgTable(
   'habit_logs',
   {
     id: text('id').primaryKey(),
@@ -215,7 +216,7 @@ export const habitLogs = sqliteTable(
     logDate: text('log_date').notNull(), // YYYY-MM-DD
     value: integer('value').notNull().default(1),
     note: text('note'),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     uniqueIndex('habit_logs_habit_date_idx').on(table.habitId, table.logDate),
@@ -227,7 +228,7 @@ export const habitLogs = sqliteTable(
 /*  Journal entries                                                   */
 /* ------------------------------------------------------------------ */
 
-export const journalEntries = sqliteTable(
+export const journalEntries = pgTable(
   'journal_entries',
   {
     id: text('id').primaryKey(),
@@ -241,8 +242,8 @@ export const journalEntries = sqliteTable(
     title: text('title'),
     content: text('content').notNull(),
     mood: text('mood').$type<JournalMood>(),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
-    updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull().default(sql`(unixepoch() * 1000)`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     index('journal_workspace_date_idx').on(table.workspaceId, table.entryDate),

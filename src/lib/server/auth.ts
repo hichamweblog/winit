@@ -157,10 +157,10 @@ export async function registerUser(email: string, name: string, passwordHash: st
   const workspaceId = crypto.randomUUID();
   const slugBase = email.split('@')[0].toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 24) || 'workspace';
   const slug = `${slugBase}-${workspaceId.slice(0, 8)}`;
-  db.transaction((tx) => {
-    tx.insert(users).values({ id: userId, email, name, passwordHash }).run();
-    tx.insert(workspaces).values({ id: workspaceId, name: `مساحة ${name}`, slug, ownerId: userId, plan: 'personal' }).run();
-    tx.insert(memberships).values({ id: crypto.randomUUID(), workspaceId, userId, role: 'owner' }).run();
+  await db.transaction(async (tx) => {
+    await tx.insert(users).values({ id: userId, email, name, passwordHash });
+    await tx.insert(workspaces).values({ id: workspaceId, name: `مساحة ${name}`, slug, ownerId: userId, plan: 'personal' });
+    await tx.insert(memberships).values({ id: crypto.randomUUID(), workspaceId, userId, role: 'owner' });
   });
   return { userId, workspaceId };
 }

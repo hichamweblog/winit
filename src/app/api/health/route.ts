@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi('health', async (_request: NextRequest) => {
   const started = Date.now();
   try {
-    db.get(sql`SELECT 1`);
+    await db.execute(sql`SELECT 1`);
     return json({
       status: 'ok',
       database: 'up',

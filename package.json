@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
     "dev:setup": "npm run db:migrate && npm run db:seed",
-    "build:migrate": "esbuild src/db/migrate.ts --bundle --platform=node --format=esm --outfile=scripts/migrate.mjs --external:better-sqlite3",
+    "build:migrate": "esbuild src/db/migrate.ts --bundle --platform=node --format=esm --outfile=scripts/migrate.mjs --external:postgres",
     "build": "npm run build:migrate && next build",
     "start": "next start -H 0.0.0.0",
     "bootstrap": "node scripts/bootstrap.mjs",
@@ -33,6 +33,7 @@
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.4",
     "next": "15.5.29",
+    "postgres": "^4.1.0",
     "react": "19.2.1",
     "react-day-picker": "^10.0.2",
     "react-dom": "19.2.1",
