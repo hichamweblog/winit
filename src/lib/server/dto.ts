@@ -49,6 +49,7 @@ export const projectInput = z
     // Derived from the picker catalogue so the API can never lag behind the UI.
     icon: z.enum(PROJECT_ICON_IDS).optional(),
     targetWeeklyMinutes: z.number().int().min(0).max(10080).optional(),
+    sortOrder: z.number().int().min(0).max(1000000).optional(),
   })
   .strict();
 
@@ -62,10 +63,17 @@ export const habitInput = z
     color: hexColor.optional(),
     icon: z.enum(HABIT_ICON_IDS).optional(),
     reminderTime: clockTime.nullable().optional(),
+    sortOrder: z.number().int().min(0).max(1000000).optional(),
   })
   .strict();
 
 export const habitPatch = habitInput.partial().extend({ isArchived: z.boolean().optional() }).strict();
+
+export const reorderInput = z
+  .object({
+    ids: z.array(identifier).min(1).max(500),
+  })
+  .strict();
 
 export const habitLogInput = z
   .object({

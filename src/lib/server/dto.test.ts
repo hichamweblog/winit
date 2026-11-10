@@ -7,6 +7,7 @@ import {
   likeTerm,
   passwordInput,
   registerInput,
+  reorderInput,
   taskInput,
   taskPatch,
 } from './dto';
@@ -78,4 +79,11 @@ test('likeTerm escapes wildcards so a search cannot become match-all', () => {
   assert.equal(likeTerm('_'), '%\\_%');
   assert.equal(likeTerm('a\\b'), '%a\\\\b%');
   assert.equal(likeTerm('50%'), '%50\\%%');
+});
+
+test('reorderInput validates list of identifiers strictly', () => {
+  assert.equal(reorderInput.safeParse({ ids: ['id-1', 'id-2', 'uuid_123'] }).success, true);
+  assert.equal(reorderInput.safeParse({ ids: [] }).success, false);
+  assert.equal(reorderInput.safeParse({ ids: ['invalid spaces'] }).success, false);
+  assert.equal(reorderInput.safeParse({ ids: ['valid'], extra: true }).success, false);
 });

@@ -49,3 +49,29 @@
      - `WINIT_TRUST_PROXY` = `1`
      - `WINIT_PUBLIC_ORIGIN` = `https://winit-dz.vercel.app`
    - اضغط **Save** ثم اضغط **Redeploy** في Vercel.
+
+---
+
+## ملاحظة حول قيود المفاتيح الأجنبية (Foreign Keys) عند الحذف
+
+إذا تم إنشاء الجداول يدوياً أو عبر واجهة Supabase، تأكد من أن قيود المفاتيح الأجنبية تسمح بالحذف دون أخطاء (SET NULL / CASCADE):
+
+```sql
+-- تأكيد فك ارتباط جلسات التركيز تلقائياً عند حذف المهمة
+ALTER TABLE "focus_sessions" DROP CONSTRAINT IF EXISTS "focus_sessions_task_id_tasks_id_fk";
+ALTER TABLE "focus_sessions" ADD CONSTRAINT "focus_sessions_task_id_tasks_id_fk"
+  FOREIGN KEY ("task_id") REFERENCES "public"."tasks"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- تأكيد فك ارتباط جلسات التركيز عند حذف المشروع
+ALTER TABLE "focus_sessions" DROP CONSTRAINT IF EXISTS "focus_sessions_project_id_projects_id_fk";
+ALTER TABLE "focus_sessions" ADD CONSTRAINT "focus_sessions_project_id_projects_id_fk"
+  FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- تأكيد حذف المهام الفرعية تلقائياً عند حذف المهمة الأصلية
+ALTER TABLE "tasks" DROP CONSTRAINT IF EXISTS "tasks_parent_task_id_tasks_id_fk";
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_parent_task_id_tasks_id_fk"
+  FOREIGN KEY ("parent_task_id") REFERENCES "public"."tasks"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+```
+
+*(تطبيق Winit في الكود يعالج هذا الأمر برمجياً أيضاً داخل Transaction لضمان الحذف السلس حتى لو كان القيد صارماً في قاعدة البيانات).*
+

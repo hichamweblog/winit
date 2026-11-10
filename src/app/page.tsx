@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Activity, ArrowDownLeft, ArrowLeft, Bolt, BookOpen, CalendarDays, ChartBar, Check, ChevronLeft, ChevronRight, Clock3, Code2, Feather, Flag, Flame, FolderKanban, Globe2, Grid2X2, Inbox, Info, Languages, LayoutDashboard, ListTodo, Logout, Menu, Moon, MoreHorizontal, NotebookPen, Pause, Pencil, Play, Plus, Search, Settings2, Sparkles, Stopwatch, Sun, Target, Timer, Trash2, X,
+  Activity, ArrowDown, ArrowDownLeft, ArrowLeft, ArrowUp, Bolt, BookOpen, CalendarDays, ChartBar, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Clock3, Code2, Feather, Flag, Flame, FolderKanban, Globe2, Grid2X2, GripVertical, Inbox, Info, Languages, LayoutDashboard, ListTodo, Logout, Menu, Moon, MoreHorizontal, NotebookPen, Pause, Pencil, Play, Plus, Search, Settings2, Sparkles, Stopwatch, Sun, Target, Timer, Trash2, X,
 } from './icons';
 import type { AppIcon } from './icons';
 import HabitHistory from './components/HabitHistory';
@@ -77,6 +77,8 @@ function WinitApp() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null);
+  const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
   const [mobileViews, setMobileViews] = useState<View[]>(defaultMobileViews);
   const [pomodoroMinutes, setPomodoroMinutes] = useState(25);
   const [showFocus, setShowFocus] = useState(false);
@@ -226,7 +228,18 @@ function WinitApp() {
       confirmLabel: 'حذف المهمة',
     });
     if (!okToDelete) return;
-    await mutate(`/api/tasks/${taskId}`, 'DELETE');
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            tasks: prev.tasks.filter((t) => t.id !== taskId),
+            focusSessions: prev.focusSessions.map((s) => (s.taskId === taskId ? { ...s, taskId: null } : s)),
+          }
+        : prev,
+    );
+    const ok = await mutate(`/api/tasks/${taskId}`, 'DELETE');
+    if (!ok) void refresh();
+    else notify('حُذفت المهمة');
   };
 
   const addTask = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -267,6 +280,30 @@ function WinitApp() {
     });
     if (!okToDelete) return;
     await mutate(`/api/habits/${habit.id}`, 'DELETE');
+  };
+  const reorderProjects = async (nextProjects: Project[]) => {
+    setData((prev) => (prev ? { ...prev, projects: nextProjects } : prev));
+    try {
+      await api('/api/projects/reorder', {
+        method: 'POST',
+        body: { ids: nextProjects.map((p) => p.id) },
+      });
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر حفظ ترتيب المشاريع', 'error');
+      void refresh();
+    }
+  };
+  const reorderHabits = async (nextHabits: Habit[]) => {
+    setData((prev) => (prev ? { ...prev, habits: nextHabits } : prev));
+    try {
+      await api('/api/habits/reorder', {
+        method: 'POST',
+        body: { ids: nextHabits.map((h) => h.id) },
+      });
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر حفظ ترتيب العادات', 'error');
+      void refresh();
+    }
   };
   const setTimerMinutes = (minutes: number) => {
     setPomodoroMinutes(minutes);
@@ -399,8 +436,86 @@ function WinitApp() {
           })}
         </nav>
         <div className="project-head"><div className="nav-label">المشاريع</div><button className="tiny-add" aria-label="إضافة مشروع" onClick={() => { setEditingProject(null); setShowProjectAdd(true); }}><Plus size={16} /></button></div>
-        <nav className="project-nav">
-          {projects.map((project) => { const Icon = projectIconFor(project.icon); const active = selectedProject === project.id; const count = tasks.filter((t) => t.projectId === project.id && t.status !== 'completed').length; return <div key={project.id} className="project-item-row"><button className={`project-item ${active ? 'project-active' : ''}`} onClick={() => switchView('all', project.id)}><span className="project-icon" style={{ color: goalStyle(project.color).onSoft, backgroundColor: goalStyle(project.color).soft }}><Icon size={14} /></span><span className="project-item-name" title={project.name}><bdi aria-hidden="true">{truncateWords(project.name)}</bdi><span className="sr-only">{project.name}</span></span><span className="project-count">{count}</span></button><button className="project-manage" aria-label={`تعديل ${project.name}`} title="تعديل المشروع" onClick={() => { setEditingProject(project); setShowProjectAdd(true); }}><Pencil size={14} /></button><button className="project-manage project-remove" aria-label={`حذف ${project.name}`} title="حذف المشروع" onClick={() => void deleteProject(project)}><Trash2 size={14} /></button></div>; })}
+        <nav className="project-nav" aria-label="قائمة المشاريع">
+          {projects.map((project, index) => {
+            const Icon = projectIconFor(project.icon);
+            const active = selectedProject === project.id;
+            const count = tasks.filter((t) => t.projectId === project.id && t.status !== 'completed').length;
+            const isDragging = draggedProjectId === project.id;
+            const isOver = dragOverProjectId === project.id;
+            return (
+              <div
+                key={project.id}
+                className={`project-item-row ${isDragging ? 'is-dragging' : ''} ${isOver ? 'drag-over' : ''}`}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('text/plain', project.id);
+                  e.dataTransfer.effectAllowed = 'move';
+                  setDraggedProjectId(project.id);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dragOverProjectId !== project.id) setDragOverProjectId(project.id);
+                }}
+                onDragLeave={() => {
+                  if (dragOverProjectId === project.id) setDragOverProjectId(null);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverProjectId(null);
+                  const fromId = draggedProjectId || e.dataTransfer.getData('text/plain');
+                  if (!fromId || fromId === project.id) return;
+                  const fromIndex = projects.findIndex((p) => p.id === fromId);
+                  const toIndex = projects.findIndex((p) => p.id === project.id);
+                  if (fromIndex < 0 || toIndex < 0) return;
+                  const updated = [...projects];
+                  const [moved] = updated.splice(fromIndex, 1);
+                  updated.splice(toIndex, 0, moved);
+                  void reorderProjects(updated);
+                  setDraggedProjectId(null);
+                }}
+                onDragEnd={() => {
+                  setDraggedProjectId(null);
+                  setDragOverProjectId(null);
+                }}
+              >
+                <span
+                  className="project-drag-handle"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`إعادة ترتيب مشروع ${project.name}`}
+                  title="اسحب لإعادة الترتيب (أو الأسهم)"
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowUp' && index > 0) {
+                      e.preventDefault();
+                      const updated = [...projects];
+                      const [moved] = updated.splice(index, 1);
+                      updated.splice(index - 1, 0, moved);
+                      void reorderProjects(updated);
+                      notify(`تم نقل مشروع «${project.name}» للأعلى`);
+                    } else if (e.key === 'ArrowDown' && index < projects.length - 1) {
+                      e.preventDefault();
+                      const updated = [...projects];
+                      const [moved] = updated.splice(index, 1);
+                      updated.splice(index + 1, 0, moved);
+                      void reorderProjects(updated);
+                      notify(`تم نقل مشروع «${project.name}» للأسفل`);
+                    }
+                  }}
+                >
+                  <GripVertical size={13} />
+                </span>
+                <button className={`project-item ${active ? 'project-active' : ''}`} onClick={() => switchView('all', project.id)}>
+                  <span className="project-icon" style={{ color: goalStyle(project.color).onSoft, backgroundColor: goalStyle(project.color).soft }}><Icon size={14} /></span>
+                  <span className="project-item-name" title={project.name}><bdi aria-hidden="true">{truncateWords(project.name)}</bdi><span className="sr-only">{project.name}</span></span>
+                  <span className="project-count">{count}</span>
+                </button>
+                <button className="project-manage" aria-label={`تعديل ${project.name}`} title="تعديل المشروع" onClick={() => { setEditingProject(project); setShowProjectAdd(true); }}><Pencil size={14} /></button>
+                <button className="project-manage project-remove" aria-label={`حذف ${project.name}`} title="حذف المشروع" onClick={() => void deleteProject(project)}><Trash2 size={14} /></button>
+              </div>
+            );
+          })}
         </nav>
         <div className="sidebar-bottom"><div className="sidebar-quote"><p>خطوة صغيرة كل يوم<br />تصنع طريقاً عظيماً.</p><span>استمر، أنت في الطريق الصحيح</span></div></div>
       </aside>
@@ -411,7 +526,7 @@ function WinitApp() {
         <div className="page-content">
           {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalEntries.length, true)} />}
-          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} onToggle={toggleHabit} onSetValue={(habit, value) => void mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value })} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
+          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} onToggle={toggleHabit} onSetValue={(habit, value) => void mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value })} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
         </div>
         <footer className="app-footer"><span>مصمّم لأيامك، لا لمزيد من الضجيج.</span><span>أنجز ما يهمّك</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
@@ -543,28 +658,382 @@ function JournalEditor({ entry, today, busy, onClose, onSave }: { entry: Journal
   return <div className="modal-backdrop journal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><form ref={dialogRef} className="task-modal journal-editor-modal" role="dialog" aria-modal="true" aria-labelledby="journal-editor-heading" onSubmit={(event) => { event.preventDefault(); if (!content.trim()) return; onSave({ entryDate, title: title.trim() || null, content, mood }, entry?.id); }}><div className="modal-topline"><span className="modal-icon"><NotebookPen size={17} /></span><span id="journal-editor-heading">{entry ? 'تعديل التدوينة' : 'تدوينة جديدة'}</span><button type="button" className="icon-button" onClick={close} aria-label="إغلاق المحرر" disabled={busy}><X size={18} /></button></div><label className="journal-field-label" htmlFor="journal-title">عنوان اختياري</label><input id="journal-title" className="journal-title-input" dir="auto" autoFocus value={title} onChange={(event) => setTitle(event.target.value)} maxLength={120} placeholder="كلمة تلخّص يومك" /><div className="journal-date-field"><label className="journal-field-label" htmlFor="journal-date">تاريخ التدوينة</label><input id="journal-date" type="date" required value={entryDate} onChange={(event) => setEntryDate(event.target.value)} /></div><fieldset className="journal-mood-field"><legend>كيف كان شعورك؟ <span>اختياري</span></legend><div className="journal-mood-options">{journalMoods.map((option) => <button key={option.id} type="button" className={`journal-mood-option ${mood === option.id ? 'mood-selected' : ''}`} aria-pressed={mood === option.id} onClick={() => setMood(mood === option.id ? null : option.id)}>{option.label}</button>)}</div></fieldset><label className="journal-field-label" htmlFor="journal-content">ما الذي تود تدوينه؟</label><textarea id="journal-content" className="journal-content-input" dir="auto" value={content} onChange={(event) => setContent(event.target.value)} maxLength={20000} required placeholder="اكتب بحرية. لا تحتاج إلى صياغة مثالية…" /><div className="journal-editor-foot"><span>{formatArNumber(content.length)} / {formatArNumber(20000)} حرف</span><button className="primary-button" type="submit" disabled={busy || !content.trim()}>{busy ? 'جارٍ الحفظ…' : 'حفظ التدوينة'}</button></div></form>{confirmDialog}</div>;
 }
 
-function HabitsView({ habits, logs, today, onToggle, onSetValue, onEdit, onDelete, onAdd }: { habits: Habit[]; logs: Log[]; today: string; onToggle: (habit: Habit, log?: Log) => void; onSetValue: (habit: Habit, value: number) => void; onEdit: (habit: Habit) => void; onDelete: (habit: Habit) => void; onAdd: () => void }) {
+function HabitsView({ habits, logs, today, onToggle, onSetValue, onEdit, onDelete, onAdd, onReorder }: {
+  habits: Habit[];
+  logs: Log[];
+  today: string;
+  onToggle: (habit: Habit, log?: Log) => void;
+  onSetValue: (habit: Habit, value: number) => void;
+  onEdit: (habit: Habit) => void;
+  onDelete: (habit: Habit) => void;
+  onAdd: () => void;
+  onReorder: (next: Habit[]) => void;
+}) {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [values, setValues] = useState<Record<string, string>>({});
-  return <section className="list-page habits-page" aria-labelledby="habits-heading">
-    <div className="page-title-row"><div><h1 id="habits-heading">مساحة العادات</h1><p>تابع تقدّمك من دون ضغط؛ كل عودة هي بداية جديدة.</p></div><button className="primary-button" onClick={onAdd}><Plus size={17} />عادة جديدة</button></div>
-    <div className="habit-dashboard-list">{habits.map((habit) => {
-      const log = logs.find((item) => item.habitId === habit.id && item.logDate === today);
-      const done = Boolean(log && log.value >= habit.targetValue);
-      const Icon = habitIconFor(habit.icon);
-      // §8.7: seven circles for the current week, Saturday-first.
-      const weekStart = getWeekStart(new Date(`${today}T12:00:00`));
-      const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-      const progress = habit.recordType === 'check' ? (done ? 100 : 0) : Math.min(100, Math.round((log?.value ?? 0) / habit.targetValue * 100));
-      const kind = habit.recordType === 'duration' ? 'مدة يومية' : habit.recordType === 'quantity' ? 'هدف يومي' : 'إنجاز يومي';
-      return <article className="habit-card" key={habit.id}>
-        <div className="habit-card-top"><span className="habit-icon habit-large-icon" style={{ color: goalStyle(habit.color).onSoft, background: goalStyle(habit.color).soft }}><Icon size={20} /></span><div className="habit-card-title"><span className="habit-type-label">{kind}</span><h2><bdi>{habit.name}</bdi></h2><p>{habit.description || `${habit.targetValue} ${habit.unit} كل يوم`}</p></div><div className="habit-card-tools"><RowActions><button className="icon-button row-action" onClick={() => onEdit(habit)} aria-label={`تعديل عادة ${habit.name}`}><Pencil size={14} /></button><button className="icon-button row-action row-action-danger" onClick={() => onDelete(habit)} aria-label={`حذف عادة ${habit.name}`}><Trash2 size={14} /></button></RowActions></div></div>
-        <div className="habit-progress-copy"><span>{done ? 'اكتمل هدف اليوم' : log ? `${log.value} من ${habit.targetValue} ${habit.unit}` : `هدف اليوم: ${habit.targetValue} ${habit.unit}`}</span><b><bdi>{progress}%</bdi></b></div><div className="habit-progress-track" role="progressbar" aria-label={`تقدم ${habit.name} اليوم`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ transform: `scaleX(${progress / 100})`, background: goalStyle(habit.color).solid }} /></div>
-        <div className="habit-week">{weekDays.map((day, i) => { const key = localDateKey(day); const entry = logs.find((item) => item.habitId === habit.id && item.logDate === key); const met = (entry?.value ?? 0) >= habit.targetValue; const state = met ? 'done' : key >= today ? 'future' : 'missed'; const label = `${['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'][i]}: ${met ? 'اكتمل' : key > today ? 'قادم' : 'لم يسجّل'}`; return <span key={key} className="week-strip__day" data-state={state} data-today={key === today} title={label} aria-label={label} role="img" style={{ '--goal-solid': goalStyle(habit.color).solid } as CSSProperties}>{met ? <Check size={13} /> : null}</span>; })}</div><HabitHistory habitId={habit.id} habitName={habit.name} color={habit.color} unit={habit.unit} />
-        <div className="habit-card-bottom">{habit.recordType === 'check' ? <span>تسجيل بنقرة واحدة</span> : <div className="habit-log-editor"><label htmlFor={`habit-value-${habit.id}`}>قيمة اليوم</label><input id={`habit-value-${habit.id}`} type="number" min="0" max="10000" step="1" value={values[habit.id] ?? String(log?.value ?? '')} onChange={(event) => setValues({ ...values, [habit.id]: event.target.value })} /><span>{habit.unit}</span><button className="habit-action" onClick={() => onSetValue(habit, Math.max(0, Number(values[habit.id] ?? log?.value ?? 0)))}>{log ? 'تحديث' : 'حفظ'}</button></div>}{habit.recordType === 'check' && <button className={`habit-action ${done ? 'habit-action-done' : ''}`} aria-pressed={done} onClick={() => onToggle(habit, log)}>{done ? <><Check size={14} />تم اليوم</> : <><Plus size={14} />تسجيل اليوم</>}</button>}</div>
-        {habit.reminderTime && <div className="habit-reminder"><Clock3 size={13} />تذكير يومي {habit.reminderTime}</div>}
-      </article>;
-    })}{!habits.length && <div className="empty-page"><h3>ابدأ بعادة واحدة</h3><p>القرآن، الحركة، أو أي شيء تريد الاستمرار عليه.</p><button className="primary-button" onClick={onAdd}><Plus size={16} />أنشئ عادة</button></div>}</div>
-  </section>;
+  const [draggedHabitId, setDraggedHabitId] = useState<string | null>(null);
+  const [dragOverHabitId, setDragOverHabitId] = useState<string | null>(null);
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const allExpanded = habits.length > 0 && habits.every((h) => expanded[h.id]);
+  const toggleAll = () => {
+    if (allExpanded) {
+      setExpanded({});
+    } else {
+      const all: Record<string, boolean> = {};
+      habits.forEach((h) => { all[h.id] = true; });
+      setExpanded(all);
+    }
+  };
+
+  const moveHabit = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= habits.length) return;
+    const updated = [...habits];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIndex, 0, moved);
+    onReorder(updated);
+  };
+
+  return (
+    <section className="list-page habits-page" aria-labelledby="habits-heading">
+      <div className="page-title-row">
+        <div>
+          <h1 id="habits-heading">مساحة العادات</h1>
+          <p>تابع تقدّمك من دون ضغط؛ كل عودة هي بداية جديدة.</p>
+        </div>
+        <div className="page-title-actions">
+          {habits.length > 0 && (
+            <button
+              type="button"
+              className="ghost-button habit-expand-all-btn"
+              onClick={toggleAll}
+              aria-label={allExpanded ? 'طي كل التفاصيل' : 'عرض كل التفاصيل'}
+            >
+              {allExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              <span>{allExpanded ? 'طي التفاصيل' : 'عرض التفاصيل'}</span>
+            </button>
+          )}
+          <button className="primary-button" onClick={onAdd}>
+            <Plus size={17} />عادة جديدة
+          </button>
+        </div>
+      </div>
+      <div className="habit-dashboard-list">
+        {habits.map((habit, index) => {
+          const log = logs.find((item) => item.habitId === habit.id && item.logDate === today);
+          const done = Boolean(log && log.value >= habit.targetValue);
+          const Icon = habitIconFor(habit.icon);
+          const weekStart = getWeekStart(new Date(`${today}T12:00:00`));
+          const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+          const progress = habit.recordType === 'check' ? (done ? 100 : 0) : Math.min(100, Math.round(((log?.value ?? 0) / habit.targetValue) * 100));
+          const kind = habit.recordType === 'duration' ? 'مدة يومية' : habit.recordType === 'quantity' ? 'هدف يومي' : 'إنجاز يومي';
+          const isExpanded = Boolean(expanded[habit.id]);
+          const isDragging = draggedHabitId === habit.id;
+          const isOver = dragOverHabitId === habit.id;
+
+          return (
+            <article
+              className={`habit-card ${isExpanded ? 'habit-card-expanded' : 'habit-card-compact'} ${isDragging ? 'is-dragging' : ''} ${isOver ? 'drag-over' : ''}`}
+              key={habit.id}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData('text/plain', habit.id);
+                e.dataTransfer.effectAllowed = 'move';
+                setDraggedHabitId(habit.id);
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (dragOverHabitId !== habit.id) setDragOverHabitId(habit.id);
+              }}
+              onDragLeave={() => {
+                if (dragOverHabitId === habit.id) setDragOverHabitId(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOverHabitId(null);
+                const fromId = draggedHabitId || e.dataTransfer.getData('text/plain');
+                if (!fromId || fromId === habit.id) return;
+                const fromIndex = habits.findIndex((h) => h.id === fromId);
+                const toIndex = habits.findIndex((h) => h.id === habit.id);
+                if (fromIndex < 0 || toIndex < 0) return;
+                const updated = [...habits];
+                const [moved] = updated.splice(fromIndex, 1);
+                updated.splice(toIndex, 0, moved);
+                onReorder(updated);
+                setDraggedHabitId(null);
+              }}
+              onDragEnd={() => {
+                setDraggedHabitId(null);
+                setDragOverHabitId(null);
+              }}
+            >
+              <div
+                className="habit-card-summary"
+                role="button"
+                tabIndex={0}
+                aria-expanded={isExpanded}
+                aria-controls={`habit-details-${habit.id}`}
+                aria-label={`${habit.name}، ${isExpanded ? 'انقر لطي التفاصيل' : 'انقر لعرض التفاصيل'}`}
+                onClick={() => toggleExpand(habit.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleExpand(habit.id);
+                  }
+                }}
+              >
+                <div className="habit-summary-main">
+                  <span
+                    className="habit-drag-handle"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`إعادة ترتيب عادة ${habit.name}`}
+                    title="اسحب لإعادة الترتيب (أو الأسهم)"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        moveHabit(index, 'up');
+                      } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        moveHabit(index, 'down');
+                      }
+                    }}
+                  >
+                    <GripVertical size={16} />
+                  </span>
+                  <span
+                    className="habit-icon"
+                    style={{ color: goalStyle(habit.color).onSoft, background: goalStyle(habit.color).soft }}
+                  >
+                    <Icon size={18} />
+                  </span>
+                  <div className="habit-summary-info">
+                    <strong className="habit-summary-title">
+                      <bdi>{habit.name}</bdi>
+                    </strong>
+                    <div className="habit-summary-meta-row">
+                      {done ? (
+                        <span className="habit-summary-badge habit-badge-done">
+                          <Check size={12} /> اكتمل هدف اليوم
+                        </span>
+                      ) : habit.recordType === 'check' ? (
+                        <span className="habit-summary-badge">{habit.targetValue} {habit.unit} كل يوم</span>
+                      ) : (
+                        <span className="habit-summary-badge">
+                          {log ? `${log.value} من ${habit.targetValue} ${habit.unit}` : `هدف اليوم: ${habit.targetValue} ${habit.unit}`} ({progress}%)
+                        </span>
+                      )}
+                      {habit.reminderTime && (
+                        <span className="habit-summary-time">
+                          <Clock3 size={12} /> {habit.reminderTime}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="habit-summary-end">
+                  {habit.recordType === 'check' ? (
+                    <button
+                      className={`habit-check ${done ? 'habit-check-done' : ''}`}
+                      style={{ '--goal-fill': goalStyle(habit.color).solid } as CSSProperties}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggle(habit, log);
+                      }}
+                      role="checkbox"
+                      aria-checked={done}
+                      aria-label={done ? `إلغاء إنجاز ${habit.name}` : `تسجيل إنجاز ${habit.name}`}
+                    >
+                      {done && <Check size={14} />}
+                    </button>
+                  ) : (
+                    <span
+                      className="habit-progress-pill"
+                      style={{ color: goalStyle(habit.color).onSoft, background: goalStyle(habit.color).soft }}
+                    >
+                      {progress}%
+                    </span>
+                  )}
+                  <span className="habit-expand-icon" aria-hidden="true">
+                    <ChevronDown className={`habit-chevron ${isExpanded ? 'is-expanded' : ''}`} size={18} />
+                  </span>
+                </div>
+              </div>
+
+              {isExpanded && (
+                <div id={`habit-details-${habit.id}`} className="habit-card-details">
+                  <div className="habit-card-top">
+                    <div className="habit-card-title">
+                      <span className="habit-type-label">{kind}</span>
+                      {habit.description && <p className="habit-details-desc">{habit.description}</p>}
+                    </div>
+                    <div className="habit-card-tools">
+                      <RowActions>
+                        <button
+                          type="button"
+                          className="icon-button row-action"
+                          onClick={() => moveHabit(index, 'up')}
+                          disabled={index === 0}
+                          aria-label={`تحريك عادة ${habit.name} لأعلى`}
+                          title="تحريك لأعلى"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-button row-action"
+                          onClick={() => moveHabit(index, 'down')}
+                          disabled={index === habits.length - 1}
+                          aria-label={`تحريك عادة ${habit.name} لأسفل`}
+                          title="تحريك لأسفل"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-button row-action"
+                          onClick={() => onEdit(habit)}
+                          aria-label={`تعديل عادة ${habit.name}`}
+                          title="تعديل"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-button row-action row-action-danger"
+                          onClick={() => onDelete(habit)}
+                          aria-label={`حذف عادة ${habit.name}`}
+                          title="حذف"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </RowActions>
+                    </div>
+                  </div>
+                  <div className="habit-progress-copy">
+                    <span>
+                      {done
+                        ? 'اكتمل هدف اليوم'
+                        : log
+                        ? `${log.value} من ${habit.targetValue} ${habit.unit}`
+                        : `هدف اليوم: ${habit.targetValue} ${habit.unit}`}
+                    </span>
+                    <b>
+                      <bdi>{progress}%</bdi>
+                    </b>
+                  </div>
+                  <div
+                    className="habit-progress-track"
+                    role="progressbar"
+                    aria-label={`تقدم ${habit.name} اليوم`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progress}
+                  >
+                    <span
+                      style={{
+                        transform: `scaleX(${progress / 100})`,
+                        background: goalStyle(habit.color).solid,
+                      }}
+                    />
+                  </div>
+                  <div className="habit-week">
+                    {weekDays.map((day, i) => {
+                      const key = localDateKey(day);
+                      const entry = logs.find((item) => item.habitId === habit.id && item.logDate === key);
+                      const met = (entry?.value ?? 0) >= habit.targetValue;
+                      const state = met ? 'done' : key >= today ? 'future' : 'missed';
+                      const label = `${['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'][i]}: ${met ? 'اكتمل' : key > today ? 'قادم' : 'لم يسجّل'}`;
+                      return (
+                        <span
+                          key={key}
+                          className="week-strip__day"
+                          data-state={state}
+                          data-today={key === today}
+                          title={label}
+                          aria-label={label}
+                          role="img"
+                          style={{ '--goal-solid': goalStyle(habit.color).solid } as CSSProperties}
+                        >
+                          {met ? <Check size={13} /> : null}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <HabitHistory habitId={habit.id} habitName={habit.name} color={habit.color} unit={habit.unit} />
+                  <div className="habit-card-bottom">
+                    {habit.recordType === 'check' ? (
+                      <span>تسجيل بنقرة واحدة</span>
+                    ) : (
+                      <div className="habit-log-editor">
+                        <label htmlFor={`habit-value-${habit.id}`}>قيمة اليوم</label>
+                        <input
+                          id={`habit-value-${habit.id}`}
+                          type="number"
+                          min="0"
+                          max="10000"
+                          step="1"
+                          value={values[habit.id] ?? String(log?.value ?? '')}
+                          onChange={(event) => setValues({ ...values, [habit.id]: event.target.value })}
+                        />
+                        <span>{habit.unit}</span>
+                        <button
+                          className="habit-action"
+                          onClick={() => onSetValue(habit, Math.max(0, Number(values[habit.id] ?? log?.value ?? 0)))}
+                        >
+                          {log ? 'تحديث' : 'حفظ'}
+                        </button>
+                      </div>
+                    )}
+                    {habit.recordType === 'check' && (
+                      <button
+                        className={`habit-action ${done ? 'habit-action-done' : ''}`}
+                        aria-pressed={done}
+                        onClick={() => onToggle(habit, log)}
+                      >
+                        {done ? (
+                          <>
+                            <Check size={14} />
+                            تم اليوم
+                          </>
+                        ) : (
+                          <>
+                            <Plus size={14} />
+                            تسجيل اليوم
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  {habit.reminderTime && (
+                    <div className="habit-reminder">
+                      <Clock3 size={13} />
+                      تذكير يومي {habit.reminderTime}
+                    </div>
+                  )}
+                </div>
+              )}
+            </article>
+          );
+        })}
+        {!habits.length && (
+          <div className="empty-page">
+            <h3>ابدأ بعادة واحدة</h3>
+            <p>القرآن، الحركة، أو أي شيء تريد الاستمرار عليه.</p>
+            <button className="primary-button" onClick={onAdd}>
+              <Plus size={16} />أنشئ عادة
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }
 
 function TaskModal({ projects, selectedProject, today, task, onClose, onSubmit, busy }: { projects: Project[]; selectedProject: string | null; today: string; task: Task | null; onClose: () => void; onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; busy: boolean }) {

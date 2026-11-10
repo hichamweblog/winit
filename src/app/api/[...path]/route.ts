@@ -29,6 +29,7 @@ import {
   journalInput,
   likeTerm,
   projectInput,
+  reorderInput,
   taskInput,
   taskPatch,
 } from '@/lib/server/dto';
@@ -241,14 +242,34 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
     return json(task);
   }
 
+  if (is(path, 'projects', 'reorder')) {
+    const input = await readJson(request, reorderInput);
+    await db.transaction(async (tx) => {
+      for (const [index, id] of input.ids.entries()) {
+        await tx.update(projects).set({ sortOrder: index }).where(and(eq(projects.id, id), eq(projects.workspaceId, ws)));
+      }
+    });
+    return json({ ok: true });
+  }
+
   if (is(path, 'projects')) {
     const input = await readJson(request, projectInput);
     const [project] = await db.insert(projects).values({
       id: newId(), workspaceId: ws, createdBy: uid, name: input.name,
       description: input.description ?? null, color: input.color ?? '#2A7A55',
-      icon: input.icon ?? 'folder', targetWeeklyMinutes: input.targetWeeklyMinutes ?? 0, sortOrder: 50,
+      icon: input.icon ?? 'folder', targetWeeklyMinutes: input.targetWeeklyMinutes ?? 0, sortOrder: input.sortOrder ?? 50,
     }).returning();
     return json(project, 201);
+  }
+
+  if (is(path, 'habits', 'reorder')) {
+    const input = await readJson(request, reorderInput);
+    await db.transaction(async (tx) => {
+      for (const [index, id] of input.ids.entries()) {
+        await tx.update(habits).set({ sortOrder: index }).where(and(eq(habits.id, id), eq(habits.workspaceId, ws)));
+      }
+    });
+    return json({ ok: true });
   }
 
   if (is(path, 'habits')) {
@@ -258,7 +279,7 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
       description: input.description ?? null, recordType: input.recordType, targetValue: input.targetValue,
       unit: input.unit ?? 'مرة', color: input.color ?? '#2A7A55', icon: input.icon ?? 'target',
       reminderTime: input.reminderTime ?? null, frequencyDays: '1,2,3,4,5,6,7',
-      isArchived: false, showInCalendar: true, sortOrder: 50,
+      isArchived: false, showInCalendar: true, sortOrder: input.sortOrder ?? 50,
     }).returning();
     return json(habit, 201);
   }
@@ -402,24 +423,36 @@ export const DELETE = withApi('data.delete', async (request: NextRequest) => {
   const path = segments(request);
 
   if (is(path, 'tasks', null)) {
-    const deleted = await db.delete(tasks).where(and(eq(tasks.id, path[1]), eq(tasks.workspaceId, ws))).returning({ id: tasks.id });
+    const taskId = path[1];
+    const deleted = await db.transaction(async (tx) => {
+      await tx.update(focusSessions).set({ taskId: null }).where(and(eq(focusSessions.taskId, taskId), eq(focusSessions.workspaceId, ws)));
+      await tx.update(tasks).set({ parentTaskId: null }).where(and(eq(tasks.parentTaskId, taskId), eq(tasks.workspaceId, ws)));
+      return tx.delete(tasks).where(and(eq(tasks.id, taskId), eq(tasks.workspaceId, ws))).returning({ id: tasks.id });
+    });
     if (!deleted.length) throw notFound('المهمة');
     return json({ ok: true });
   }
 
   if (is(path, 'projects', null)) {
-    const [project] = await db.select({ id: projects.id }).from(projects).where(and(eq(projects.id, path[1]), eq(projects.workspaceId, ws)));
+    const projectId = path[1];
+    const [project] = await db.select({ id: projects.id }).from(projects).where(and(eq(projects.id, projectId), eq(projects.workspaceId, ws)));
     if (!project) throw notFound('المشروع');
-    // Preserve tasks when removing their parent project by moving them to Inbox.
+    // Preserve tasks when removing their parent project by moving them to Inbox,
+    // and unlink any focus sessions that were linked to this project.
     await db.transaction(async (tx) => {
       await tx.update(tasks).set({ projectId: null }).where(and(eq(tasks.projectId, project.id), eq(tasks.workspaceId, ws)));
+      await tx.update(focusSessions).set({ projectId: null }).where(and(eq(focusSessions.projectId, project.id), eq(focusSessions.workspaceId, ws)));
       await tx.delete(projects).where(and(eq(projects.id, project.id), eq(projects.workspaceId, ws)));
     });
     return json({ ok: true, tasksMovedToInbox: true });
   }
 
   if (is(path, 'habits', null)) {
-    const deleted = await db.delete(habits).where(and(eq(habits.id, path[1]), eq(habits.workspaceId, ws))).returning({ id: habits.id });
+    const habitId = path[1];
+    const deleted = await db.transaction(async (tx) => {
+      await tx.delete(habitLogs).where(and(eq(habitLogs.habitId, habitId), eq(habitLogs.workspaceId, ws)));
+      return tx.delete(habits).where(and(eq(habits.id, habitId), eq(habits.workspaceId, ws))).returning({ id: habits.id });
+    });
     if (!deleted.length) throw notFound('العادة');
     return json({ ok: true, logsDeleted: true });
   }

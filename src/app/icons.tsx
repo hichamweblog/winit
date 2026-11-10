@@ -16,9 +16,11 @@ import {
   IconAlertTriangle,
   IconApple,
   IconArrowBackUp,
+  IconArrowDown,
   IconArrowDownLeft,
   IconArrowLeft,
   IconArrowNarrowLeft,
+  IconArrowUp,
   IconBarbell,
   IconBed,
   IconBell,
@@ -54,6 +56,7 @@ import {
   IconFlag,
   IconFlame,
   IconFlask,
+  IconGripVertical,
   IconHeadphones,
   IconHeart,
   IconHeartHandshake,
@@ -140,9 +143,11 @@ export const Activity = /*#__PURE__*/ styled(IconActivity, 'Activity');
 
 export const AlertTriangle = /*#__PURE__*/ styled(IconAlertTriangle, 'AlertTriangle');
 export const ArrowBackUp = /*#__PURE__*/ styled(IconArrowBackUp, 'ArrowBackUp');
+export const ArrowDown = /*#__PURE__*/ styled(IconArrowDown, 'ArrowDown');
 export const ArrowDownLeft = /*#__PURE__*/ styled(IconArrowDownLeft, 'ArrowDownLeft');
 export const ArrowLeft = /*#__PURE__*/ styled(IconArrowLeft, 'ArrowLeft');
 export const ArrowNarrowLeft = /*#__PURE__*/ styled(IconArrowNarrowLeft, 'ArrowNarrowLeft');
+export const ArrowUp = /*#__PURE__*/ styled(IconArrowUp, 'ArrowUp');
 export const Bolt = /*#__PURE__*/ styled(IconBolt, 'Bolt');
 export const BookOpen = /*#__PURE__*/ styled(IconBook2, 'BookOpen');
 export const CalendarDays = /*#__PURE__*/ styled(IconCalendarEvent, 'CalendarDays');
@@ -163,6 +168,7 @@ export const Flame = /*#__PURE__*/ styled(IconFlame, 'Flame');
 export const FolderKanban = /*#__PURE__*/ styled(IconLayoutKanban, 'FolderKanban');
 export const Globe2 = /*#__PURE__*/ styled(IconWorld, 'Globe2');
 export const Grid2X2 = /*#__PURE__*/ styled(IconLayoutGrid, 'Grid2X2');
+export const GripVertical = /*#__PURE__*/ styled(IconGripVertical, 'GripVertical');
 export const Inbox = /*#__PURE__*/ styled(IconInbox, 'Inbox');
 export const Info = /*#__PURE__*/ styled(IconInfoCircle, 'Info');
 export const Key = /*#__PURE__*/ styled(IconKey, 'Key');
