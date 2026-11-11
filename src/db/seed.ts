@@ -38,7 +38,10 @@ const main = async () => {
     await db.insert(habits).values({ ...habit, workspaceId: DEMO_WORKSPACE_ID, createdBy: DEMO_USER_ID, sortOrder }).onConflictDoNothing();
   }
   // Give the first visit a lively board without blocking the user from starting fresh.
-  const [taskCountRow] = await db.select({ count: sql<number>`count(*)` }).from(tasks);
+  const [taskCountRow] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(tasks)
+    .where(eq(tasks.workspaceId, DEMO_WORKSPACE_ID));
   if (Number(taskCountRow?.count ?? 0) === 0) {
     const today = new Date();
     const key = (offset: number) => { const d = new Date(today); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
@@ -56,7 +59,10 @@ const main = async () => {
   // A year of plausible habit history so the contribution graph is meaningful
   // on a fresh install instead of an empty grid. Deterministic, and skipped
   // entirely if any log already exists so re-seeding never overwrites real data.
-  const [logCountRow] = await db.select({ count: sql<number>`count(*)` }).from(habitLogs);
+  const [logCountRow] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(habitLogs)
+    .where(eq(habitLogs.workspaceId, DEMO_WORKSPACE_ID));
   if (Number(logCountRow?.count ?? 0) === 0) {
     let seed = 42;
     const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
@@ -87,7 +93,10 @@ const main = async () => {
   // Focus history and completed tasks, so the statistics section has something
   // truthful to chart on a fresh install. Deterministic, and skipped if any
   // session already exists so re-seeding never overwrites real work.
-  const [sessionCountRow] = await db.select({ count: sql<number>`count(*)` }).from(focusSessions);
+  const [sessionCountRow] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(focusSessions)
+    .where(eq(focusSessions.workspaceId, DEMO_WORKSPACE_ID));
   if (Number(sessionCountRow?.count ?? 0) === 0) {
     let seed = 1337;
     const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
@@ -140,6 +149,7 @@ const main = async () => {
     console.log(`Seeded ${sessions.length} focus session(s) and ${done.length} completed task(s) across 120 days.`);
   }
   console.log('Seeded Winit personal workspace.');
+  await client.end();
 };
 
 main().catch((error) => { console.error(error); process.exit(1); });

@@ -7080,16 +7080,23 @@ var sessions = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow()
   },
-  (table) => [index("sessions_user_idx").on(table.userId)]
+  (table) => [
+    index("sessions_user_idx").on(table.userId),
+    index("sessions_expires_at_idx").on(table.expiresAt)
+  ]
 );
-var workspaces = pgTable("workspaces", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  plan: text("plan").notNull().default("personal"),
-  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow()
-});
+var workspaces = pgTable(
+  "workspaces",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    plan: text("plan").notNull().default("personal"),
+    ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow()
+  },
+  (table) => [index("workspaces_owner_idx").on(table.ownerId)]
+);
 var memberships = pgTable(
   "memberships",
   {
@@ -7099,14 +7106,17 @@ var memberships = pgTable(
     role: text("role").$type().notNull().default("member"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow()
   },
-  (table) => [uniqueIndex("memberships_workspace_user_idx").on(table.workspaceId, table.userId)]
+  (table) => [
+    uniqueIndex("memberships_workspace_user_idx").on(table.workspaceId, table.userId),
+    index("memberships_user_idx").on(table.userId)
+  ]
 );
 var projects = pgTable(
   "projects",
   {
     id: text("id").primaryKey(),
     workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
-    createdBy: text("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+    createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
     name: text("name").notNull(),
     description: text("description"),
     color: text("color").notNull().default("#0f766e"),
@@ -7123,9 +7133,9 @@ var tasks = pgTable(
   {
     id: text("id").primaryKey(),
     workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
-    projectId: text("project_id").references(() => projects.id, { onDelete: "cascade" }),
+    projectId: text("project_id").references(() => projects.id, { onDelete: "set null" }),
     parentTaskId: text("parent_task_id").references(() => tasks.id, {
-      onDelete: "cascade"
+      onDelete: "set null"
     }),
     title: text("title").notNull(),
     notes: text("notes"),
@@ -7169,7 +7179,8 @@ var focusSessions = pgTable(
   },
   (table) => [
     index("focus_workspace_started_idx").on(table.workspaceId, table.startedAt),
-    index("focus_project_idx").on(table.projectId)
+    index("focus_project_idx").on(table.projectId),
+    index("focus_task_idx").on(table.taskId)
   ]
 );
 var habits = pgTable(
@@ -7177,7 +7188,7 @@ var habits = pgTable(
   {
     id: text("id").primaryKey(),
     workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
-    createdBy: text("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+    createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
     name: text("name").notNull(),
     description: text("description"),
     icon: text("icon").notNull().default("target"),
@@ -7208,7 +7219,7 @@ var habitLogs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow()
   },
   (table) => [
-    uniqueIndex("habit_logs_habit_date_idx").on(table.habitId, table.logDate),
+    uniqueIndex("habit_logs_habit_user_date_idx").on(table.habitId, table.userId, table.logDate),
     index("habit_logs_workspace_date_idx").on(table.workspaceId, table.logDate)
   ]
 );
@@ -7271,7 +7282,7 @@ var globalForDb = globalThis;
 var client = globalForDb.client ?? postgres(connectionString, {
   // prepare: false is required for Supabase / PgBouncer / Supavisor transaction pooler (port 6543)
   prepare: false,
-  max: process.env.NODE_ENV === "production" ? 10 : 1,
+  max: process.env.NODE_ENV === "production" ? 2 : 1,
   idle_timeout: 20,
   connect_timeout: 10
 });

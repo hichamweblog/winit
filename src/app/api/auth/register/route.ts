@@ -21,7 +21,10 @@ export const POST = withApi('auth.register', async (request: NextRequest) => {
     created = await registerUser(input.email, input.name, passwordHash);
   } catch (cause) {
     // Unique-constraint race between the check above and the insert.
-    if (String(cause).includes('UNIQUE')) throw new ApiError(409, 'هذا البريد مسجّل بالفعل', 'email_taken');
+    const isUnique =
+      (cause as { code?: string })?.code === '23505' ||
+      /unique/i.test(String(cause));
+    if (isUnique) throw new ApiError(409, 'هذا البريد مسجّل بالفعل', 'email_taken');
     throw cause;
   }
   const { token, csrf, expiresAt } = await createSession(created.userId);

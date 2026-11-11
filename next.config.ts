@@ -43,7 +43,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['*.e2b.app'],
-  serverExternalPackages: ['better-sqlite3'],
+  serverExternalPackages: [],
   poweredByHeader: false,
   reactStrictMode: true,
   // Standalone output is for the Docker image only. `next start` warns and

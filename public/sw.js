@@ -2,7 +2,7 @@
  * Winit PWA Service Worker
  * Provides offline resilience for static assets and enables PWA installation.
  */
-const CACHE_NAME = 'winit-v1';
+const CACHE_NAME = 'winit-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/manifest.json',
@@ -21,12 +21,10 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
+    caches.keys().then((names) =>
       Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        }),
-      ),
+        names.filter((n) => n.startsWith('winit-') && n !== CACHE_NAME).map((n) => caches.delete(n))
+      )
     ).then(() => self.clients.claim()),
   );
 });

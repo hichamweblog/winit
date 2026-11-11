@@ -133,22 +133,40 @@ export function assertCsrf(request: NextRequest) {
 type Bucket = { count: number; resetAt: number };
 const buckets = new Map<string, Bucket>();
 let lastSweep = 0;
+const MAX_BUCKETS = 10_000;
 
 function sweep(now: number) {
-  if (now - lastSweep < 60_000) return;
+  if (now - lastSweep < 60_000 && buckets.size <= MAX_BUCKETS) return;
   lastSweep = now;
   for (const [key, bucket] of buckets) if (bucket.resetAt <= now) buckets.delete(key);
+  if (buckets.size > MAX_BUCKETS) {
+    const excess = buckets.size - MAX_BUCKETS;
+    let evicted = 0;
+    for (const key of buckets.keys()) {
+      buckets.delete(key);
+      evicted++;
+      if (evicted >= excess) break;
+    }
+  }
 }
 
 export function clientIp(request: NextRequest): string {
   // Only trust proxy headers when the operator says we are behind a proxy.
   if (process.env.WINIT_TRUST_PROXY === '1') {
-    const forwarded = request.headers.get('x-forwarded-for');
-    if (forwarded) return forwarded.split(',')[0].trim().slice(0, 64);
+    const cf = request.headers.get('cf-connecting-ip');
+    if (cf) return cf.trim().slice(0, 64);
     const real = request.headers.get('x-real-ip');
-    if (real) return real.slice(0, 64);
+    if (real) return real.trim().slice(0, 64);
+    const forwarded = request.headers.get('x-forwarded-for');
+    if (forwarded) {
+      const parts = forwarded.split(',');
+      const last = parts[parts.length - 1]?.trim();
+      if (last) return last.slice(0, 64);
+    }
   }
-  return 'local';
+  const platformIp = (request as { ip?: string }).ip;
+  if (platformIp) return platformIp.slice(0, 64);
+  return 'untrusted';
 }
 
 export function rateLimit(key: string, limit: number, windowMs: number) {
@@ -156,10 +174,13 @@ export function rateLimit(key: string, limit: number, windowMs: number) {
   sweep(now);
   const bucket = buckets.get(key);
   if (!bucket || bucket.resetAt <= now) {
+    buckets.delete(key);
     buckets.set(key, { count: 1, resetAt: now + windowMs });
     return { ok: true, remaining: limit - 1, retryAfter: 0 };
   }
   bucket.count += 1;
+  buckets.delete(key);
+  buckets.set(key, bucket);
   if (bucket.count > limit) {
     return { ok: false, remaining: 0, retryAfter: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) };
   }

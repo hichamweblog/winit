@@ -188,14 +188,17 @@ export const Play = /*#__PURE__*/ styled(IconPlayerPlay, 'Play');
 export const Plus = /*#__PURE__*/ styled(IconPlus, 'Plus');
 export const Reset = /*#__PURE__*/ styled(IconRotate2, 'Reset');
 export const Search = /*#__PURE__*/ styled(IconSearch, 'Search');
-export const Settings2 = /*#__PURE__*/ styled(IconSettings, 'Settings2');
+export const Settings = /*#__PURE__*/ styled(IconSettings, 'Settings');
+export const Settings2 = Settings;
 export const ShieldLock = /*#__PURE__*/ styled(IconShieldLock, 'ShieldLock');
 export const SkipForward = /*#__PURE__*/ styled(IconPlayerSkipForward, 'SkipForward');
 export const Sparkles = /*#__PURE__*/ styled(IconSparkles, 'Sparkles');
+export const Stopwatch = /*#__PURE__*/ styled(IconStopwatch, 'Stopwatch');
 export const Sun = /*#__PURE__*/ styled(IconSun, 'Sun');
 export const Target = /*#__PURE__*/ styled(IconTarget, 'Target');
-export const Timer = /*#__PURE__*/ styled(IconStopwatch, 'Timer');
+export const Timer = Stopwatch;
 export const Trash2 = /*#__PURE__*/ styled(IconTrash, 'Trash2');
+export const Trash = Trash2;
 export const User = /*#__PURE__*/ styled(IconUser, 'User');
 export const X = /*#__PURE__*/ styled(IconX, 'X');
 
@@ -224,19 +227,12 @@ export const Users = /*#__PURE__*/ styled(IconUsers, 'Users');
 
 /* Navigation, settings and statistics. */
 export const Bell = /*#__PURE__*/ styled(IconBell, 'Bell');
-export const CalendarEvent = /*#__PURE__*/ styled(IconCalendarEvent, 'CalendarEvent');
 export const CalendarStar = /*#__PURE__*/ styled(IconCalendarStar, 'CalendarStar');
 export const ChevronDown = /*#__PURE__*/ styled(IconChevronDown, 'ChevronDown');
 export const ChevronUp = /*#__PURE__*/ styled(IconChevronUp, 'ChevronUp');
 export const DeviceMobile = /*#__PURE__*/ styled(IconDeviceMobile, 'DeviceMobile');
-export const Dots = /*#__PURE__*/ styled(IconDots, 'Dots');
 export const LayoutDashboard = /*#__PURE__*/ styled(IconLayoutDashboard, 'LayoutDashboard');
 export const LayoutGrid = /*#__PURE__*/ styled(IconLayoutGrid, 'LayoutGrid');
-export const ListCheck = /*#__PURE__*/ styled(IconListCheck, 'ListCheck');
-export const PlayerPlay = /*#__PURE__*/ styled(IconPlayerPlay, 'PlayerPlay');
-export const Settings = /*#__PURE__*/ styled(IconSettings, 'Settings');
-export const Stopwatch = /*#__PURE__*/ styled(IconStopwatch, 'Stopwatch');
-export const Trash = /*#__PURE__*/ styled(IconTrash, 'Trash');
 export const TrendingUp = /*#__PURE__*/ styled(IconTrendingUp, 'TrendingUp');
 export const Trophy = /*#__PURE__*/ styled(IconTrophy, 'Trophy');
 

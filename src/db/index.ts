@@ -13,7 +13,7 @@ export const client =
   postgres(connectionString, {
     // prepare: false is required for Supabase / PgBouncer / Supavisor transaction pooler (port 6543)
     prepare: false,
-    max: process.env.NODE_ENV === 'production' ? 10 : 1,
+    max: process.env.NODE_ENV === 'production' ? 2 : 1,
     idle_timeout: 20,
     connect_timeout: 10,
   });

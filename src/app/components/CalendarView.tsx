@@ -179,7 +179,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
           ) : (
             <div className="empty-state agenda-empty">
               <b>يوم خالٍ</b>
-              <span>لا مهام مستحقة. مساحة terbuka لما يهمّك.</span>
+              <span>لا مهام مستحقة. مساحة مفتوحة لما يهمّك.</span>
               <button className="ghost-button" onClick={onAdd}><Plus size={15} />أضف مهمة</button>
             </div>
           )}

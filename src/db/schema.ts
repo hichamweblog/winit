@@ -48,19 +48,26 @@ export const sessions = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
-  (table) => [index('sessions_user_idx').on(table.userId)],
+  (table) => [
+    index('sessions_user_idx').on(table.userId),
+    index('sessions_expires_at_idx').on(table.expiresAt),
+  ],
 );
 
-export const workspaces = pgTable('workspaces', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  slug: text('slug').notNull().unique(),
-  plan: text('plan').notNull().default('personal'),
-  ownerId: text('owner_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
-});
+export const workspaces = pgTable(
+  'workspaces',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    slug: text('slug').notNull().unique(),
+    plan: text('plan').notNull().default('personal'),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [index('workspaces_owner_idx').on(table.ownerId)],
+);
 
 export const memberships = pgTable(
   'memberships',
@@ -75,7 +82,10 @@ export const memberships = pgTable(
     role: text('role').$type<MemberRole>().notNull().default('member'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
-  (table) => [uniqueIndex('memberships_workspace_user_idx').on(table.workspaceId, table.userId)],
+  (table) => [
+    uniqueIndex('memberships_workspace_user_idx').on(table.workspaceId, table.userId),
+    index('memberships_user_idx').on(table.userId),
+  ],
 );
 
 /* ------------------------------------------------------------------ */
@@ -89,9 +99,7 @@ export const projects = pgTable(
     workspaceId: text('workspace_id')
       .notNull()
       .references(() => workspaces.id, { onDelete: 'cascade' }),
-    createdBy: text('created_by')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+    createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
     name: text('name').notNull(),
     description: text('description'),
     color: text('color').notNull().default('#0f766e'),
@@ -111,9 +119,9 @@ export const tasks = pgTable(
     workspaceId: text('workspace_id')
       .notNull()
       .references(() => workspaces.id, { onDelete: 'cascade' }),
-    projectId: text('project_id').references(() => projects.id, { onDelete: 'cascade' }),
+    projectId: text('project_id').references(() => projects.id, { onDelete: 'set null' }),
     parentTaskId: text('parent_task_id').references((): AnyPgColumn => tasks.id, {
-      onDelete: 'cascade',
+      onDelete: 'set null',
     }),
     title: text('title').notNull(),
     notes: text('notes'),
@@ -166,6 +174,7 @@ export const focusSessions = pgTable(
   (table) => [
     index('focus_workspace_started_idx').on(table.workspaceId, table.startedAt),
     index('focus_project_idx').on(table.projectId),
+    index('focus_task_idx').on(table.taskId),
   ],
 );
 
@@ -180,9 +189,7 @@ export const habits = pgTable(
     workspaceId: text('workspace_id')
       .notNull()
       .references(() => workspaces.id, { onDelete: 'cascade' }),
-    createdBy: text('created_by')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+    createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
     name: text('name').notNull(),
     description: text('description'),
     icon: text('icon').notNull().default('target'),
@@ -219,7 +226,7 @@ export const habitLogs = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
-    uniqueIndex('habit_logs_habit_date_idx').on(table.habitId, table.logDate),
+    uniqueIndex('habit_logs_habit_user_date_idx').on(table.habitId, table.userId, table.logDate),
     index('habit_logs_workspace_date_idx').on(table.workspaceId, table.logDate),
   ],
 );

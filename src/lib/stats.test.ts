@@ -101,7 +101,7 @@ test('average session length divides by completed sessions only', () => {
     session({ id: 'b', startedAt: '2026-01-01T11:00:00', actualSeconds: 600, isCompleted: false }),
   ], [], [], '2026-01-01', '2026-01-02');
   assert.equal(summary.sessionCount, 1);
-  assert.equal(summary.averageSessionSeconds, 1800);
+  assert.equal(summary.averageSessionSeconds, 1200);
 });
 
 test('weeklyFocus returns the requested number of weeks, oldest first, ending this week', () => {

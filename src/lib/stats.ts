@@ -58,8 +58,9 @@ export function summarise(
 ): StatsSummary {
   const buckets = dailyBuckets(tasks, sessions, from, to);
   const windowSessions = sessions.filter((session) => inWindow(sessionDay(session), from, to));
-  const focusSeconds = windowSessions.reduce((sum, session) => sum + Math.max(0, session.actualSeconds), 0);
-  const sessionCount = windowSessions.filter((session) => session.isCompleted).length;
+  const completedSessions = windowSessions.filter((s) => s.isCompleted);
+  const focusSeconds = completedSessions.reduce((sum, s) => sum + Math.max(0, s.actualSeconds), 0);
+  const sessionCount = completedSessions.length;
   const completedTasks = tasks.filter((task) => task.status === 'completed' && inWindow(completionDay(task), from, to)).length;
   // Open tasks are only counted when they were created inside the window, so an
   // old backlog does not permanently depress the rate.
@@ -76,10 +77,11 @@ export function summarise(
   const bestDay = buckets.reduce<DayBucket | null>(
     (best, bucket) => (bucket.seconds > (best?.seconds ?? 0) ? bucket : best), null,
   );
+  const averageSessionSeconds = completedSessions.length ? Math.round(focusSeconds / completedSessions.length) : 0;
 
   return {
     focusSeconds, sessionCount, completedTasks, completionRate, habitConsistency, activeDays,
-    averageSessionSeconds: sessionCount ? Math.round(focusSeconds / sessionCount) : 0,
+    averageSessionSeconds,
     bestDay,
   };
 }

@@ -77,6 +77,7 @@ function WinitApp() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [habitMutationCount, setHabitMutationCount] = useState(0);
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null);
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
   const [mobileViews, setMobileViews] = useState<View[]>(defaultMobileViews);
@@ -87,7 +88,6 @@ function WinitApp() {
   const notify = (message: string, kind: 'success' | 'error' = 'success') => setNotice({ message, kind });
   const [focusTaskId, setFocusTaskId] = useState('');
   const [focusMode, setFocusMode] = useState<'pomodoro' | 'stopwatch'>('pomodoro');
-  const [focusTick, setFocusTick] = useState(Date.now());
   const [busy, setBusy] = useState(false);
   const { confirm, confirmDialog } = useConfirm();
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
@@ -108,7 +108,7 @@ function WinitApp() {
     url.searchParams.set('view', next);
     if (projectId) url.searchParams.set('project', projectId);
     else url.searchParams.delete('project');
-    window.history.pushState(null, '', url);
+    window.history.replaceState(null, '', url);
   }, []);
   const setView = useCallback((next: View) => navigate(next), [navigate]);
   const switchView = useCallback((next: View, projectId: string | null = null) => {
@@ -192,16 +192,10 @@ function WinitApp() {
   const logs = data?.logs ?? [];
   const sessions = data?.focusSessions ?? [];
   const activeSession = [...sessions].reverse().find((s) => !s.endedAt && !s.isCompleted);
-  useEffect(() => {
-    if (!activeSession) return;
-    setFocusTick(Date.now());
-    const timer = window.setInterval(() => setFocusTick(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [activeSession?.id]);
   const todayTasks = tasks.filter((task) => task.status !== 'completed' && task.dueDate !== null && task.dueDate <= today);
   const completedToday = tasks.filter((task) => task.status === 'completed' && (task.completedAt ? localDateKey(new Date(task.completedAt)) : '') === today).length;
   const todayLogs = habits.map((habit) => ({ habit, log: logs.find((log) => log.habitId === habit.id && log.logDate === today) }));
-  const todayFocusSeconds = sessions.filter((s) => localDateKey(new Date(s.startedAt)) === today).reduce((total, s) => total + s.actualSeconds, 0) + (activeSession && localDateKey(new Date(activeSession.startedAt)) === today ? Math.max(0, Math.floor((focusTick - new Date(activeSession.startedAt).getTime()) / 1000)) : 0);
+  const todayFocusSeconds = sessions.filter((s) => localDateKey(new Date(s.startedAt)) === today).reduce((total, s) => total + s.actualSeconds, 0);
   const toggleTheme = () => {
     const nextMode = darkMode ? 'light' : 'dark';
     document.documentElement.dataset.mode = nextMode;
@@ -260,7 +254,11 @@ function WinitApp() {
   };
   const saveHabit = async (body: unknown) => {
     const ok = await mutate(editingHabit ? `/api/habits/${editingHabit.id}` : '/api/habits', editingHabit ? 'PATCH' : 'POST', body);
-    if (ok) { setShowHabitAdd(false); setEditingHabit(null); }
+    if (ok) {
+      setShowHabitAdd(false);
+      setEditingHabit(null);
+      setHabitMutationCount((c) => c + 1);
+    }
   };
   const deleteProject = async (project: Project) => {
     const okToDelete = await confirm({
@@ -279,7 +277,8 @@ function WinitApp() {
       confirmLabel: 'حذف العادة',
     });
     if (!okToDelete) return;
-    await mutate(`/api/habits/${habit.id}`, 'DELETE');
+    const ok = await mutate(`/api/habits/${habit.id}`, 'DELETE');
+    if (ok) setHabitMutationCount((c) => c + 1);
   };
   const reorderProjects = async (nextProjects: Project[]) => {
     setData((prev) => (prev ? { ...prev, projects: nextProjects } : prev));
@@ -292,6 +291,15 @@ function WinitApp() {
       notify(error instanceof Error ? error.message : 'تعذر حفظ ترتيب المشاريع', 'error');
       void refresh();
     }
+  };
+  const moveProject = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= projects.length) return;
+    const updated = [...projects];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIndex, 0, moved);
+    void reorderProjects(updated);
+    notify(`تم نقل مشروع «${moved.name}» ${direction === 'up' ? 'للأعلى' : 'للأسفل'}`);
   };
   const reorderHabits = async (nextHabits: Habit[]) => {
     setData((prev) => (prev ? { ...prev, habits: nextHabits } : prev));
@@ -339,7 +347,8 @@ function WinitApp() {
       };
     });
     const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value });
-    if (!ok) void refresh();
+    if (ok) setHabitMutationCount((c) => c + 1);
+    else void refresh();
   };
   const exportAccountData = async () => {
     try {
@@ -377,7 +386,7 @@ function WinitApp() {
   };
   const finishFocus = async (completed: boolean) => {
     if (!activeSession) return;
-    const elapsed = Math.max(0, Math.floor((focusTick - new Date(activeSession.startedAt).getTime()) / 1000));
+    const elapsed = Math.max(0, Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000));
     await mutate(`/api/focus/${activeSession.id}/finish`, 'POST', { actualSeconds: Math.min(elapsed, activeSession.plannedSeconds), completed });
   };
   const saveJournal = async (input: JournalInput, entryId?: string) => {
@@ -487,24 +496,40 @@ function WinitApp() {
                   aria-label={`إعادة ترتيب مشروع ${project.name}`}
                   title="اسحب لإعادة الترتيب (أو الأسهم)"
                   onKeyDown={(e) => {
-                    if (e.key === 'ArrowUp' && index > 0) {
+                    if (e.key === 'ArrowUp') {
                       e.preventDefault();
-                      const updated = [...projects];
-                      const [moved] = updated.splice(index, 1);
-                      updated.splice(index - 1, 0, moved);
-                      void reorderProjects(updated);
-                      notify(`تم نقل مشروع «${project.name}» للأعلى`);
-                    } else if (e.key === 'ArrowDown' && index < projects.length - 1) {
+                      moveProject(index, 'up');
+                    } else if (e.key === 'ArrowDown') {
                       e.preventDefault();
-                      const updated = [...projects];
-                      const [moved] = updated.splice(index, 1);
-                      updated.splice(index + 1, 0, moved);
-                      void reorderProjects(updated);
-                      notify(`تم نقل مشروع «${project.name}» للأسفل`);
+                      moveProject(index, 'down');
                     }
                   }}
                 >
                   <GripVertical size={13} />
+                </span>
+                <span className="project-reorder-buttons" style={{ display: 'inline-flex', flexDirection: 'column', gap: '1px', flex: 'none' }}>
+                  <button
+                    type="button"
+                    className="icon-button project-reorder-btn"
+                    onClick={(e) => { e.stopPropagation(); moveProject(index, 'up'); }}
+                    disabled={index === 0}
+                    aria-label={`تحريك مشروع ${project.name} لأعلى`}
+                    title="تحريك لأعلى"
+                    style={{ width: '18px', height: '16px', minWidth: '18px', minHeight: '16px', padding: 0, opacity: index === 0 ? 0.25 : 0.75 }}
+                  >
+                    <ArrowUp size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-button project-reorder-btn"
+                    onClick={(e) => { e.stopPropagation(); moveProject(index, 'down'); }}
+                    disabled={index === projects.length - 1}
+                    aria-label={`تحريك مشروع ${project.name} لأسفل`}
+                    title="تحريك لأسفل"
+                    style={{ width: '18px', height: '16px', minWidth: '18px', minHeight: '16px', padding: 0, opacity: index === projects.length - 1 ? 0.25 : 0.75 }}
+                  >
+                    <ArrowDown size={11} />
+                  </button>
                 </span>
                 <button className={`project-item ${active ? 'project-active' : ''}`} onClick={() => switchView('all', project.id)}>
                   <span className="project-icon" style={{ color: goalStyle(project.color).onSoft, backgroundColor: goalStyle(project.color).soft }}><Icon size={14} /></span>
@@ -524,9 +549,9 @@ function WinitApp() {
       <main className="main-area">
         <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="فتح القائمة" aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date">{new Intl.DateTimeFormat(AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${today}T12:00:00`))}</span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
         <div className="page-content">
-          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} />}
+          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalEntries.length, true)} />}
-          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} onToggle={toggleHabit} onSetValue={(habit, value) => void mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value })} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
+          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
         </div>
         <footer className="app-footer"><span>مصمّم لأيامك، لا لمزيد من الضجيج.</span><span>أنجز ما يهمّك</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
@@ -546,7 +571,7 @@ function WinitApp() {
       {showProjectAdd && <ProjectModal key={editingProject?.id ?? 'new'} project={editingProject} onClose={() => { setShowProjectAdd(false); setEditingProject(null); }} onSubmit={addProject} onDelete={(target) => { setShowProjectAdd(false); setEditingProject(null); void deleteProject(target); }} busy={busy} />}
       {showJournalEditor && <JournalEditor key={editingJournal?.id ?? 'new'} entry={editingJournal} today={today} busy={journalSaving} onClose={() => setShowJournalEditor(false)} onSave={saveJournal} />}
       {showFocus && <FocusModal tasks={tasks.filter((t) => t.status !== 'completed')} selectedId={focusTaskId} setSelectedId={setFocusTaskId} mode={focusMode} setMode={setFocusMode} pomodoroMinutes={pomodoroMinutes} setPomodoroMinutes={setTimerMinutes} onClose={() => setShowFocus(false)} onStart={() => void startFocus()} />} 
-      {activeSession && <FocusDock session={activeSession} tick={focusTick} tasks={tasks} busy={busy} onFinish={() => void finishFocus(true)} onStop={() => void finishFocus(false)} />}
+      {activeSession && <FocusDock session={activeSession} tasks={tasks} busy={busy} onFinish={(completed = true) => void finishFocus(completed)} onStop={() => void finishFocus(false)} />}
       {notice && <div className={`toast toast-${notice.kind}`} role={notice.kind === 'error' ? 'alert' : 'status'} aria-live={notice.kind === 'error' ? 'assertive' : 'polite'}>{notice.message}<button onClick={() => setNotice(null)} aria-label="إغلاق"><X size={15} /></button></div>}
     </div>
   );
@@ -555,7 +580,7 @@ function WinitApp() {
 type DashboardProps = {
   today: string; todayTasks: Task[]; tasks: Task[]; projects: Project[]; habits: Habit[];
   todayLogs: { habit: Habit; log: Log | undefined }[]; todayFocusSeconds: number; completedToday: number;
-  activeSession?: FocusSession; focusTick: number; startFocus: (id?: string) => Promise<void>; finishFocus: (completed: boolean) => Promise<void>;
+  activeSession?: FocusSession; startFocus: (id?: string) => Promise<void>; finishFocus: (completed: boolean) => Promise<void>;
   setShowFocus: (show: boolean) => void; setShowAdd: (show: boolean) => void; setFocusTaskId: (id: string) => void; setView: (view: View) => void;
   switchView: (view: View, projectId?: string | null) => void; mutate: (url: string, method: string, body?: unknown) => Promise<boolean>;
   toggleHabit: (habit: Habit, log?: Log) => Promise<void>; completeTask: (taskId: string) => Promise<void>; logs: Log[]; sessions: FocusSession[];
@@ -563,7 +588,7 @@ type DashboardProps = {
 };
 
 function TodayDashboard(props: DashboardProps) {
-  const { today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, focusTick, startFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, onEditTask } = props;
+  const { today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, onEditTask } = props;
   const sorted = [...todayTasks].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
   const doneHabits = todayLogs.filter(({ habit, log }) => log && log.value >= habit.targetValue).length;
   const weekStartDate = getWeekStart(new Date(`${today}T12:00:00`));
@@ -585,7 +610,7 @@ function TodayDashboard(props: DashboardProps) {
         <div className="habit-note"><span>لا تبحث عن الكمال، فقط عُد كل يوم.</span></div>
       </section>
     </div>
-    <div className="lower-grid"><section className="panel focus-panel"><div className="focus-copy"><span className="focus-label">{activeSession && <span className="live-dot" />} {activeSession ? 'جلسة تركيز جارية' : 'مؤقت التركيز'}</span><h3>{activeSession ? 'أنت في قلب الإنجاز.' : 'امنح هدفك انتباهك.'}</h3><p>{activeSession ? 'اترك المشتتات جانباً، أنت تقوم بعمل رائع.' : 'جلسة واحدة هادئة قد تغيّر شكل يومك.'}</p><button className="primary-button focus-cta-position" disabled={Boolean(activeSession)} onClick={() => { if (!activeSession) setShowFocus(true); }}><Play size={15} fill="currentColor" />{activeSession ? 'جلسة جارية، تابعها من الشريط' : 'ابدأ جلسة تركيز'}</button></div><div className="focus-visual"><div className="timer-halo halo-outer" /><div className="timer-halo halo-inner" /><div className="timer-center"><Timer size={23} /><span>{activeSession ? activeSession.mode === 'stopwatch' ? formatClock(Math.floor((focusTick - new Date(activeSession.startedAt).getTime()) / 1000)) : formatClock(getRemainingSeconds(new Date(activeSession.startedAt).getTime(), activeSession.plannedSeconds, 0, focusTick)) : '25:00'}</span></div><span className="focus-orbit-dot" /></div></section>
+    <div className="lower-grid"><section className="panel focus-panel"><div className="focus-copy"><span className="focus-label">{activeSession && <span className="live-dot" />} {activeSession ? 'جلسة تركيز جارية' : 'مؤقت التركيز'}</span><h3>{activeSession ? 'أنت في قلب الإنجاز.' : 'امنح هدفك انتباهك.'}</h3><p>{activeSession ? 'اترك المشتتات جانباً، أنت تقوم بعمل رائع.' : 'جلسة واحدة هادئة قد تغيّر شكل يومك.'}</p><button className="primary-button focus-cta-position" disabled={Boolean(activeSession)} onClick={() => { if (!activeSession) setShowFocus(true); }}><Play size={15} fill="currentColor" />{activeSession ? 'جلسة جارية، تابعها من الشريط' : 'ابدأ جلسة تركيز'}</button></div><div className="focus-visual"><div className="timer-halo halo-outer" /><div className="timer-halo halo-inner" /><div className="timer-center"><Timer size={23} /><span>{activeSession ? (activeSession.mode === 'stopwatch' ? formatClock(Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000)) : formatClock(getRemainingSeconds(new Date(activeSession.startedAt).getTime(), activeSession.plannedSeconds))) : '25:00'}</span></div><span className="focus-orbit-dot" /></div></section>
       <section className="panel week-panel"><div className="week-heading"><div><h3>التركيز خلال الأسبوع</h3></div><button className="text-link" onClick={() => setView('calendar')}>التقويم</button></div><div className="week-bars">{weekDays.map((day, index) => { const key = localDateKey(day); const count = sessions.filter((s) => localDateKey(new Date(s.startedAt)) === key).reduce((acc, s) => acc + s.actualSeconds, 0); const height = Math.min(48, Math.max(count ? 12 : 5, count / 60 * 1.3)); return <div className={`week-day ${key === today ? 'week-day-current' : ''}`} key={key}><span className="week-bar-track"><i style={{ height: `${height}px` }} /></span><span className="week-day-label">{['س', 'ح', 'ن', 'ث', 'ر', 'خ', 'ج'][index]}</span></div>; })}</div><div className="week-summary"><span>{formatDuration(sessions.filter((s) => localDateKey(new Date(s.startedAt)) >= localDateKey(weekStartDate) && localDateKey(new Date(s.startedAt)) <= today).reduce((acc, s) => acc + s.actualSeconds, 0))} تركيز هذا الأسبوع</span><SessionCount count={sessions.filter((s) => s.isCompleted && localDateKey(new Date(s.startedAt)) >= localDateKey(weekStartDate) && localDateKey(new Date(s.startedAt)) <= today).length} size={13} /></div></section></div>
     <section className="quote-banner"><div><p>«أحب الأعمال إلى الله أدومها وإن قل»</p><span>تذكير لطيف: الثبات أجمل من السرعة.</span></div><button className="journal-quick-link" onClick={() => switchView('journal')}><NotebookPen size={15} />دوّن فكرة</button></section>
   </>;
@@ -658,7 +683,7 @@ function JournalEditor({ entry, today, busy, onClose, onSave }: { entry: Journal
   return <div className="modal-backdrop journal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><form ref={dialogRef} className="task-modal journal-editor-modal" role="dialog" aria-modal="true" aria-labelledby="journal-editor-heading" onSubmit={(event) => { event.preventDefault(); if (!content.trim()) return; onSave({ entryDate, title: title.trim() || null, content, mood }, entry?.id); }}><div className="modal-topline"><span className="modal-icon"><NotebookPen size={17} /></span><span id="journal-editor-heading">{entry ? 'تعديل التدوينة' : 'تدوينة جديدة'}</span><button type="button" className="icon-button" onClick={close} aria-label="إغلاق المحرر" disabled={busy}><X size={18} /></button></div><label className="journal-field-label" htmlFor="journal-title">عنوان اختياري</label><input id="journal-title" className="journal-title-input" dir="auto" autoFocus value={title} onChange={(event) => setTitle(event.target.value)} maxLength={120} placeholder="كلمة تلخّص يومك" /><div className="journal-date-field"><label className="journal-field-label" htmlFor="journal-date">تاريخ التدوينة</label><input id="journal-date" type="date" required value={entryDate} onChange={(event) => setEntryDate(event.target.value)} /></div><fieldset className="journal-mood-field"><legend>كيف كان شعورك؟ <span>اختياري</span></legend><div className="journal-mood-options">{journalMoods.map((option) => <button key={option.id} type="button" className={`journal-mood-option ${mood === option.id ? 'mood-selected' : ''}`} aria-pressed={mood === option.id} onClick={() => setMood(mood === option.id ? null : option.id)}>{option.label}</button>)}</div></fieldset><label className="journal-field-label" htmlFor="journal-content">ما الذي تود تدوينه؟</label><textarea id="journal-content" className="journal-content-input" dir="auto" value={content} onChange={(event) => setContent(event.target.value)} maxLength={20000} required placeholder="اكتب بحرية. لا تحتاج إلى صياغة مثالية…" /><div className="journal-editor-foot"><span>{formatArNumber(content.length)} / {formatArNumber(20000)} حرف</span><button className="primary-button" type="submit" disabled={busy || !content.trim()}>{busy ? 'جارٍ الحفظ…' : 'حفظ التدوينة'}</button></div></form>{confirmDialog}</div>;
 }
 
-function HabitsView({ habits, logs, today, onToggle, onSetValue, onEdit, onDelete, onAdd, onReorder }: {
+function HabitsView({ habits, logs, today, onToggle, onSetValue, onEdit, onDelete, onAdd, onReorder, invalidationToken }: {
   habits: Habit[];
   logs: Log[];
   today: string;
@@ -668,6 +693,7 @@ function HabitsView({ habits, logs, today, onToggle, onSetValue, onEdit, onDelet
   onDelete: (habit: Habit) => void;
   onAdd: () => void;
   onReorder: (next: Habit[]) => void;
+  invalidationToken?: string | number;
 }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [values, setValues] = useState<Record<string, string>>({});
@@ -966,7 +992,7 @@ function HabitsView({ habits, logs, today, onToggle, onSetValue, onEdit, onDelet
                       );
                     })}
                   </div>
-                  <HabitHistory habitId={habit.id} habitName={habit.name} color={habit.color} unit={habit.unit} />
+                  <HabitHistory habitId={habit.id} habitName={habit.name} color={habit.color} unit={habit.unit} invalidationToken={invalidationToken} />
                   <div className="habit-card-bottom">
                     {habit.recordType === 'check' ? (
                       <span>تسجيل بنقرة واحدة</span>
@@ -1038,8 +1064,67 @@ function HabitsView({ habits, logs, today, onToggle, onSetValue, onEdit, onDelet
 
 function TaskModal({ projects, selectedProject, today, task, onClose, onSubmit, busy }: { projects: Project[]; selectedProject: string | null; today: string; task: Task | null; onClose: () => void; onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; busy: boolean }) {
   const [title, setTitle] = useState(task?.title ?? '');
-  const dialogRef = useDialogFocus<HTMLFormElement>(onClose);
-  return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><form ref={dialogRef} className="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-editor-heading" onSubmit={onSubmit}><div className="modal-topline"><span className="modal-icon"><ListTodo size={17} /></span><span id="task-editor-heading">{task ? 'تعديل المهمة' : 'مهمة جديدة'}</span><button type="button" className="icon-button" onClick={onClose} aria-label="إغلاق"><X size={18} /></button></div><input className="task-title-input" dir="auto" autoFocus name="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="ما الذي تود إنجازه؟" maxLength={240} required /><textarea className="task-notes-input" dir="auto" name="notes" defaultValue={task?.notes ?? ''} placeholder="أضف ملاحظة صغيرة تساعدك…" rows={2} /><div className="modal-fields"><label><span>المشروع</span><select name="projectId" defaultValue={task?.projectId ?? selectedProject ?? ''}><option value="">صندوق الوارد</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label><label><span>الأولوية</span><select name="priority" defaultValue={task?.priority ?? 'none'}><option value="none">بدون أولوية</option><option value="high">عالية</option><option value="medium">متوسطة</option><option value="low">منخفضة</option></select></label><label><span>تاريخ الاستحقاق</span><input name="dueDate" type="date" defaultValue={task?.dueDate ?? (selectedProject ? '' : today)} /></label><label><span><Stopwatch size={13} aria-hidden="true" />جلسات التركيز</span><select name="estimatedPomodoros" aria-label="عدد جلسات التركيز المتوقعة" defaultValue={String(task?.estimatedPomodoros ?? 1)}>{Array.from({ length: 20 }, (_, index) => index + 1).map((n) => <option key={n} value={n}>{n}</option>)}</select></label><label className="modal-field-full"><span>وسوم، مفصولة بفواصل</span><input name="tags" defaultValue={task?.tags ?? ''} maxLength={300} placeholder="دراسة، مراجعة" /></label>{task && <label><span>الحالة</span><select name="status" defaultValue={task.status}><option value="todo">قيد الانتظار</option><option value="in_progress">قيد التنفيذ</option><option value="completed">مكتملة</option></select></label>}</div><div className="modal-footer"><span><kbd>Esc</kbd> للإغلاق</span><button className="primary-button" type="submit" disabled={busy || !title.trim()}><Plus size={15} />{busy ? 'جارٍ الحفظ…' : task ? 'حفظ التعديلات' : 'أضف إلى يومي'}</button></div></form></div>;
+  const [notes, setNotes] = useState(task?.notes ?? '');
+  const [projectId, setProjectId] = useState(task?.projectId ?? selectedProject ?? '');
+  const [priority, setPriority] = useState(task?.priority ?? 'none');
+  const [dueDate, setDueDate] = useState(task?.dueDate ?? (selectedProject ? '' : today));
+  const [estimatedPomodoros, setEstimatedPomodoros] = useState(String(task?.estimatedPomodoros ?? 1));
+  const [tags, setTags] = useState(task?.tags ?? '');
+  const [status, setStatus] = useState(task?.status ?? 'todo');
+
+  const dirty =
+    title !== (task?.title ?? '') ||
+    notes !== (task?.notes ?? '') ||
+    projectId !== (task?.projectId ?? selectedProject ?? '') ||
+    priority !== (task?.priority ?? 'none') ||
+    dueDate !== (task?.dueDate ?? (selectedProject ? '' : today)) ||
+    estimatedPomodoros !== String(task?.estimatedPomodoros ?? 1) ||
+    tags !== (task?.tags ?? '') ||
+    (task ? status !== task.status : false);
+
+  const { confirm, confirmDialog } = useConfirm();
+  const requestClose = async () => {
+    if (busy) return;
+    if (dirty) {
+      const discard = await confirm({
+        title: 'تغييرات غير محفوظة',
+        message: 'لديك تغييرات لم تُحفظ في هذه المهمة. هل تريد إغلاق النافذة وتجاهل التعديلات؟',
+        confirmLabel: 'تجاهل التغييرات',
+        cancelLabel: 'متابعة التعديل',
+      });
+      if (!discard) return;
+    }
+    onClose();
+  };
+  const close = () => { void requestClose(); };
+  const dialogRef = useDialogFocus<HTMLFormElement>(close);
+
+  return (
+    <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+      <form ref={dialogRef} className="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-editor-heading" onSubmit={onSubmit}>
+        <div className="modal-topline">
+          <span className="modal-icon"><ListTodo size={17} /></span>
+          <span id="task-editor-heading">{task ? 'تعديل المهمة' : 'مهمة جديدة'}</span>
+          <button type="button" className="icon-button" onClick={close} aria-label="إغلاق"><X size={18} /></button>
+        </div>
+        <input className="task-title-input" dir="auto" autoFocus name="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="ما الذي تود إنجازه؟" maxLength={240} required />
+        <textarea className="task-notes-input" dir="auto" name="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="أضف ملاحظة صغيرة تساعدك…" rows={2} />
+        <div className="modal-fields">
+          <label><span>المشروع</span><select name="projectId" value={projectId} onChange={(e) => setProjectId(e.target.value)}><option value="">صندوق الوارد</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
+          <label><span>الأولوية</span><select name="priority" value={priority} onChange={(e) => setPriority(e.target.value as Task['priority'])}><option value="none">بدون أولوية</option><option value="high">عالية</option><option value="medium">متوسطة</option><option value="low">منخفضة</option></select></label>
+          <label><span>تاريخ الاستحقاق</span><input name="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} /></label>
+          <label><span><Stopwatch size={13} aria-hidden="true" />جلسات التركيز</span><select name="estimatedPomodoros" aria-label="عدد جلسات التركيز المتوقعة" value={estimatedPomodoros} onChange={(e) => setEstimatedPomodoros(e.target.value)}>{Array.from({ length: 20 }, (_, index) => index + 1).map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
+          <label className="modal-field-full"><span>وسوم، مفصولة بفواصل</span><input name="tags" value={tags} onChange={(e) => setTags(e.target.value)} maxLength={300} placeholder="دراسة، مراجعة" /></label>
+          {task && <label><span>الحالة</span><select name="status" value={status} onChange={(e) => setStatus(e.target.value as Task['status'])}><option value="todo">قيد الانتظار</option><option value="in_progress">قيد التنفيذ</option><option value="completed">مكتملة</option></select></label>}
+        </div>
+        <div className="modal-footer">
+          <span><kbd>Esc</kbd> للإغلاق</span>
+          <button className="primary-button" type="submit" disabled={busy || !title.trim()}><Plus size={15} />{busy ? 'جارٍ الحفظ…' : task ? 'حفظ التعديلات' : 'أضف إلى يومي'}</button>
+        </div>
+      </form>
+      {confirmDialog}
+    </div>
+  );
 }
 
 
@@ -1052,25 +1137,62 @@ function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: { project:
   const colors = project && !palette.includes(project.color) ? [project.color, ...palette] : palette;
   const currentIcon = project?.icon ?? DEFAULT_PROJECT_ICON;
   const legacyIcon = project && !isProjectIcon(currentIcon) ? currentIcon : null;
-  const dialogRef = useDialogFocus<HTMLFormElement>(onClose);
-  return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><form ref={dialogRef} className="task-modal project-modal" role="dialog" aria-modal="true" aria-labelledby="project-editor-heading" onSubmit={onSubmit}>
-    <div className="modal-topline"><span className="modal-icon"><FolderKanban size={17} /></span><span id="project-editor-heading">{project ? 'تعديل المشروع' : 'مشروع جديد'}</span><button type="button" className="icon-button" onClick={onClose} aria-label="إغلاق"><X size={18} /></button></div>
-    <label className="journal-field-label" htmlFor="project-name">اسم المشروع</label><input id="project-name" className="task-title-input" dir="auto" name="name" autoFocus required maxLength={100} defaultValue={project?.name ?? ''} placeholder="مثلاً: تعلّم البرمجة" />
-    <label className="journal-field-label" htmlFor="project-description">وصف قصير، اختياري</label><textarea id="project-description" className="task-notes-input" dir="auto" name="description" maxLength={1000} rows={2} defaultValue={project?.description ?? ''} placeholder="ما الذي تريد إنجازه في هذا المشروع؟" />
-    <div className="modal-fields"><label><span>هدف التركيز الأسبوعي بالدقائق</span><input name="targetWeeklyMinutes" type="number" min="0" max="10080" step="15" defaultValue={project?.targetWeeklyMinutes ?? 0} /></label></div>
-    <fieldset className="project-icon-field"><legend>أيقونة المشروع</legend>
-      {legacyIcon && <div className="picker-legacy"><label className="project-icon-choice"><input type="radio" name="icon" value={legacyIcon} defaultChecked aria-label="الأيقونة الحالية" /><span><FolderKanban size={17} /></span></label><small>الأيقونة الحالية</small></div>}
-      {PROJECT_ICON_GROUPS.map((group) => <div className="picker-group" key={group.label}>
-        <p className="picker-group__label">{group.label}</p>
-        <div className="picker-grid">{group.ids.map((value) => { const Icon = projectIcons[value]; const label = PROJECT_ICON_LABELS[value]; return <label key={value} className="project-icon-choice" title={label}><input type="radio" name="icon" value={value} defaultChecked={!legacyIcon && value === currentIcon} aria-label={label} /><span><Icon size={18} /></span></label>; })}</div>
-      </div>)}
-    </fieldset>
-    <fieldset className="project-color-field"><legend>لون المشروع</legend>
-      <div className="picker-grid picker-grid--color">{colors.map((value, index) => { const slot = GOAL_SLOTS.find((item) => item.key === value); const label = slot?.label ?? 'اللون الحالي'; return <label key={value} className="project-color-choice" title={label}><input type="radio" name="color" value={value} defaultChecked={value === (project?.color ?? DEFAULT_GOAL_KEY) || (!project && index === 0)} aria-label={label} /><i style={{ backgroundColor: goalStyle(value).solid }} /></label>; })}</div>
-      <p className="picker-hint">{formatArNumber(GOAL_SLOTS.length)} لوناً ثابتاً، لكل منها اسم حتى لا يكون اللون هو الإشارة الوحيدة.</p>
-    </fieldset>
-    <div className="modal-footer">{project ? <button className="text-button-danger" type="button" onClick={() => onDelete(project)} disabled={busy}><Trash2 size={15} />حذف المشروع</button> : <span>يمكنك تعديل المشروع لاحقاً</span>}<button className="primary-button" type="submit" disabled={busy}>{busy ? 'جارٍ الحفظ…' : project ? 'حفظ التعديلات' : 'إنشاء المشروع'}</button></div>
-  </form></div>;
+
+  const [name, setName] = useState(project?.name ?? '');
+  const [description, setDescription] = useState(project?.description ?? '');
+  const [targetWeeklyMinutes, setTargetWeeklyMinutes] = useState(String(project?.targetWeeklyMinutes ?? 0));
+  const initialIcon = legacyIcon || currentIcon;
+  const [icon, setIcon] = useState(initialIcon);
+  const initialColor = project?.color ?? colors[0] ?? DEFAULT_GOAL_KEY;
+  const [color, setColor] = useState(initialColor);
+
+  const dirty =
+    name !== (project?.name ?? '') ||
+    description !== (project?.description ?? '') ||
+    Number(targetWeeklyMinutes) !== (project?.targetWeeklyMinutes ?? 0) ||
+    icon !== initialIcon ||
+    color !== initialColor;
+
+  const { confirm, confirmDialog } = useConfirm();
+  const requestClose = async () => {
+    if (busy) return;
+    if (dirty) {
+      const discard = await confirm({
+        title: 'تغييرات غير محفوظة',
+        message: 'لديك تغييرات لم تُحفظ في هذا المشروع. هل تريد إغلاق النافذة وتجاهل التعديلات؟',
+        confirmLabel: 'تجاهل التغييرات',
+        cancelLabel: 'متابعة التعديل',
+      });
+      if (!discard) return;
+    }
+    onClose();
+  };
+  const close = () => { void requestClose(); };
+  const dialogRef = useDialogFocus<HTMLFormElement>(close);
+
+  return (
+    <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+      <form ref={dialogRef} className="task-modal project-modal" role="dialog" aria-modal="true" aria-labelledby="project-editor-heading" onSubmit={onSubmit}>
+        <div className="modal-topline"><span className="modal-icon"><FolderKanban size={17} /></span><span id="project-editor-heading">{project ? 'تعديل المشروع' : 'مشروع جديد'}</span><button type="button" className="icon-button" onClick={close} aria-label="إغلاق"><X size={18} /></button></div>
+        <label className="journal-field-label" htmlFor="project-name">اسم المشروع</label><input id="project-name" className="task-title-input" dir="auto" name="name" autoFocus required maxLength={100} value={name} onChange={(e) => setName(e.target.value)} placeholder="مثلاً: تعلّم البرمجة" />
+        <label className="journal-field-label" htmlFor="project-description">وصف قصير، اختياري</label><textarea id="project-description" className="task-notes-input" dir="auto" name="description" maxLength={1000} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="ما الذي تريد إنجازه في هذا المشروع؟" />
+        <div className="modal-fields"><label><span>هدف التركيز الأسبوعي بالدقائق</span><input name="targetWeeklyMinutes" type="number" min="0" max="10080" step="15" value={targetWeeklyMinutes} onChange={(e) => setTargetWeeklyMinutes(e.target.value)} /></label></div>
+        <fieldset className="project-icon-field"><legend>أيقونة المشروع</legend>
+          {legacyIcon && <div className="picker-legacy"><label className="project-icon-choice"><input type="radio" name="icon" value={legacyIcon} checked={icon === legacyIcon} onChange={() => setIcon(legacyIcon)} aria-label="الأيقونة الحالية" /><span><FolderKanban size={17} /></span></label><small>الأيقونة الحالية</small></div>}
+          {PROJECT_ICON_GROUPS.map((group) => <div className="picker-group" key={group.label}>
+            <p className="picker-group__label">{group.label}</p>
+            <div className="picker-grid">{group.ids.map((value) => { const Icon = projectIcons[value]; const label = PROJECT_ICON_LABELS[value]; return <label key={value} className="project-icon-choice" title={label}><input type="radio" name="icon" value={value} checked={icon === value} onChange={() => setIcon(value)} aria-label={label} /><span><Icon size={18} /></span></label>; })}</div>
+          </div>)}
+        </fieldset>
+        <fieldset className="project-color-field"><legend>لون المشروع</legend>
+          <div className="picker-grid picker-grid--color">{colors.map((value) => { const slot = GOAL_SLOTS.find((item) => item.key === value); const label = slot?.label ?? 'اللون الحالي'; return <label key={value} className="project-color-choice" title={label}><input type="radio" name="color" value={value} checked={color === value} onChange={() => setColor(value)} aria-label={label} /><i style={{ backgroundColor: goalStyle(value).solid }} /></label>; })}</div>
+          <p className="picker-hint">{formatArNumber(GOAL_SLOTS.length)} لوناً ثابتاً، لكل منها اسم حتى لا يكون اللون هو الإشارة الوحيدة.</p>
+        </fieldset>
+        <div className="modal-footer">{project ? <button className="text-button-danger" type="button" onClick={() => onDelete(project)} disabled={busy}><Trash2 size={15} />حذف المشروع</button> : <span>يمكنك تعديل المشروع لاحقاً</span>}<button className="primary-button" type="submit" disabled={busy}>{busy ? 'جارٍ الحفظ…' : project ? 'حفظ التعديلات' : 'إنشاء المشروع'}</button></div>
+      </form>
+      {confirmDialog}
+    </div>
+  );
 }
 
 function HabitModal({ habit, onClose, onSubmit, busy }: { habit: Habit | null; onClose: () => void; onSubmit: (body: unknown) => Promise<void>; busy: boolean }) {
@@ -1082,27 +1204,58 @@ function HabitModal({ habit, onClose, onSubmit, busy }: { habit: Habit | null; o
   const [reminderTime, setReminderTime] = useState(habit?.reminderTime ?? '');
   const [color, setColor] = useState(habit?.color ?? '#138A78');
   const [icon, setIcon] = useState(habit?.icon ?? DEFAULT_HABIT_ICON);
-  const dialogRef = useDialogFocus<HTMLFormElement>(onClose);
+
+  const dirty =
+    name !== (habit?.name ?? '') ||
+    description !== (habit?.description ?? '') ||
+    type !== (habit?.recordType ?? 'check') ||
+    target !== String(habit?.targetValue ?? 1) ||
+    unit !== (habit?.unit ?? 'مرة') ||
+    reminderTime !== (habit?.reminderTime ?? '') ||
+    color !== (habit?.color ?? '#138A78') ||
+    icon !== (habit?.icon ?? DEFAULT_HABIT_ICON);
+
+  const { confirm, confirmDialog } = useConfirm();
+  const requestClose = async () => {
+    if (busy) return;
+    if (dirty) {
+      const discard = await confirm({
+        title: 'تغييرات غير محفوظة',
+        message: 'لديك تغييرات لم تُحفظ في هذه العادة. هل تريد إغلاق النافذة وتجاهل التعديلات؟',
+        confirmLabel: 'تجاهل التغييرات',
+        cancelLabel: 'متابعة التعديل',
+      });
+      if (!discard) return;
+    }
+    onClose();
+  };
+  const close = () => { void requestClose(); };
+  const dialogRef = useDialogFocus<HTMLFormElement>(close);
   const palette = GOAL_SLOTS.map((slot) => slot.key);
   const colors = habit && !palette.includes(habit.color) ? [habit.color, ...palette] : palette;
   // An unknown legacy icon stays selectable so editing never silently changes it.
   const legacyIcon = habit && !isHabitIcon(habit.icon) ? habit.icon : null;
-  return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><form ref={dialogRef} className="task-modal habit-modal" role="dialog" aria-modal="true" aria-label={habit ? 'تعديل العادة' : 'إضافة عادة جديدة'} onSubmit={(event) => { event.preventDefault(); void onSubmit({ name: name.trim(), description: description.trim() || null, recordType: type, targetValue: Number(target), unit, reminderTime: reminderTime || null, color, icon }); }}>
-    <div className="modal-topline"><span className="modal-icon modal-icon-habit"><Target size={17} /></span><span>{habit ? 'تعديل العادة' : 'عادة جديدة'}</span><button type="button" className="icon-button" onClick={onClose} aria-label="إغلاق"><X size={18} /></button></div>
-    <label className="journal-field-label" htmlFor="habit-name">اسم العادة</label><input id="habit-name" className="task-title-input" dir="auto" autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="ما العادة التي تريد بناءها؟" required maxLength={100} />
-    <label className="journal-field-label" htmlFor="habit-description">وصف، اختياري</label><textarea id="habit-description" className="task-notes-input" dir="auto" rows={2} value={description} onChange={(event) => setDescription(event.target.value)} maxLength={500} placeholder="أضف تذكيراً لطيفاً لنفسك" />
-    <div className="modal-fields"><label><span>طريقة التتبع</span><select value={type} onChange={(event) => { const value = event.target.value as Habit['recordType']; setType(value); setUnit(value === 'duration' ? 'دقيقة' : value === 'quantity' ? 'صفحات' : 'مرة'); }}><option value="check">إنجاز بسيط</option><option value="quantity">عدد / كمية</option><option value="duration">مدة زمنية</option></select></label>{type !== 'check' && <><label><span>الهدف اليومي</span><input type="number" min="1" max="10000" value={target} onChange={(event) => setTarget(event.target.value)} /></label><label><span>الوحدة</span><input value={unit} onChange={(event) => setUnit(event.target.value)} maxLength={30} /></label></>}<label><span>تذكير اختياري</span><input type="time" value={reminderTime} onChange={(event) => setReminderTime(event.target.value)} /></label></div>
-    <fieldset className="project-icon-field habit-icon-field"><legend>أيقونة العادة</legend>
-      {legacyIcon && <div className="picker-group picker-legacy"><p className="picker-group__label">الأيقونة الحالية</p><div className="picker-grid"><label className="project-icon-choice" title="الأيقونة الحالية"><input type="radio" name="habitIcon" checked={icon === legacyIcon} onChange={() => setIcon(legacyIcon)} aria-label="الأيقونة الحالية" /><span>{(() => { const Icon = habitIconFor(legacyIcon); return <Icon size={18} />; })()}</span></label></div></div>}
-      {HABIT_ICON_GROUPS.map((group) => <div className="picker-group" key={group.label}>
-        <p className="picker-group__label">{group.label}</p>
-        <div className="picker-grid">{group.ids.map((value) => { const Icon = habitIcons[value]; const label = HABIT_ICON_LABELS[value]; return <label key={value} className="project-icon-choice" title={label}><input type="radio" name="habitIcon" checked={!legacyIcon && icon === value} onChange={() => setIcon(value)} aria-label={label} /><span><Icon size={18} /></span></label>; })}</div>
-      </div>)}
-      <p className="picker-hint">{formatArNumber(Object.keys(habitIcons).length)} أيقونة في {formatArNumber(HABIT_ICON_GROUPS.length)} مجموعات، لكل منها اسم يقرأه قارئ الشاشة.</p>
-    </fieldset>
-    <fieldset className="project-color-field"><legend>لون العادة</legend><div className="picker-grid picker-grid--color">{colors.map((value, index) => <label key={value} className="project-color-choice"><input type="radio" name="habitColor" checked={color === value} onChange={() => setColor(value)} aria-label={GOAL_SLOTS.find((slot) => slot.key === value)?.label ?? `لون ${index + 1}`} /><i style={{ backgroundColor: goalStyle(value).solid }} /></label>)}</div></fieldset>
-    <div className="modal-footer"><span>يمكنك تعديلها لاحقاً</span><button className="primary-button" type="submit" disabled={busy || !name.trim() || (type !== 'check' && Number(target) < 1)}><Plus size={15} />{busy ? 'جارٍ الحفظ…' : habit ? 'حفظ التعديلات' : 'أنشئ العادة'}</button></div>
-  </form></div>;
+  return (
+    <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+      <form ref={dialogRef} className="task-modal habit-modal" role="dialog" aria-modal="true" aria-label={habit ? 'تعديل العادة' : 'إضافة عادة جديدة'} onSubmit={(event) => { event.preventDefault(); void onSubmit({ name: name.trim(), description: description.trim() || null, recordType: type, targetValue: Number(target), unit, reminderTime: reminderTime || null, color, icon }); }}>
+        <div className="modal-topline"><span className="modal-icon modal-icon-habit"><Target size={17} /></span><span>{habit ? 'تعديل العادة' : 'عادة جديدة'}</span><button type="button" className="icon-button" onClick={close} aria-label="إغلاق"><X size={18} /></button></div>
+        <label className="journal-field-label" htmlFor="habit-name">اسم العادة</label><input id="habit-name" className="task-title-input" dir="auto" autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="ما العادة التي تريد بناءها؟" required maxLength={100} />
+        <label className="journal-field-label" htmlFor="habit-description">وصف، اختياري</label><textarea id="habit-description" className="task-notes-input" dir="auto" rows={2} value={description} onChange={(event) => setDescription(event.target.value)} maxLength={500} placeholder="أضف تذكيراً لطيفاً لنفسك" />
+        <div className="modal-fields"><label><span>طريقة التتبع</span><select value={type} onChange={(event) => { const value = event.target.value as Habit['recordType']; setType(value); setUnit(value === 'duration' ? 'دقيقة' : value === 'quantity' ? 'صفحات' : 'مرة'); }}><option value="check">إنجاز بسيط</option><option value="quantity">عدد / كمية</option><option value="duration">مدة زمنية</option></select></label>{type !== 'check' && <><label><span>الهدف اليومي</span><input type="number" min="1" max="10000" value={target} onChange={(event) => setTarget(event.target.value)} /></label><label><span>الوحدة</span><input value={unit} onChange={(event) => setUnit(event.target.value)} maxLength={30} /></label></>}<label><span>تذكير اختياري</span><input type="time" value={reminderTime} onChange={(event) => setReminderTime(event.target.value)} /></label></div>
+        <fieldset className="project-icon-field habit-icon-field"><legend>أيقونة العادة</legend>
+          {legacyIcon && <div className="picker-group picker-legacy"><p className="picker-group__label">الأيقونة الحالية</p><div className="picker-grid"><label className="project-icon-choice" title="الأيقونة الحالية"><input type="radio" name="habitIcon" checked={icon === legacyIcon} onChange={() => setIcon(legacyIcon)} aria-label="الأيقونة الحالية" /><span>{(() => { const Icon = habitIconFor(legacyIcon); return <Icon size={18} />; })()}</span></label></div></div>}
+          {HABIT_ICON_GROUPS.map((group) => <div className="picker-group" key={group.label}>
+            <p className="picker-group__label">{group.label}</p>
+            <div className="picker-grid">{group.ids.map((value) => { const Icon = habitIcons[value]; const label = HABIT_ICON_LABELS[value]; return <label key={value} className="project-icon-choice" title={label}><input type="radio" name="habitIcon" checked={!legacyIcon && icon === value} onChange={() => setIcon(value)} aria-label={label} /><span><Icon size={18} /></span></label>; })}</div>
+          </div>)}
+          <p className="picker-hint">{formatArNumber(Object.keys(habitIcons).length)} أيقونة في {formatArNumber(HABIT_ICON_GROUPS.length)} مجموعات، لكل منها اسم يقرأه قارئ الشاشة.</p>
+        </fieldset>
+        <fieldset className="project-color-field"><legend>لون العادة</legend><div className="picker-grid picker-grid--color">{colors.map((value, index) => <label key={value} className="project-color-choice"><input type="radio" name="habitColor" checked={color === value} onChange={() => setColor(value)} aria-label={GOAL_SLOTS.find((slot) => slot.key === value)?.label ?? `لون ${index + 1}`} /><i style={{ backgroundColor: goalStyle(value).solid }} /></label>)}</div></fieldset>
+        <div className="modal-footer"><span>يمكنك تعديلها لاحقاً</span><button className="primary-button" type="submit" disabled={busy || !name.trim() || (type !== 'check' && Number(target) < 1)}><Plus size={15} />{busy ? 'جارٍ الحفظ…' : habit ? 'حفظ التعديلات' : 'أنشئ العادة'}</button></div>
+      </form>
+      {confirmDialog}
+    </div>
+  );
 }
 
 function FocusModal({ tasks, selectedId, setSelectedId, mode, setMode, pomodoroMinutes, setPomodoroMinutes, onClose, onStart }: { tasks: Task[]; selectedId: string; setSelectedId: (id: string) => void; mode: 'pomodoro' | 'stopwatch'; setMode: (mode: 'pomodoro' | 'stopwatch') => void; pomodoroMinutes: number; setPomodoroMinutes: (minutes: number) => void; onClose: () => void; onStart: () => void }) {
@@ -1110,7 +1263,13 @@ function FocusModal({ tasks, selectedId, setSelectedId, mode, setMode, pomodoroM
   return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><div ref={dialogRef} className="focus-modal" role="dialog" aria-modal="true" aria-label="جلسة تركيز هادئة"><div className="modal-topline"><span className="modal-icon modal-icon-focus"><Timer size={17} /></span><span>جلسة تركيز هادئة</span><button className="icon-button" onClick={onClose} aria-label="إغلاق"><X size={18} /></button></div><div className="focus-modal-timer"><div className="modal-timer-ring"><svg className="timer-ring" viewBox="0 0 220 220" aria-hidden="true" focusable="false"><circle cx="110" cy="110" r="100" fill="none" stroke="var(--line)" strokeWidth="10" />{mode === 'pomodoro' && <circle cx="110" cy="110" r="100" fill="none" stroke="var(--accent)" strokeWidth="10" strokeLinecap="round" strokeDasharray={2 * Math.PI * 100} strokeDashoffset={0} transform="rotate(-90 110 110)" />}</svg><div className="timer-ring__label"><span>{mode === 'pomodoro' ? `${String(pomodoroMinutes).padStart(2, '0')}:00` : '∞'}</span><small>{mode === 'pomodoro' ? `${formatArNumber(pomodoroMinutes)} دقيقة تركيز` : 'مؤقت مفتوح'}</small></div></div></div><div className="focus-mode-switch"><button type="button" className={mode === 'pomodoro' ? 'mode-active' : ''} aria-pressed={mode === 'pomodoro'} onClick={() => setMode('pomodoro')}><Timer size={14} />بومودورو، {formatArNumber(pomodoroMinutes)} دقيقة</button><button type="button" className={mode === 'stopwatch' ? 'mode-active' : ''} aria-pressed={mode === 'stopwatch'} onClick={() => setMode('stopwatch')}><Clock3 size={14} />مؤقت مفتوح</button></div>{mode === 'pomodoro' && <label className="focus-task-select focus-duration-select"><span>مدة التركيز</span><select value={pomodoroMinutes} onChange={(event) => setPomodoroMinutes(Number(event.target.value))}>{[10, 15, 20, 25, 30, 45, 60, 90].map((minutes) => <option key={minutes} value={minutes}>{minutes} دقيقة</option>)}</select></label>}<label className="focus-task-select"><span>على ماذا ستركز؟ <small>اختياري</small></span><select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}><option value="">اختر مهمة أو اتركها فارغة</option>{tasks.map((task) => <option key={task.id} value={task.id}>{task.title}</option>)}</select></label><button className="primary-button focus-start-wide" onClick={onStart}><Play size={16} fill="currentColor" />ابدأ التركيز</button><div className="focus-modal-note"><Sparkles size={13} />أغلق ما يشتت انتباهك. هذه اللحظة لك.</div></div></div>;
 }
 
-function FocusDock({ session, tick, tasks, busy, onFinish, onStop }: { session: FocusSession; tick: number; tasks: Task[]; busy: boolean; onFinish: () => void; onStop: () => void }) {
+function FocusDock({ session, tasks, busy, onFinish, onStop }: { session: FocusSession; tasks: Task[]; busy: boolean; onFinish: (completed?: boolean) => void; onStop: () => void }) {
+  const [tick, setTick] = useState(Date.now());
+  useEffect(() => {
+    setTick(Date.now());
+    const timer = window.setInterval(() => setTick(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [session.id]);
   const elapsed = Math.max(0, Math.floor((tick - new Date(session.startedAt).getTime()) / 1000));
   const remaining = getRemainingSeconds(new Date(session.startedAt).getTime(), session.plannedSeconds, 0, tick);
   const task = tasks.find((item) => item.id === session.taskId);
@@ -1121,10 +1280,10 @@ function FocusDock({ session, tick, tasks, busy, onFinish, onStop }: { session: 
   useEffect(() => {
     if (session.mode === 'pomodoro' && remaining === 0 && autoFinishedSession.current !== session.id) {
       autoFinishedSession.current = session.id;
-      finishRef.current();
+      finishRef.current(true);
     }
   }, [remaining, session.mode, session.id]);
-  return <div className="focus-dock"><span className="dock-live"><i />تركيز</span><span className="dock-title">{task?.title ?? 'جلسة تركيز مستقلة'}</span><b className="dock-timer">{display}</b><button className="dock-stop" onClick={onStop} disabled={busy} title="إنهاء الجلسة" aria-label="إنهاء جلسة التركيز"><Pause size={14} fill="currentColor" /><span>إنهاء</span></button><button className="dock-done" onClick={onFinish} disabled={busy} title="إكمال الجلسة" aria-label="إكمال جلسة التركيز"><Check size={15} /></button></div>;
+  return <div className="focus-dock"><span className="dock-live"><i />تركيز</span><span className="dock-title">{task?.title ?? 'جلسة تركيز مستقلة'}</span><b className="dock-timer">{display}</b><button className="dock-stop" onClick={onStop} disabled={busy} title="إنهاء الجلسة" aria-label="إنهاء جلسة التركيز"><Pause size={14} fill="currentColor" /><span>إنهاء</span></button><button className="dock-done" onClick={() => onFinish(true)} disabled={busy} title="إكمال الجلسة" aria-label="إكمال جلسة التركيز"><Check size={15} /></button></div>;
 }
 
 

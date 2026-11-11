@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
-import { and, desc, eq, gte, isNull, lte, ne, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, lte, ne, or, sql } from 'drizzle-orm';
+import { z } from 'zod';
 import { db } from '@/db';
-import { focusSessions, habitLogs, habits, journalEntries, projects, tasks } from '@/db/schema';
+import { focusSessions, habitLogs, habits, journalEntries, projects, tasks, users } from '@/db/schema';
 import {
   ApiError,
   assertCsrf,
@@ -18,6 +19,7 @@ import {
   requireIdentity,
   type Identity,
 } from '@/lib/server/auth';
+import { verifyPassword } from '@/lib/server/password';
 import { localDateKey } from '@/lib/core';
 import {
   dateKey,
@@ -29,6 +31,7 @@ import {
   journalInput,
   likeTerm,
   projectInput,
+  projectPatch,
   reorderInput,
   taskInput,
   taskPatch,
@@ -95,6 +98,7 @@ export const GET = withApi('data.get', async (request: NextRequest) => {
   enforceRateLimit(request, 'read', 600, 60 * 1000);
 
   if (is(path, 'account', 'export')) {
+    assertSameOrigin(request);
     if (identity.demo) throw new ApiError(403, 'غير متاح للحساب التجريبي', 'forbidden');
     const exportData = await exportUserData(identity.userId, ws);
     return json(exportData);
@@ -141,7 +145,23 @@ export const GET = withApi('data.get', async (request: NextRequest) => {
   }
 
   if (is(path, 'tasks')) {
-    return json(await db.select().from(tasks).where(eq(tasks.workspaceId, ws)).orderBy(tasks.sortOrder, desc(tasks.createdAt)));
+    const rawLimit = Number(request.nextUrl.searchParams.get('limit') ?? 200);
+    const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 1000) : 200;
+    const rawOffset = Number(request.nextUrl.searchParams.get('offset') ?? 0);
+    const offset = Number.isInteger(rawOffset) && rawOffset >= 0 ? Math.min(rawOffset, 100000) : 0;
+
+    const [rows, countRows] = await Promise.all([
+      db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.workspaceId, ws))
+        .orderBy(tasks.sortOrder, desc(tasks.createdAt))
+        .limit(limit)
+        .offset(offset),
+      db.select({ total: sql<number>`count(*)` }).from(tasks).where(eq(tasks.workspaceId, ws)),
+    ]);
+    const total = Number(countRows[0]?.total ?? 0);
+    return json({ tasks: rows, total, limit, offset });
   }
 
   if (is(path, 'projects')) {
@@ -214,9 +234,14 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
       const [project] = await db.select({ id: projects.id }).from(projects).where(and(eq(projects.id, input.projectId), eq(projects.workspaceId, ws)));
       if (!project) throw notFound('المشروع');
     }
+    if (input.parentTaskId) {
+      const [parentTask] = await db.select({ id: tasks.id }).from(tasks).where(and(eq(tasks.id, input.parentTaskId), eq(tasks.workspaceId, ws)));
+      if (!parentTask) throw notFound('المهمة الرئيسية');
+    }
     const now = stamp();
     const [task] = await db.insert(tasks).values({
       id: newId(), workspaceId: ws, ...input, status: 'todo',
+      parentTaskId: input.parentTaskId ?? null,
       estimatedPomodoros: input.estimatedPomodoros ?? 1, priority: input.priority ?? 'none',
       tags: input.tags ?? '', createdAt: now, updatedAt: now,
     }).returning();
@@ -244,11 +269,16 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
 
   if (is(path, 'projects', 'reorder')) {
     const input = await readJson(request, reorderInput);
-    await db.transaction(async (tx) => {
-      for (const [index, id] of input.ids.entries()) {
-        await tx.update(projects).set({ sortOrder: index }).where(and(eq(projects.id, id), eq(projects.workspaceId, ws)));
-      }
-    });
+    if (input.ids.length > 0) {
+      const cases = sql.join(
+        input.ids.map((id, index) => sql`WHEN ${projects.id} = ${id} THEN ${index}`),
+        sql.raw(' '),
+      );
+      await db
+        .update(projects)
+        .set({ sortOrder: sql`CASE ${cases} ELSE ${projects.sortOrder} END` })
+        .where(and(eq(projects.workspaceId, ws), inArray(projects.id, input.ids)));
+    }
     return json({ ok: true });
   }
 
@@ -264,11 +294,16 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
 
   if (is(path, 'habits', 'reorder')) {
     const input = await readJson(request, reorderInput);
-    await db.transaction(async (tx) => {
-      for (const [index, id] of input.ids.entries()) {
-        await tx.update(habits).set({ sortOrder: index }).where(and(eq(habits.id, id), eq(habits.workspaceId, ws)));
-      }
-    });
+    if (input.ids.length > 0) {
+      const cases = sql.join(
+        input.ids.map((id, index) => sql`WHEN ${habits.id} = ${id} THEN ${index}`),
+        sql.raw(' '),
+      );
+      await db
+        .update(habits)
+        .set({ sortOrder: sql`CASE ${cases} ELSE ${habits.sortOrder} END` })
+        .where(and(eq(habits.workspaceId, ws), inArray(habits.id, input.ids)));
+    }
     return json({ ok: true });
   }
 
@@ -289,13 +324,13 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
     const [habit] = await db.select().from(habits).where(and(eq(habits.id, path[1]), eq(habits.workspaceId, ws)));
     if (!habit) throw notFound('العادة');
     if (input.value === 0) {
-      await db.delete(habitLogs).where(and(eq(habitLogs.habitId, habit.id), eq(habitLogs.workspaceId, ws), eq(habitLogs.logDate, input.date)));
+      await db.delete(habitLogs).where(and(eq(habitLogs.habitId, habit.id), eq(habitLogs.workspaceId, ws), eq(habitLogs.userId, uid), eq(habitLogs.logDate, input.date)));
       return json({ ok: true, value: 0 });
     }
     const [log] = await db.insert(habitLogs).values({
       id: newId(), habitId: habit.id, workspaceId: ws, userId: uid, logDate: input.date, value: input.value,
     }).onConflictDoUpdate({
-      target: [habitLogs.habitId, habitLogs.logDate],
+      target: [habitLogs.habitId, habitLogs.userId, habitLogs.logDate],
       set: { value: input.value, createdAt: stamp() },
     }).returning();
     return json(log);
@@ -314,8 +349,8 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
 
   if (is(path, 'focus', 'start')) {
     const input = await readJson(request, focusStartInput);
-    // Only one active timer per workspace: close stale running entries first.
-    const running = await db.select().from(focusSessions).where(and(eq(focusSessions.workspaceId, ws), eq(focusSessions.isCompleted, false)));
+    // Only one active timer per user: close stale running entries first.
+    const running = await db.select().from(focusSessions).where(and(eq(focusSessions.workspaceId, ws), eq(focusSessions.userId, uid), eq(focusSessions.isCompleted, false)));
     for (const old of running.filter((item) => !item.endedAt)) {
       const elapsed = Math.max(0, Math.floor((Date.now() - old.startedAt.getTime()) / 1000));
       await db.update(focusSessions).set({ endedAt: stamp(), actualSeconds: elapsed, isCompleted: true }).where(eq(focusSessions.id, old.id));
@@ -340,13 +375,14 @@ export const POST = withApi('data.post', async (request: NextRequest) => {
     const input = await readJson(request, focusFinishInput);
     const [existing] = await db.select().from(focusSessions).where(and(eq(focusSessions.id, path[1]), eq(focusSessions.workspaceId, ws)));
     if (!existing || existing.isCompleted) throw new ApiError(404, 'جلسة التركيز غير موجودة أو منتهية', 'not_found');
+    if (existing.userId !== uid) throw new ApiError(403, 'غير مصرح بإنهاء هذه الجلسة', 'forbidden');
     // Never trust a client-reported duration beyond the wall-clock elapsed time
     // (plus a small grace for clock skew and a paused tab).
     const elapsed = Math.max(0, Math.floor((Date.now() - existing.startedAt.getTime()) / 1000)) + 5;
     const actualSeconds = Math.min(input.actualSeconds, elapsed, 4 * 3600);
     const [session] = await db.update(focusSessions)
       .set({ actualSeconds, endedAt: stamp(), isCompleted: input.completed, note: input.note ?? null })
-      .where(and(eq(focusSessions.id, path[1]), eq(focusSessions.workspaceId, ws), eq(focusSessions.isCompleted, false)))
+      .where(and(eq(focusSessions.id, path[1]), eq(focusSessions.workspaceId, ws), eq(focusSessions.userId, uid), eq(focusSessions.isCompleted, false)))
       .returning();
     if (!session) throw new ApiError(404, 'جلسة التركيز غير موجودة أو منتهية', 'not_found');
     return json(session);
@@ -367,9 +403,17 @@ export const PATCH = withApi('data.patch', async (request: NextRequest) => {
 
   if (is(path, 'tasks', null)) {
     const input = await readJson(request, taskPatch);
+    const taskId = path[1];
+    if (input.parentTaskId !== undefined && input.parentTaskId !== null && input.parentTaskId === taskId) {
+      throw new ApiError(400, 'لا يمكن للمهمة أن تكون تابعة لنفسها', 'invalid_parent_task');
+    }
     if (input.projectId) {
       const [project] = await db.select({ id: projects.id }).from(projects).where(and(eq(projects.id, input.projectId), eq(projects.workspaceId, ws)));
       if (!project) throw notFound('المشروع');
+    }
+    if (input.parentTaskId) {
+      const [parentTask] = await db.select({ id: tasks.id }).from(tasks).where(and(eq(tasks.id, input.parentTaskId), eq(tasks.workspaceId, ws)));
+      if (!parentTask) throw notFound('المهمة الرئيسية');
     }
     const now = stamp();
     const [task] = await db.update(tasks).set({
@@ -378,15 +422,15 @@ export const PATCH = withApi('data.patch', async (request: NextRequest) => {
       // Preserve the first completion time when the status does not change.
       ...(input.status === 'completed' ? { completedAt: sql`COALESCE(${tasks.completedAt}, ${now})` } : {}),
       ...(input.status !== undefined && input.status !== 'completed' ? { completedAt: null } : {}),
-    }).where(and(eq(tasks.id, path[1]), eq(tasks.workspaceId, ws))).returning();
+    }).where(and(eq(tasks.id, taskId), eq(tasks.workspaceId, ws))).returning();
     if (!task) throw notFound('المهمة');
     return json(task);
   }
 
   if (is(path, 'projects', null)) {
-    const input = await readJson(request, projectInput.partial().strict());
+    const input = await readJson(request, projectPatch);
     const [project] = await db.update(projects).set(input)
-      .where(and(eq(projects.id, path[1]), eq(projects.workspaceId, ws), eq(projects.isArchived, false))).returning();
+      .where(and(eq(projects.id, path[1]), eq(projects.workspaceId, ws))).returning();
     if (!project) throw notFound('المشروع');
     return json(project);
   }
@@ -467,6 +511,18 @@ export const DELETE = withApi('data.delete', async (request: NextRequest) => {
 
   if (is(path, 'account')) {
     if (identity.demo) throw new ApiError(403, 'لا يمكن حذف الحساب التجريبي', 'forbidden');
+    const input = await readJson(
+      request,
+      z.object({ password: z.string().min(1, 'اكتب كلمة المرور لتأكيد الحذف') }).strict(),
+    );
+    const [user] = await db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.id, identity.userId))
+      .limit(1);
+    if (!user) throw notFound('المستخدم');
+    const valid = await verifyPassword(input.password, user.passwordHash);
+    if (!valid) throw new ApiError(403, 'كلمة المرور غير صحيحة', 'invalid_password');
     await deleteUserAccount(identity.userId);
     const response = json({ ok: true, deleted: true });
     clearSessionCookies(response);

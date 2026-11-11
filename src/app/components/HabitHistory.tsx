@@ -44,28 +44,58 @@ type Payload = {
   logs: Array<{ date: string; value: number }>;
 };
 
-/** Survives view switches so navigating away and back does not refetch. */
-const cache = new Map<string, Payload>();
+type CacheEntry = { data: Payload; cachedAt: number };
+/** Survives view switches so navigating away and back does not refetch immediately. */
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 60_000;
+
+/** Invalidate habit history cache. Clears all entries if habitId is omitted, or only entries for the given habit. */
+export function clearCache(habitId?: string): void {
+  if (habitId) {
+    for (const key of Array.from(cache.keys())) {
+      if (key.startsWith(`${habitId}:`)) {
+        cache.delete(key);
+      }
+    }
+  } else {
+    cache.clear();
+  }
+}
+
+function getFromCache(key: string): Payload | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.cachedAt > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
 
 export default function HabitHistory({
   habitId,
   habitName,
   color,
   unit,
+  cacheKey: externalCacheKey,
+  invalidationToken,
 }: {
   habitId: string;
   habitName: string;
   color: string;
   unit: string;
+  cacheKey?: string;
+  invalidationToken?: string | number;
 }) {
   const [rangeId, setRangeId] = useState('6m');
   const range = RANGES.find((r) => r.id === rangeId) ?? RANGES[1];
-  const cacheKey = `${habitId}:${range.days}`;
+  const cacheKey = externalCacheKey ? `${habitId}:${range.days}:${externalCacheKey}` : `${habitId}:${range.days}`;
 
-  const [payload, setPayload] = useState<Payload | null>(() => cache.get(cacheKey) ?? null);
-  const [loading, setLoading] = useState(!cache.has(cacheKey));
+  const [payload, setPayload] = useState<Payload | null>(() => getFromCache(cacheKey));
+  const [loading, setLoading] = useState(() => !getFromCache(cacheKey));
   const [failed, setFailed] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
+  const prevTokenRef = useRef(invalidationToken);
   const [cursor, setCursor] = useState<{ row: number; col: number } | null>(null);
   const [readout, setReadout] = useState<string | null>(null);
   const [tip, setTip] = useState<{ text: string; x: number; y: number; met: boolean } | null>(null);
@@ -75,13 +105,21 @@ export default function HabitHistory({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const hit = cache.get(cacheKey);
+    if (invalidationToken !== undefined && invalidationToken !== prevTokenRef.current) {
+      prevTokenRef.current = invalidationToken;
+      clearCache(habitId);
+      setReloadToken((n) => n + 1);
+    }
+  }, [invalidationToken, habitId]);
+
+  useEffect(() => {
+    const hit = getFromCache(cacheKey);
     if (hit && reloadToken === 0) { setPayload(hit); setLoading(false); setFailed(false); return; }
     const controller = new AbortController();
     setLoading(true);
     setFailed(false);
     api<Payload>(`/api/habits/${habitId}/history?days=${range.days}`, { signal: controller.signal })
-      .then((data) => { cache.set(cacheKey, data); setPayload(data); setLoading(false); })
+      .then((data) => { cache.set(cacheKey, { data, cachedAt: Date.now() }); setPayload(data); setLoading(false); })
       .catch((cause) => {
         if (controller.signal.aborted) return;
         console.error('habit history:', cause);

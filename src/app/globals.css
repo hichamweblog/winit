@@ -477,9 +477,6 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 @media (min-width: 1100px) {
   .habit-dashboard-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (min-width: 1440px) {
-
-}
 @media (max-width: 767px) {
 
   .habit-card-details { padding: var(--space-sm); }
@@ -994,7 +991,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .segmented-control { display: inline-flex; padding: var(--space-3xs); gap: var(--space-3xs); border-radius: var(--radius-pill); background: var(--color-paper-2); }
 .segmented-control button { min-block-size: 36px; padding-inline: var(--space-sm); border-radius: var(--radius-pill); color: var(--color-ink-2); font-size: var(--text-small); white-space: nowrap; }
 .segmented-control .segment-active { background: var(--color-paper); color: var(--accent); font-weight: 600; box-shadow: var(--shadow-1); }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-sm); }
+.stats-page .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-sm); }
 .kpi-card { position: relative; gap: var(--space-2xs); }
 .kpi-icon { display: inline-flex; align-items: center; justify-content: center; inline-size: 34px; block-size: 34px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--color-accent-ink); }
 .kpi-hint { color: var(--text-muted); font-size: var(--text-small); }
@@ -1043,16 +1040,8 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .setting-control { flex: none; margin-inline-start: auto; }
 .setting-note { margin: 0; color: var(--text-muted); font-size: var(--text-small); }
 .account-badge { padding: var(--space-3xs) var(--space-xs); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--color-accent-ink); font-size: var(--text-micro); }
-.danger-button { color: var(--on-danger); background: var(--danger); }
 .ghost-button.danger-button { color: var(--danger-text); background: var(--danger-bg); }
 .ghost-button.danger-button:hover:not(:disabled) { background: var(--danger); color: var(--on-danger); }
-
-.switch { inline-size: 48px; block-size: 28px; padding: 3px; display: inline-flex; align-items: center; border-radius: var(--radius-pill); background: var(--color-rule); transition: background var(--dur-fast) var(--ease-out); }
-.switch i { inline-size: 22px; block-size: 22px; border-radius: var(--radius-pill); background: var(--color-paper); box-shadow: var(--shadow-1); transition: transform var(--dur-fast) var(--ease-out); }
-.switch[aria-checked="true"] { background: var(--accent); }
-.switch[aria-checked="true"] i { transform: translateX(-20px); }
-.switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .switch, .switch i { transition: none; } }
 
 .nav-choice[data-disabled="true"] { opacity: .55; }
 .habit-icon-field .picker-grid { max-block-size: none; }
@@ -1148,6 +1137,8 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .switch[aria-checked="true"] { background: none; }
 .switch[aria-checked="true"]::before { background: var(--accent); }
 .switch[aria-checked="true"] i { transform: translateX(-20px); }
+[dir="ltr"] .switch[aria-checked="true"] i { transform: translateX(20px); }
+.switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .switch::before, .switch i { transition: none; } }
 
 /* The day number sits on a small surface-coloured chip, NOT directly on the

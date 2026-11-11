@@ -28,6 +28,7 @@ export const taskInput = z
   .object({
     title: z.string().trim().min(1, 'اكتب عنوان المهمة').max(240),
     projectId: identifier.nullable().optional(),
+    parentTaskId: identifier.nullable().optional(),
     priority: z.enum(['none', 'low', 'medium', 'high']).optional(),
     dueDate: dateKey.nullable().optional(),
     estimatedPomodoros: z.number().int().min(1).max(20).optional(),
@@ -51,6 +52,11 @@ export const projectInput = z
     targetWeeklyMinutes: z.number().int().min(0).max(10080).optional(),
     sortOrder: z.number().int().min(0).max(1000000).optional(),
   })
+  .strict();
+
+export const projectPatch = projectInput
+  .partial()
+  .extend({ isArchived: z.boolean().optional() })
   .strict();
 
 export const habitInput = z

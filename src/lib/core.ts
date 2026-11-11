@@ -28,6 +28,8 @@ export function addDays(date: Date, amount: number): Date {
 export function getWeekStart(date = new Date(), weekStartsOn = 6): Date {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   start.setDate(start.getDate() - ((start.getDay() - weekStartsOn + 7) % 7));
+  // After setting to start of week at midnight, normalize to noon to avoid DST issues
+  start.setHours(12, 0, 0, 0);
   return start;
 }
 

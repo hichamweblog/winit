@@ -1,28 +1,33 @@
 import type { Metadata, Viewport } from 'next';
+import { El_Messiri, Readex_Pro, Noto_Naskh_Arabic } from 'next/font/google';
 import PwaRegister from './components/PwaRegister';
-// Calm Sea §3.1 — El Messiri (headings + large numerals), Readex Pro (all UI),
-// Noto Naskh Arabic (reading container only). Tajawal is no longer used.
-import '@fontsource/el-messiri/arabic-600.css';
-import '@fontsource/el-messiri/latin-600.css';
-import '@fontsource/el-messiri/arabic-700.css';
-import '@fontsource/el-messiri/latin-700.css';
-import '@fontsource/readex-pro/arabic-300.css';
-import '@fontsource/readex-pro/latin-300.css';
-import '@fontsource/readex-pro/arabic-400.css';
-import '@fontsource/readex-pro/latin-400.css';
-import '@fontsource/readex-pro/arabic-500.css';
-import '@fontsource/readex-pro/latin-500.css';
-import '@fontsource/readex-pro/arabic-600.css';
-import '@fontsource/readex-pro/latin-600.css';
-import '@fontsource/readex-pro/arabic-700.css';
-import '@fontsource/readex-pro/latin-700.css';
-import '@fontsource/noto-naskh-arabic/arabic-400.css';
 import './globals.css';
+
+const elMessiri = El_Messiri({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-heading',
+  display: 'swap',
+});
+
+const readexPro = Readex_Pro({
+  subsets: ['arabic', 'latin'],
+  weight: ['200', '300', '400', '500', '600', '700'],
+  variable: '--font-ui',
+  display: 'swap',
+});
+
+const notoNaskh = Noto_Naskh_Arabic({
+  subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-reading',
+  display: 'swap',
+});
 
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a1128' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B1A20' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -59,11 +64,11 @@ const themeBootstrap = "try{var s=localStorage.getItem('winit-mode');var d=s==='
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className={`${elMessiri.variable} ${readexPro.variable} ${notoNaskh.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
-      <body>
+      <body className={`${elMessiri.variable} ${readexPro.variable} ${notoNaskh.variable}`}>
         <PwaRegister />
         {children}
       </body>
