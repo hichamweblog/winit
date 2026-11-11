@@ -126,28 +126,143 @@ export function assertCsrf(request: NextRequest) {
 
 /* ------------------------------------------------------------------ */
 /*  Rate limiting                                                      */
-/*  Fixed-window counters in process memory. Correct for a single      */
-/*  instance; a multi-instance deployment must swap this for Redis.    */
+/*  Pluggable architecture: in-memory LRU by default, with optional    */
+/*  distributed Upstash / Redis adapter for multi-instance SaaS.       */
 /* ------------------------------------------------------------------ */
 
-type Bucket = { count: number; resetAt: number };
-const buckets = new Map<string, Bucket>();
-let lastSweep = 0;
-const MAX_BUCKETS = 10_000;
+export interface RateLimitResult {
+  ok: boolean;
+  remaining: number;
+  retryAfter: number;
+}
 
-function sweep(now: number) {
-  if (now - lastSweep < 60_000 && buckets.size <= MAX_BUCKETS) return;
-  lastSweep = now;
-  for (const [key, bucket] of buckets) if (bucket.resetAt <= now) buckets.delete(key);
-  if (buckets.size > MAX_BUCKETS) {
-    const excess = buckets.size - MAX_BUCKETS;
-    let evicted = 0;
-    for (const key of buckets.keys()) {
-      buckets.delete(key);
-      evicted++;
-      if (evicted >= excess) break;
+export interface RateLimiterAdapter {
+  limit(key: string, limit: number, windowMs: number): RateLimitResult | Promise<RateLimitResult>;
+  reset?(): void | Promise<void>;
+}
+
+type Bucket = { count: number; resetAt: number };
+
+export class MemoryRateLimiter implements RateLimiterAdapter {
+  private buckets = new Map<string, Bucket>();
+  private lastSweep = 0;
+  private maxBuckets: number;
+
+  constructor(maxBuckets = 10_000) {
+    this.maxBuckets = maxBuckets;
+  }
+
+  private sweep(now: number) {
+    if (now - this.lastSweep < 60_000 && this.buckets.size <= this.maxBuckets) return;
+    this.lastSweep = now;
+    for (const [key, bucket] of this.buckets) if (bucket.resetAt <= now) this.buckets.delete(key);
+    if (this.buckets.size > this.maxBuckets) {
+      const excess = this.buckets.size - this.maxBuckets;
+      let evicted = 0;
+      for (const key of this.buckets.keys()) {
+        this.buckets.delete(key);
+        evicted++;
+        if (evicted >= excess) break;
+      }
     }
   }
+
+  limit(key: string, limit: number, windowMs: number): RateLimitResult {
+    const now = Date.now();
+    this.sweep(now);
+    const bucket = this.buckets.get(key);
+    if (!bucket || bucket.resetAt <= now) {
+      this.buckets.delete(key);
+      this.buckets.set(key, { count: 1, resetAt: now + windowMs });
+      if (this.buckets.size > this.maxBuckets) {
+        this.sweep(now);
+      }
+      if (1 > limit) {
+        return { ok: false, remaining: 0, retryAfter: Math.max(1, Math.ceil(windowMs / 1000)) };
+      }
+      return { ok: true, remaining: limit - 1, retryAfter: 0 };
+    }
+    bucket.count += 1;
+    this.buckets.delete(key);
+    this.buckets.set(key, bucket);
+    if (bucket.count > limit) {
+      return { ok: false, remaining: 0, retryAfter: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) };
+    }
+    return { ok: true, remaining: limit - bucket.count, retryAfter: 0 };
+  }
+
+  reset(): void {
+    this.buckets.clear();
+    this.lastSweep = 0;
+  }
+
+  get size(): number {
+    return this.buckets.size;
+  }
+}
+
+/** Lightweight zero-dependency Upstash Redis REST adapter for distributed rate limiting. */
+export class UpstashRedisRateLimiter implements RateLimiterAdapter {
+  constructor(
+    private url: string,
+    private token: string,
+  ) {}
+
+  async limit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
+    const windowSec = Math.max(1, Math.ceil(windowMs / 1000));
+    const redisKey = `winit:rl:${key}`;
+    try {
+      const res = await fetch(`${this.url}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          ['INCR', redisKey],
+          ['TTL', redisKey],
+        ]),
+      });
+      if (!res.ok) throw new Error(`Upstash returned ${res.status}`);
+      const data = (await res.json()) as Array<{ result: number }>;
+      const count = Number(data[0]?.result ?? 1);
+      let ttl = Number(data[1]?.result ?? -1);
+
+      if (count === 1 || ttl <= 0) {
+        await fetch(`${this.url}/expire/${encodeURIComponent(redisKey)}/${windowSec}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
+        ttl = windowSec;
+      }
+
+      const retryAfter = Math.max(1, ttl);
+      if (count > limit) {
+        return { ok: false, remaining: 0, retryAfter };
+      }
+      return { ok: true, remaining: limit - count, retryAfter: 0 };
+    } catch {
+      // Fail open on network partition so transient Redis errors don't lock users out
+      return { ok: true, remaining: 1, retryAfter: 0 };
+    }
+  }
+
+  async reset(): Promise<void> {
+    // Distributed reset requires key scanning or prefix deletion; no-op in standard app flow
+  }
+}
+
+let activeLimiter: RateLimiterAdapter =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new UpstashRedisRateLimiter(process.env.UPSTASH_REDIS_REST_URL, process.env.UPSTASH_REDIS_REST_TOKEN)
+    : new MemoryRateLimiter();
+
+export function setRateLimiterAdapter(adapter: RateLimiterAdapter) {
+  activeLimiter = adapter;
+}
+
+export function getRateLimiterAdapter(): RateLimiterAdapter {
+  return activeLimiter;
 }
 
 export function clientIp(request: NextRequest): string {
@@ -169,26 +284,22 @@ export function clientIp(request: NextRequest): string {
   return 'untrusted';
 }
 
-export function rateLimit(key: string, limit: number, windowMs: number) {
-  const now = Date.now();
-  sweep(now);
-  const bucket = buckets.get(key);
-  if (!bucket || bucket.resetAt <= now) {
-    buckets.delete(key);
-    buckets.set(key, { count: 1, resetAt: now + windowMs });
-    return { ok: true, remaining: limit - 1, retryAfter: 0 };
-  }
-  bucket.count += 1;
-  buckets.delete(key);
-  buckets.set(key, bucket);
-  if (bucket.count > limit) {
-    return { ok: false, remaining: 0, retryAfter: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) };
-  }
-  return { ok: true, remaining: limit - bucket.count, retryAfter: 0 };
+export function rateLimit(key: string, limit: number, windowMs: number): RateLimitResult | Promise<RateLimitResult> {
+  return activeLimiter.limit(key, limit, windowMs);
 }
 
-export function enforceRateLimit(request: NextRequest, scope: string, limit: number, windowMs: number) {
+export function enforceRateLimit(request: NextRequest, scope: string, limit: number, windowMs: number): RateLimitResult | Promise<RateLimitResult> {
   const result = rateLimit(`${scope}:${clientIp(request)}`, limit, windowMs);
+  if (result instanceof Promise) {
+    return result.then((res) => {
+      if (!res.ok) {
+        throw new ApiError(429, 'محاولات كثيرة خلال وقت قصير؛ انتظر قليلاً ثم أعد المحاولة', 'rate_limited', {
+          'retry-after': String(res.retryAfter),
+        });
+      }
+      return res;
+    });
+  }
   if (!result.ok) {
     throw new ApiError(429, 'محاولات كثيرة خلال وقت قصير؛ انتظر قليلاً ثم أعد المحاولة', 'rate_limited', {
       'retry-after': String(result.retryAfter),
@@ -197,30 +308,39 @@ export function enforceRateLimit(request: NextRequest, scope: string, limit: num
   return result;
 }
 
-/** Test helper — never called by application code. */
+/** Test helper — resets the active rate limiter. */
 export function resetRateLimits() {
-  buckets.clear();
-  lastSweep = 0;
+  activeLimiter.reset?.();
 }
 
 /* ------------------------------------------------------------------ */
 /*  Handler wrapper                                                    */
 /* ------------------------------------------------------------------ */
 
-type Handler = (request: NextRequest, context: { requestId: string }) => Promise<NextResponse>;
+export type RouteContext<TParams = Record<string, string>> = {
+  params: Promise<TParams>;
+};
+
+type Handler<TParams = Record<string, string>> = (
+  request: NextRequest,
+  context: { requestId: string; params: Promise<TParams> },
+) => Promise<NextResponse>;
 
 /**
  * Wraps a route handler with a request id, one structured log line per request,
- * and a single place where errors become responses. Stack traces never reach
- * the client.
+ * route params forwarding, and a single place where errors become responses.
+ * Stack traces never reach the client.
  */
-export function withApi(route: string, handler: Handler) {
-  return async (request: NextRequest): Promise<NextResponse> => {
+export function withApi<TParams = Record<string, string>>(route: string, handler: Handler<TParams>) {
+  return async (request: NextRequest, routeContext: RouteContext<TParams>): Promise<NextResponse> => {
     const requestId = crypto.randomUUID();
     const started = Date.now();
     let response: NextResponse;
     try {
-      response = await handler(request, { requestId });
+      response = await handler(request, {
+        requestId,
+        params: routeContext?.params ?? Promise.resolve({} as TParams),
+      });
     } catch (cause) {
       if (cause instanceof ApiError) {
         response = json({ error: cause.message, code: cause.code, requestId }, cause.status, requestId, cause.headers);
