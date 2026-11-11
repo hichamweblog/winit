@@ -5,7 +5,7 @@ import * as schema from './schema';
 const connectionString =
   process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/winit';
 
-// In serverless environments (Vercel / Next.js API routes), preserve client across hot reloads in dev
+// In serverless environments (Vercel / Next.js API routes), preserve client across invocations
 const globalForDb = globalThis as unknown as { client?: postgres.Sql };
 
 export const client =
@@ -13,12 +13,13 @@ export const client =
   postgres(connectionString, {
     // prepare: false is required for Supabase / PgBouncer / Supavisor transaction pooler (port 6543)
     prepare: false,
-    max: process.env.NODE_ENV === 'production' ? 2 : 1,
-    idle_timeout: 20,
-    connect_timeout: 10,
+    max: process.env.NODE_ENV === 'production' ? 10 : 3,
+    idle_timeout: 30,
+    connect_timeout: 20,
   });
 
-if (process.env.NODE_ENV !== 'production') globalForDb.client = client;
+// Always cache client on globalThis to avoid creating new connection pools on every serverless invocation
+globalForDb.client = client;
 
 export const db = drizzle(client, { schema });
 export const DEMO_USER_ID = 'user_personal';

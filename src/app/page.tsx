@@ -102,9 +102,21 @@ function WinitApp() {
     setMobileMenu(false);
   }, [navigate]);
 
-  const refresh = useCallback(async () => {
-    try { const now = new Date(); const todayKey = localDateKey(now); const fromKey = localDateKey(addDays(new Date(`${todayKey}T12:00:00`), -20)); setData(await api<Dataset>(`/api/overview?date=${encodeURIComponent(todayKey)}&from=${encodeURIComponent(fromKey)}`)); }
-    catch (error) { notify(error instanceof Error ? error.message : 'تعذر الاتصال', 'error'); }
+  const refresh = useCallback(async (retryCount = 1) => {
+    try {
+      const now = new Date();
+      const todayKey = localDateKey(now);
+      const fromKey = localDateKey(addDays(new Date(`${todayKey}T12:00:00`), -20));
+      const dataset = await api<Dataset>(`/api/overview?date=${encodeURIComponent(todayKey)}&from=${encodeURIComponent(fromKey)}`);
+      setData(dataset);
+    } catch (error) {
+      if (retryCount > 0) {
+        // Automatically retry once after 1s on serverless cold start or network blip
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return refresh(retryCount - 1);
+      }
+      notify(error instanceof Error ? error.message : 'تعذر الاتصال', 'error');
+    }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
   const loadJournal = useCallback(async (offset = 0, append = false) => {
@@ -223,27 +235,94 @@ function WinitApp() {
   };
 
   const addTask = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); const form = new FormData(event.currentTarget);
-    const title = String(form.get('title') ?? '').trim(); if (!title) return;
-    const payload = { title, projectId: String(form.get('projectId') ?? '') || null, priority: String(form.get('priority') || 'none'), dueDate: String(form.get('dueDate') || (view === 'today' ? today : '')) || null, estimatedPomodoros: Number(form.get('estimatedPomodoros') || 1), notes: String(form.get('notes') || '') || null, tags: String(form.get('tags') || ''), ...(editingTask ? { status: String(form.get('status') || editingTask.status) } : {}) };
-    const ok = await mutate(editingTask ? `/api/tasks/${editingTask.id}` : '/api/tasks', editingTask ? 'PATCH' : 'POST', payload);
-    if (ok) { setShowAdd(false); setEditingTask(null); }
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const title = String(form.get('title') ?? '').trim();
+    if (!title) return;
+    const payload = {
+      title,
+      projectId: String(form.get('projectId') ?? '') || null,
+      priority: String(form.get('priority') || 'none'),
+      dueDate: String(form.get('dueDate') || (view === 'today' ? today : '')) || null,
+      estimatedPomodoros: Number(form.get('estimatedPomodoros') || 1),
+      notes: String(form.get('notes') || '') || null,
+      tags: String(form.get('tags') || ''),
+      ...(editingTask ? { status: String(form.get('status') || editingTask.status) } : {}),
+    };
+    setBusy(true);
+    try {
+      const url = editingTask ? `/api/tasks/${editingTask.id}` : '/api/tasks';
+      const method = editingTask ? 'PATCH' : 'POST';
+      const saved = await api<Task>(url, { method, body: payload });
+      setData((prev) => {
+        if (!prev) return prev;
+        if (editingTask) {
+          return { ...prev, tasks: prev.tasks.map((t) => (t.id === saved.id ? saved : t)) };
+        }
+        return { ...prev, tasks: [saved, ...prev.tasks] };
+      });
+      setShowAdd(false);
+      setEditingTask(null);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر حفظ المهمة', 'error');
+    } finally {
+      setBusy(false);
+    }
   };
+
   const addProject = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const name = String(form.get('name') ?? '').trim();
     if (!name) return;
-    const payload = { name, description: String(form.get('description') ?? '').trim() || null, color: String(form.get('color') ?? '#9b315f'), icon: String(form.get('icon') ?? 'folder'), targetWeeklyMinutes: Math.max(0, Number(form.get('targetWeeklyMinutes') ?? 0)) };
-    const ok = await mutate(editingProject ? `/api/projects/${editingProject.id}` : '/api/projects', editingProject ? 'PATCH' : 'POST', payload);
-    if (ok) { setShowProjectAdd(false); setEditingProject(null); }
+    const payload = {
+      name,
+      description: String(form.get('description') ?? '').trim() || null,
+      color: String(form.get('color') ?? '#9b315f'),
+      icon: String(form.get('icon') ?? 'folder'),
+      targetWeeklyMinutes: Math.max(0, Number(form.get('targetWeeklyMinutes') ?? 0)),
+    };
+    setBusy(true);
+    try {
+      const url = editingProject ? `/api/projects/${editingProject.id}` : '/api/projects';
+      const method = editingProject ? 'PATCH' : 'POST';
+      const saved = await api<Project>(url, { method, body: payload });
+      setData((prev) => {
+        if (!prev) return prev;
+        if (editingProject) {
+          return { ...prev, projects: prev.projects.map((p) => (p.id === saved.id ? saved : p)) };
+        }
+        return { ...prev, projects: [...prev.projects, saved] };
+      });
+      setShowProjectAdd(false);
+      setEditingProject(null);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر حفظ المشروع', 'error');
+    } finally {
+      setBusy(false);
+    }
   };
+
   const saveHabit = async (body: unknown) => {
-    const ok = await mutate(editingHabit ? `/api/habits/${editingHabit.id}` : '/api/habits', editingHabit ? 'PATCH' : 'POST', body);
-    if (ok) {
+    setBusy(true);
+    try {
+      const url = editingHabit ? `/api/habits/${editingHabit.id}` : '/api/habits';
+      const method = editingHabit ? 'PATCH' : 'POST';
+      const saved = await api<Habit>(url, { method, body });
+      setData((prev) => {
+        if (!prev) return prev;
+        if (editingHabit) {
+          return { ...prev, habits: prev.habits.map((h) => (h.id === saved.id ? saved : h)) };
+        }
+        return { ...prev, habits: [...prev.habits, saved] };
+      });
       setShowHabitAdd(false);
       setEditingHabit(null);
       setHabitMutationCount((c) => c + 1);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر حفظ العادة', 'error');
+    } finally {
+      setBusy(false);
     }
   };
   const deleteProject = async (project: Project) => {
@@ -308,20 +387,41 @@ function WinitApp() {
     try { window.localStorage.setItem('winit-mobile-views', JSON.stringify(nextViews)); } catch { /* keep this session's selection */ }
   };
   const completeTask = async (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const isDone = task.status === 'completed';
+    const nextStatus = isDone ? 'todo' : 'completed';
+    const nextCompletedAt = isDone ? null : new Date().toISOString();
+    const endpoint = isDone ? `/api/tasks/${taskId}/restore` : `/api/tasks/${taskId}/complete`;
+
+    // Optimistic UI update
     setData((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         tasks: prev.tasks.map((t) =>
           t.id === taskId
-            ? { ...t, status: t.status === 'completed' ? 'todo' : 'completed', completedAt: t.status === 'completed' ? null : new Date().toISOString() }
+            ? { ...t, status: nextStatus, completedAt: nextCompletedAt }
             : t,
         ),
       };
     });
-    const ok = await mutate(`/api/tasks/${taskId}/complete`, 'POST');
-    if (!ok) void refresh();
+
+    try {
+      const updated = await api<Task>(endpoint, { method: 'POST' });
+      setData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) => (t.id === taskId ? updated : t)),
+        };
+      });
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر حفظ حالة المهمة', 'error');
+      void refresh();
+    }
   };
+
   const toggleHabit = async (habit: Habit, existing?: Log) => {
     const value = existing && existing.value >= habit.targetValue ? 0 : (habit.recordType === 'check' ? 1 : habit.targetValue);
     setData((prev) => {
@@ -332,9 +432,32 @@ function WinitApp() {
         logs: [...filtered, { id: existing?.id ?? 'optimistic', habitId: habit.id, logDate: today, value }],
       };
     });
-    const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value });
-    if (ok) setHabitMutationCount((c) => c + 1);
-    else void refresh();
+
+    try {
+      const result = await api<Log | { ok: boolean; value: number }>(`/api/habits/${habit.id}/log`, {
+        method: 'POST',
+        body: { date: today, value },
+      });
+      if (result && 'id' in result) {
+        setData((prev) => {
+          if (!prev) return prev;
+          const filtered = prev.logs.filter((l) => !(l.habitId === habit.id && l.logDate === today));
+          return { ...prev, logs: [...filtered, result as Log] };
+        });
+      } else if (value === 0) {
+        setData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            logs: prev.logs.filter((l) => !(l.habitId === habit.id && l.logDate === today)),
+          };
+        });
+      }
+      setHabitMutationCount((c) => c + 1);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'تعذر تسجيل العادة', 'error');
+      void refresh();
+    }
   };
   const exportAccountData = async () => {
     try {
