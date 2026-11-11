@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { JournalEntry, JournalMood } from '@/lib/types';
 import { journalMoods } from '../types';
-import { Info, NotebookPen, Pencil, Plus, Search, Trash2 } from '../icons';
+import { NotebookPen, Pencil, Plus, Search, Trash2 } from '../icons';
 import { RowActions } from './atoms';
 import { AR_LOCALE, formatArNumber } from '@/lib/core';
 
@@ -65,10 +65,6 @@ export function JournalView({
         </button>
       </div>
 
-      <aside className="journal-privacy-note" role="note">
-        <Info size={16} />
-        <p>ملاحظة خصوصية: هذه نسخة تجريبية بلا تسجيل دخول. تجنّب تدوين معلومات شديدة الحساسية.</p>
-      </aside>
 
       <div className="journal-toolbar">
         <span className="journal-count">

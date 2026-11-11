@@ -7282,11 +7282,11 @@ var globalForDb = globalThis;
 var client = globalForDb.client ?? postgres(connectionString, {
   // prepare: false is required for Supabase / PgBouncer / Supavisor transaction pooler (port 6543)
   prepare: false,
-  max: process.env.NODE_ENV === "production" ? 2 : 1,
-  idle_timeout: 20,
-  connect_timeout: 10
+  max: process.env.NODE_ENV === "production" ? 10 : 3,
+  idle_timeout: 30,
+  connect_timeout: 20
 });
-if (process.env.NODE_ENV !== "production") globalForDb.client = client;
+globalForDb.client = client;
 var db = drizzle(client, { schema: schema_exports });
 
 // src/db/migrate.ts

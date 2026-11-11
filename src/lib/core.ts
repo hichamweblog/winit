@@ -40,6 +40,7 @@ export function getWeekStart(date = new Date(), weekStartsOn = 6): Date {
  * pinned explicitly rather than inherited from the runtime.
  */
 export const AR_LOCALE = 'ar-u-nu-latn';
+export const AR_HIJRI_LOCALE = 'ar-u-ca-islamic-umalqura-nu-latn';
 
 export function formatArDate(
   value: Date | string,
@@ -48,6 +49,23 @@ export function formatArDate(
   const date = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(date.getTime())) return '';
   return new Intl.DateTimeFormat(AR_LOCALE, options).format(date);
+}
+
+export function formatArHijriDate(
+  value: Date | string = new Date(),
+  options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' },
+): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return '';
+  try {
+    return new Intl.DateTimeFormat(AR_HIJRI_LOCALE, options).format(date);
+  } catch {
+    try {
+      return new Intl.DateTimeFormat('ar-u-ca-islamic-nu-latn', options).format(date);
+    } catch {
+      return '';
+    }
+  }
 }
 
 /** Locale-aware count formatting with Western digits (1,234 not ١٬٣٤). */

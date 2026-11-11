@@ -76,9 +76,15 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .topbar-start, .topbar-end { gap: var(--space-xs); }
 .breadcrumbs { gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); white-space: nowrap; }
 .breadcrumbs svg { color: var(--color-muted); }
-.breadcrumbs b { color: var(--color-ink); font-weight: 600; }
-.today-date { color: var(--color-ink-2); font-size: var(--text-small); white-space: nowrap; }
-.icon-button { position: relative; width: 44px; height: 44px; display: grid; place-items: center; flex: none; color: var(--color-ink-2); border-radius: 8px; }
+.today-date { display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); white-space: nowrap; }
+.today-date-separator { opacity: 0.5; user-select: none; }
+.today-date-hijri { opacity: 0.9; }
+@media (max-width: 640px) {
+  .today-date-hijri,
+  .today-date-separator {
+    display: none;
+  }
+}
 .icon-button:focus-visible::before { content: ""; position: absolute; inset: 2px; border-radius: 7px; outline: 2px solid var(--color-focus); outline-offset: 2px; pointer-events: none; }
 .mobile-menu-button { display: grid; }
 .top-avatar { width: 32px; height: 32px; font-size: var(--text-ui); }
@@ -193,8 +199,8 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .empty-page h3 { font-size: var(--text-h3); }
 .empty-page p { max-width: 52ch; color: var(--color-ink-2); font-size: var(--text-ui); }
 
-.habit-dashboard-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-lg); }
-.habit-card { min-width: 0; padding-block: var(--space-md); border-block-start: 1px solid var(--color-rule); }
+.habit-dashboard-list { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--space-lg); }
+.habit-card { min-width: 0; align-self: start; padding-block: var(--space-md); border-block-start: 1px solid var(--color-rule); }
 .habit-card-top { min-height: 48px; display: flex; align-items: center; gap: var(--space-xs); }
 .habit-large-icon { width: 40px; height: 40px; }
 .habit-card-title { min-width: 0; flex: 1; }
@@ -278,7 +284,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   .welcome-row h1 { font-size: var(--text-h1-compact); }
   .stats-grid { max-width: 720px; }
   .stat-card { padding-inline: var(--space-sm); }
-  .habit-dashboard-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .habit-dashboard-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-lg); align-items: start; }
   .modal-backdrop { padding: var(--space-md); align-items: center; }
   .task-modal { max-width: 560px; border-radius: var(--radius-xl); }
   .page-content { padding-block-end: var(--space-lg); }
@@ -323,8 +329,6 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .journal-prompt h2 { margin-block: var(--space-2xs); font-size: var(--text-h3); }
 .journal-prompt p { color: var(--color-ink-2); font-size: var(--text-ui); }
 .journal-prompt-action { min-height: 44px; padding-inline: var(--space-sm); display: inline-flex; align-items: center; gap: var(--space-xs); flex: none; color: var(--color-ink); border: 1.5px solid var(--color-edge); border-radius: var(--radius-pill); font-size: var(--text-ui); font-weight: 600; }
-.journal-privacy-note { margin-block-end: var(--space-md); padding: var(--space-xs) var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-xs); color: var(--color-ink-2); background: var(--color-paper-2); border-inline-start: 2px solid var(--color-edge); border-radius: var(--radius-card); font-size: var(--text-small); line-height: 1.7; }
-.journal-privacy-note svg { margin-block-start: var(--space-3xs); flex: none; color: var(--color-muted); }
 .journal-toolbar { margin-block-end: var(--space-sm); display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
 .journal-count { color: var(--color-ink-2); font-family: var(--font-ui); font-size: var(--text-ui); }
 .journal-search { min-width: 0; width: min(100%, 360px); min-height: 44px; padding-inline: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs); color: var(--color-muted); background: var(--color-paper-3); border: 1px solid var(--color-edge); border-radius: var(--radius-pill); }
@@ -424,8 +428,8 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .focus-duration-select select { min-height: 44px; padding-inline: var(--space-xs); border: 1px solid var(--color-edge); border-radius: 10px; }
 
 
-.habit-dashboard-list { grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
-.habit-card { min-width: 0; padding: 0; color: var(--color-ink); background: var(--color-paper-3); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-card); overflow: hidden; transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+.habit-dashboard-list { grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--space-md); }
+.habit-card { min-width: 0; align-self: start; padding: 0; color: var(--color-ink); background: var(--color-paper-3); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-card); overflow: hidden; transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
 .habit-card:hover { border-color: var(--line-strong); }
 .habit-card.is-dragging { opacity: 0.4; }
 .habit-card.drag-over { border-block-start: 2px solid var(--accent); }
@@ -475,7 +479,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .habit-reminder { margin-block-start: var(--space-sm); display: flex; align-items: center; gap: var(--space-2xs); color: var(--color-muted); font-family: var(--font-ui); font-size: var(--text-small); }
 
 @media (min-width: 1100px) {
-  .habit-dashboard-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .habit-dashboard-list { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
 @media (max-width: 767px) {
 
