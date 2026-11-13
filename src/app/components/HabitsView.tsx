@@ -126,7 +126,7 @@ export function HabitsView({
 
           return (
             <article
-              className={`habit-card ${isExpanded ? 'habit-card-expanded' : 'habit-card-compact'} ${
+              className={`habit-card row-interactive ${isExpanded ? 'habit-card-expanded' : 'habit-card-compact'} ${
                 isDragging ? 'is-dragging' : ''
               } ${isOver ? 'drag-over' : ''}`}
               key={habit.id}
@@ -229,6 +229,26 @@ export function HabitsView({
                 </div>
 
                 <div className="habit-summary-side" onClick={(e) => e.stopPropagation()}>
+                  <RowActions className="habit-summary-actions">
+                    <button
+                      type="button"
+                      className="icon-button row-action"
+                      onClick={() => onEdit(habit)}
+                      aria-label={`تعديل عادة ${habit.name}`}
+                      title="تعديل"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-button row-action row-action-danger"
+                      onClick={() => onDelete(habit)}
+                      aria-label={`حذف عادة ${habit.name}`}
+                      title="حذف"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </RowActions>
                   {habit.recordType === 'check' ? (
                     <button
                       className={`habit-toggle habit-toggle-large ${done ? 'done' : ''}`}
@@ -259,46 +279,44 @@ export function HabitsView({
                       {habit.description && <p className="habit-details-desc">{habit.description}</p>}
                     </div>
                     <div className="habit-card-tools">
-                      <RowActions>
-                        <button
-                          type="button"
-                          className="icon-button row-action"
-                          onClick={() => moveHabit(index, 'up')}
-                          disabled={index === 0}
-                          aria-label={`تحريك عادة ${habit.name} لأعلى`}
-                          title="تحريك لأعلى"
-                        >
-                          <ArrowUp size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          className="icon-button row-action"
-                          onClick={() => moveHabit(index, 'down')}
-                          disabled={index === habits.length - 1}
-                          aria-label={`تحريك عادة ${habit.name} لأسفل`}
-                          title="تحريك لأسفل"
-                        >
-                          <ArrowDown size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          className="icon-button row-action"
-                          onClick={() => onEdit(habit)}
-                          aria-label={`تعديل عادة ${habit.name}`}
-                          title="تعديل"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          className="icon-button row-action row-action-danger"
-                          onClick={() => onDelete(habit)}
-                          aria-label={`حذف عادة ${habit.name}`}
-                          title="حذف"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </RowActions>
+                      <button
+                        type="button"
+                        className="icon-button"
+                        onClick={() => moveHabit(index, 'up')}
+                        disabled={index === 0}
+                        aria-label={`تحريك عادة ${habit.name} لأعلى`}
+                        title="تحريك لأعلى"
+                      >
+                        <ArrowUp size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-button"
+                        onClick={() => moveHabit(index, 'down')}
+                        disabled={index === habits.length - 1}
+                        aria-label={`تحريك عادة ${habit.name} لأسفل`}
+                        title="تحريك لأسفل"
+                      >
+                        <ArrowDown size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-button"
+                        onClick={() => onEdit(habit)}
+                        aria-label={`تعديل عادة ${habit.name}`}
+                        title="تعديل"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-button row-action-danger"
+                        onClick={() => onDelete(habit)}
+                        aria-label={`حذف عادة ${habit.name}`}
+                        title="حذف"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                   <div className="habit-progress-copy">

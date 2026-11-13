@@ -445,8 +445,9 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .habit-summary-meta-row { display: flex; align-items: center; gap: var(--space-xs); flex-wrap: wrap; }
 .habit-summary-badge { color: var(--color-ink-2); font-size: var(--text-small); font-family: var(--font-ui); }
 .habit-badge-done { color: var(--success); font-weight: 600; display: inline-flex; align-items: center; gap: var(--space-3xs); }
-.habit-summary-time { display: inline-flex; align-items: center; gap: var(--space-3xs); color: var(--color-muted); font-size: var(--text-small); }
-.habit-summary-end { display: flex; align-items: center; gap: var(--space-xs); flex: none; }
+.habit-summary-end, .habit-summary-side { display: flex; align-items: center; gap: var(--space-xs); flex: none; }
+.habit-summary-actions { display: inline-flex; align-items: center; gap: var(--space-3xs); }
+.habit-summary-actions .row-action { width: 34px; height: 34px; border-radius: 8px; }
 .habit-progress-pill { padding-inline: var(--space-2xs); padding-block: var(--space-3xs); border-radius: var(--radius-full); font-size: var(--text-small); font-weight: 600; font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
 .habit-expand-icon { width: 32px; height: 32px; display: grid; place-items: center; color: var(--color-muted); }
 .habit-chevron { transition: transform var(--dur-base) var(--ease); }
@@ -465,8 +466,11 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .habit-card-title { min-width: 0; flex: 1; }
 .habit-type-label { display: block; margin-block-end: var(--space-3xs); color: var(--color-accent-strong); font-family: var(--font-ui); font-size: var(--text-small); }
 .habit-card-title h2 { overflow-wrap: anywhere; font-size: var(--text-body-lg); }
-.habit-card-title p { margin-block-start: var(--space-3xs); color: var(--color-ink-2); font-size: var(--text-small); }
 .habit-card-tools { display: flex; align-items: center; gap: var(--space-2xs); flex: none; }
+.habit-card-tools .icon-button { width: 34px; height: 34px; border-radius: 8px; color: var(--color-ink-2); }
+.habit-card-tools .icon-button:hover { color: var(--color-ink); background: var(--color-paper-2); }
+.habit-card-tools .icon-button:disabled { opacity: 0.35; cursor: not-allowed; }
+.habit-card-tools .row-action-danger:hover { color: var(--danger); background: var(--danger-bg); }
 
 .habit-progress-copy { margin-block-start: var(--space-md); display: flex; justify-content: space-between; gap: var(--space-xs); color: var(--color-ink-2); font-family: var(--font-ui); font-size: var(--text-small); }
 .habit-progress-copy b { color: var(--color-ink); font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
@@ -482,7 +486,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   .habit-dashboard-list { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
 @media (max-width: 767px) {
-
+  .habit-summary-actions { display: none; }
   .habit-card-details { padding: var(--space-sm); }
   .habit-card-summary { padding: var(--space-xs) var(--space-sm); }
   .habit-card-top { align-items: flex-start; flex-wrap: wrap; }
