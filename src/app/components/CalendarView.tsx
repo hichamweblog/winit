@@ -16,7 +16,7 @@
 import { useMemo, useState } from 'react';
 import { DayPicker, type DayButtonProps } from 'react-day-picker';
 import { ar } from 'react-day-picker/locale';
-import { CalendarDays, ChevronLeft, ChevronRight, Plus } from '../icons';
+import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus } from '../icons';
 import { PriorityFlag, RowActions, SessionCount } from './atoms';
 import { AR_LOCALE, formatArNumber, localDateKey } from '@/lib/core';
 import { tasksLabel } from '@/lib/semantics';
@@ -170,7 +170,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
                       </span>
                     </button>
                     <RowActions>
-                      <button className="icon-button row-action" onClick={() => onEdit(task)} aria-label={`تعديل ${task.title}`}><CalendarDays size={15} /></button>
+                      <button className="icon-button row-action" onClick={() => onEdit(task)} aria-label={`تعديل ${task.title}`} title="تعديل"><Pencil size={14} /></button>
                     </RowActions>
                   </li>
                 );

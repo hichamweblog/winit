@@ -2,7 +2,7 @@
 
 import { memo, type CSSProperties } from 'react';
 import type { Project, Task } from '@/lib/types';
-import { Check, Pencil, Play } from '../icons';
+import { Check, Pencil, Play, Trash2 } from '../icons';
 import { DueChip, PriorityFlag, RowActions, SessionCount } from './atoms';
 import { goalStyle } from '@/lib/goals';
 import { truncateWords } from '@/lib/label';
@@ -14,6 +14,7 @@ export type TaskRowProps = {
   onComplete: () => void;
   onStart: () => void;
   onEdit: () => void;
+  onDelete?: () => void;
 };
 
 export const TaskRow = memo(function TaskRow({
@@ -23,22 +24,35 @@ export const TaskRow = memo(function TaskRow({
   onComplete,
   onStart,
   onEdit,
+  onDelete,
 }: TaskRowProps) {
-  const isOverdue = task.dueDate && task.dueDate < today && task.status !== 'completed';
   const isDone = task.status === 'completed';
 
   return (
-    <div className={`task-row ${isDone ? 'task-done' : ''}`}>
+    <div className={`task-row row-interactive ${isDone ? 'task-done' : ''}`}>
       <button
-        className={`checkbox ${isDone ? 'checked' : ''}`}
-        onClick={onComplete}
-        aria-label={isDone ? 'إلغاء إكمال المهمة' : 'إكمال المهمة'}
+        type="button"
+        className="task-check"
+        role="checkbox"
+        aria-checked={isDone}
+        onClick={(e) => {
+          e.stopPropagation();
+          onComplete();
+        }}
+        aria-label={isDone ? `إلغاء إكمال ${task.title}` : `إكمال ${task.title}`}
       >
-        {isDone && <Check size={13} />}
+        <Check size={13} />
       </button>
-      <div className="task-body">
+      <button
+        type="button"
+        className="task-body"
+        onClick={onEdit}
+        aria-label={`تعديل ${task.title}`}
+      >
         <div className="task-title-line">
-          <strong className="task-title">{task.title}</strong>
+          <strong className="task-title">
+            <bdi>{task.title}</bdi>
+          </strong>
           {task.priority !== 'none' && <PriorityFlag priority={task.priority} />}
         </div>
         <div className="task-meta">
@@ -54,14 +68,51 @@ export const TaskRow = memo(function TaskRow({
           {task.dueDate && <DueChip date={task.dueDate} today={today} />}
           {task.estimatedPomodoros > 0 && <SessionCount count={task.estimatedPomodoros} size={11} />}
         </div>
-      </div>
+        {task.notes && (
+          <p className="task-notes-snippet" dir="auto">
+            <bdi>{task.notes}</bdi>
+          </p>
+        )}
+      </button>
       <RowActions>
-        <button className="icon-button row-action" onClick={onStart} aria-label="بدء جلسة تركيز" title="بدء جلسة تركيز">
+        <button
+          type="button"
+          className="icon-button row-action"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          aria-label={`تعديل ${task.title}`}
+          title="تعديل"
+        >
+          <Pencil size={14} />
+        </button>
+        <button
+          type="button"
+          className="icon-button row-action"
+          onClick={(e) => {
+            e.stopPropagation();
+            onStart();
+          }}
+          aria-label={`بدء التركيز على ${task.title}`}
+          title="بدء جلسة تركيز"
+        >
           <Play size={13} />
         </button>
-        <button className="icon-button row-action" onClick={onEdit} aria-label="تعديل المهمة" title="تعديل">
-          <Pencil size={13} />
-        </button>
+        {onDelete && (
+          <button
+            type="button"
+            className="icon-button row-action row-action-danger"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            aria-label={`حذف ${task.title}`}
+            title="حذف"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
       </RowActions>
     </div>
   );

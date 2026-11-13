@@ -121,6 +121,9 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .task-body { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: var(--space-3xs); }
 .task-title { overflow: clip; color: var(--color-ink); font-size: var(--text-ui); font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); color: var(--color-ink-2); font-size: var(--text-small); }
+.task-title-line { display: flex; align-items: center; gap: var(--space-xs); min-width: 0; }
+.task-done .task-title { text-decoration: line-through; opacity: 0.6; }
+.task-notes-snippet { margin: 0; color: var(--color-ink-2); font-size: var(--text-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .task-project { display: inline-flex; align-items: center; gap: var(--space-2xs); }
 .task-project i, .expanded-meta i { width: 7px; height: 7px; flex: none; border-radius: 50%; }
 

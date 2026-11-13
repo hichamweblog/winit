@@ -39,6 +39,7 @@ export type DashboardProps = {
   logs: Log[];
   sessions: FocusSession[];
   onEditTask: (task: Task) => void;
+  onDeleteTask?: (taskId: string) => void;
 };
 
 export function TodayDashboard(props: DashboardProps) {
@@ -61,6 +62,7 @@ export function TodayDashboard(props: DashboardProps) {
     completeTask,
     sessions,
     onEditTask,
+    onDeleteTask,
   } = props;
 
   const sorted = [...todayTasks].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
@@ -140,6 +142,7 @@ export function TodayDashboard(props: DashboardProps) {
                     void startFocus(task.id);
                   }}
                   onEdit={() => onEditTask(task)}
+                  onDelete={onDeleteTask ? () => onDeleteTask(task.id) : undefined}
                 />
               ))}
             </div>
