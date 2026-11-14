@@ -10,6 +10,7 @@ import { AR_LOCALE, formatArNumber } from '@/lib/core';
 export type JournalViewProps = {
   entries: JournalEntry[];
   total: number;
+  hasMore: boolean;
   search: string;
   loading: boolean;
   onSearch: (value: string) => void;
@@ -22,6 +23,7 @@ export type JournalViewProps = {
 export function JournalView({
   entries,
   total,
+  hasMore,
   search,
   loading,
   onSearch,
@@ -171,7 +173,7 @@ export function JournalView({
         </div>
       )}
 
-      {entries.length < total && (
+      {hasMore && (
         <button className="journal-load-more" onClick={onLoadMore} disabled={loading}>
           {loading ? 'جارٍ التحميل…' : 'تحميل تدوينات أقدم'}
         </button>

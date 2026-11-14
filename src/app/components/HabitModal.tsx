@@ -136,6 +136,7 @@ export function HabitModal({ habit, onClose, onSubmit, busy }: HabitModalProps) 
               onChange={(event) => {
                 const value = event.target.value as Habit['recordType'];
                 setType(value);
+                if (value === 'check') setTarget('1');
                 setUnit(value === 'duration' ? 'دقيقة' : value === 'quantity' ? 'صفحات' : 'مرة');
               }}
             >

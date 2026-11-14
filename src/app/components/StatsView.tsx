@@ -59,7 +59,7 @@ export default function StatsView({ tasks, sessions, habits, logs, today }: {
   const maxDay = Math.max(1, ...buckets.map((bucket) => bucket.seconds));
   const maxWeek = Math.max(1, ...weeks.map((week) => week.seconds));
   const priorityTotal = Object.values(priorities).reduce((sum, value) => sum + value, 0);
-  const empty = summary.focusSeconds === 0 && summary.completedTasks === 0 && summary.sessionCount === 0;
+  const empty = summary.focusSeconds === 0 && summary.completedTasks === 0 && summary.sessionCount === 0 && summary.habitConsistency === 0;
 
   return (
     <section className="stats-page">

@@ -7180,7 +7180,8 @@ var focusSessions = pgTable(
   (table) => [
     index("focus_workspace_started_idx").on(table.workspaceId, table.startedAt),
     index("focus_project_idx").on(table.projectId),
-    index("focus_task_idx").on(table.taskId)
+    index("focus_task_idx").on(table.taskId),
+    uniqueIndex("focus_one_active_per_user_idx").on(table.workspaceId, table.userId).where(sql`${table.isCompleted} = false AND ${table.endedAt} IS NULL`)
   ]
 );
 var habits = pgTable(

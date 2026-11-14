@@ -10,6 +10,10 @@ import { guardMutation, notFound, stamp } from '@/lib/server/api-helpers';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+function createsTaskParentCycle(taskId: string, ancestors: Array<{ id: string }>) {
+  return ancestors.some((ancestor) => ancestor.id === taskId);
+}
+
 export const PATCH = withApi<{ id: string }>('tasks.patch', async (request: NextRequest, { params }) => {
   const { id: taskId } = await params;
   const identity = await requireIdentity(request);
@@ -33,6 +37,24 @@ export const PATCH = withApi<{ id: string }>('tasks.patch', async (request: Next
       .from(tasks)
       .where(and(eq(tasks.id, input.parentTaskId), eq(tasks.workspaceId, ws)));
     if (!parentTask) throw notFound('المهمة الرئيسية');
+
+    const ancestors = await db.execute<{ id: string }>(sql`
+      WITH RECURSIVE parent_chain AS (
+        SELECT id, parent_task_id, ARRAY[id]::text[] AS path
+        FROM tasks
+        WHERE id = ${input.parentTaskId} AND workspace_id = ${ws}
+        UNION ALL
+        SELECT parent.id, parent.parent_task_id, parent_chain.path || parent.id
+        FROM tasks parent
+        JOIN parent_chain ON parent.id = parent_chain.parent_task_id
+        WHERE parent.workspace_id = ${ws}
+          AND NOT parent.id = ANY(parent_chain.path)
+      )
+      SELECT id FROM parent_chain
+    `);
+    if (createsTaskParentCycle(taskId, ancestors)) {
+      throw new ApiError(400, 'لا يمكن إنشاء دورة في تسلسل المهام', 'invalid_parent_task');
+    }
   }
 
   const now = stamp();

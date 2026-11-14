@@ -190,6 +190,14 @@ const stillAlice = await alice.call('/api/overview');
 check("Alice's task is untouched", stillAlice.json?.tasks?.find((t) => t.id === taskId)?.title === 'مهمة اختبار');
 
 const aliceProject = await alice.call('/api/projects', { method: 'POST', body: { name: 'مشروع أليس' } });
+const otherProject = await alice.call('/api/projects', { method: 'POST', body: { name: 'مشروع آخر' } });
+const attributedTask = await alice.call('/api/tasks', { method: 'POST', body: { title: 'مهمة المشروع', projectId: aliceProject.json?.id } });
+const mismatchedFocus = await alice.call('/api/focus/start', { method: 'POST', body: { taskId: attributedTask.json?.id, projectId: otherProject.json?.id, mode: 'pomodoro', plannedSeconds: 1500 } });
+check('focus rejects a project unrelated to its task', mismatchedFocus.status === 400, `status ${mismatchedFocus.status}`);
+const parentTask = await alice.call('/api/tasks', { method: 'POST', body: { title: 'مهمة رئيسية' } });
+const childTask = await alice.call('/api/tasks', { method: 'POST', body: { title: 'مهمة فرعية', parentTaskId: parentTask.json?.id } });
+const parentCycle = await alice.call(`/api/tasks/${parentTask.json?.id}`, { method: 'PATCH', body: { parentTaskId: childTask.json?.id } });
+check('task parent cycles are rejected', parentCycle.status === 400, `status ${parentCycle.status}`);
 const crossTenantRef = await bob.call('/api/tasks', { method: 'POST', body: { title: 'x', projectId: aliceProject.json?.id } });
 check("Bob cannot attach a task to Alice's project", crossTenantRef.status === 404, `status ${crossTenantRef.status}`);
 
@@ -212,8 +220,11 @@ const legacyHabitIcon = await alice.call('/api/habits', { method: 'POST', body: 
 check('the original habit icons still work', legacyHabitIcon.status === 201, `status ${legacyHabitIcon.status}`);
 if (legacyHabitIcon.json?.id) await alice.call(`/api/habits/${legacyHabitIcon.json.id}`, { method: 'DELETE' });
 
-const aliceHabit = await alice.call('/api/habits', { method: 'POST', body: { name: 'عادة', recordType: 'check', targetValue: 1 } });
+const aliceHabit = await alice.call('/api/habits', { method: 'POST', body: { name: 'عادة', recordType: 'quantity', targetValue: 30 } });
 const habitId = aliceHabit.json?.id;
+const checkHabit = await alice.call(`/api/habits/${habitId}`, { method: 'PATCH', body: { recordType: 'check' } });
+check('switching a quantity habit to check resets its target', checkHabit.json?.targetValue === 1);
+check('check habits reject non-binary log values', (await alice.call(`/api/habits/${habitId}/log`, { method: 'POST', body: { date: '2026-01-01', value: 2 } })).status === 400);
 check("Bob cannot read Alice's habit history", (await bob.call(`/api/habits/${habitId}/history`)).status === 404);
 check("Bob cannot log against Alice's habit", (await bob.call(`/api/habits/${habitId}/log`, { method: 'POST', body: { date: '2026-01-01', value: 1 } })).status === 404);
 
@@ -242,13 +253,36 @@ const noMatch = await alice.call('/api/journal?q=%25%25%25nomatch');
 check('a wildcard-only query does not match everything', noMatch.json?.total === 0, `total ${noMatch.json?.total}`);
 const real = await alice.call(`/api/journal?q=${encodeURIComponent('خاص')}`);
 check('a genuine substring search still works', real.json?.total === 1);
+const sameDateEntryA = await alice.call('/api/journal', { method: 'POST', body: { entryDate: today, title: 'إدخال إضافي أ', content: 'محتوى أ' } });
+const sameDateEntryB = await alice.call('/api/journal', { method: 'POST', body: { entryDate: today, title: 'إدخال إضافي ب', content: 'محتوى ب' } });
+const expectedJournalIds = new Set([entryId, sameDateEntryA.json?.id, sameDateEntryB.json?.id]);
+const pagedJournalIds = [];
+let journalCursor = null;
+do {
+  const query = new URLSearchParams({ limit: '1' });
+  if (journalCursor) query.set('before', journalCursor);
+  const journalPage = await alice.call(`/api/journal?${query}`);
+  if (journalPage.json?.entries?.[0]?.id) pagedJournalIds.push(journalPage.json.entries[0].id);
+  journalCursor = journalPage.json?.nextCursor ?? null;
+} while (journalCursor && pagedJournalIds.length < 5);
+check('journal cursor pagination includes every same-date entry once', pagedJournalIds.length === 3 && new Set(pagedJournalIds).size === 3 && pagedJournalIds.every((id) => expectedJournalIds.has(id)));
 
 /* ---- focus duration cannot be inflated ------------------------------- */
 const focus = await alice.call('/api/focus/start', { method: 'POST', body: { mode: 'pomodoro', plannedSeconds: 1500 } });
 check('focus session starts', focus.status === 201);
-const finished = await alice.call(`/api/focus/${focus.json?.id}/finish`, { method: 'POST', body: { actualSeconds: 14400, completed: true } });
+const replacementFocus = await alice.call('/api/focus/start', { method: 'POST', body: { mode: 'pomodoro', plannedSeconds: 1500 } });
+check('a second focus session starts', replacementFocus.status === 201);
+const interruptedFocus = (await alice.call('/api/focus')).json?.find((session) => session.id === focus.json?.id);
+check('replaced focus session ends as interrupted', Boolean(interruptedFocus?.endedAt) && interruptedFocus?.isCompleted === false);
+const finished = await alice.call(`/api/focus/${replacementFocus.json?.id}/finish`, { method: 'POST', body: { actualSeconds: 14400, completed: true } });
 check('claimed duration is clamped to wall-clock time', (finished.json?.actualSeconds ?? 999) <= 10, `actualSeconds ${finished.json?.actualSeconds}`);
-check('finishing twice is 404', (await alice.call(`/api/focus/${focus.json?.id}/finish`, { method: 'POST', body: { actualSeconds: 1, completed: true } })).status === 404);
+check('finishing twice is 404', (await alice.call(`/api/focus/${replacementFocus.json?.id}/finish`, { method: 'POST', body: { actualSeconds: 1, completed: true } })).status === 404);
+const simultaneousStarts = await Promise.all([
+  alice.call('/api/focus/start', { method: 'POST', body: { mode: 'pomodoro', plannedSeconds: 1500 } }),
+  alice.call('/api/focus/start', { method: 'POST', body: { mode: 'pomodoro', plannedSeconds: 1500 } }),
+]);
+const afterConcurrentStarts = (await alice.call('/api/focus')).json ?? [];
+check('concurrent starts leave at most one active session', afterConcurrentStarts.filter((session) => !session.endedAt && !session.isCompleted).length === 1 && simultaneousStarts.every((result) => result.status === 201 || result.status === 409));
 
 /* ---- login, enumeration and logout ----------------------------------- */
 const wrongPassword = await anon.call('/api/auth/login', { method: 'POST', body: { email: aliceEmail, password: 'wrong-password-here' } });

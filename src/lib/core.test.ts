@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addDays, AR_LOCALE, filterTaskIds, formatArDate, formatArNumber, formatClock, getHabitStreak, getRemainingSeconds, getWeekStart, localDateKey } from './core';
+import { addDays, AR_LOCALE, filterTaskIds, formatArDate, formatArNumber, formatClock, getHabitStreak, getRemainingSeconds, getWeekStart, localDateKey, normalizeHabitTarget } from './core';
 
 test('clock timer uses elapsed time rather than ticking intervals', () => {
   assert.equal(getRemainingSeconds(1_000, 1_500, 0, 31_000), 1_470);
@@ -13,6 +13,12 @@ test('date helpers format local dates and move calendar days', () => {
   assert.equal(localDateKey(date), '2025-01-31');
   assert.equal(localDateKey(addDays(date, 1)), '2025-02-01');
   assert.equal(getWeekStart(new Date(2025, 0, 8, 12)).getDay(), 6); // Saturday (§8.7)
+});
+
+test('check-in habits always have a target of one', () => {
+  assert.equal(normalizeHabitTarget('check', 30), 1);
+  assert.equal(normalizeHabitTarget('quantity', 30), 30);
+  assert.equal(normalizeHabitTarget('duration', 25), 25);
 });
 
 test('habit streaks require meeting the target and allow today to remain unfinished', () => {

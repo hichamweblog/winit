@@ -1,5 +1,7 @@
 # Winit — UI/UX, logic, journey, and phone usability review
 
+> Historical review from 6 November 2026. It records the project state at that time, when it used SQLite; the project later moved to Supabase/PostgreSQL. Findings and deployment assumptions below are historical, not current-state guidance.
+
 **Review date:** 6 November 2026  
 **Scope:** the Arabic RTL productivity app in this repository, including the Journaling feature added in this work.  
 **Review type:** source walkthrough, responsive-CSS review, production build/typecheck/tests, and HTTP/API smoke tests. This is not a device-lab or assistive-technology certification.

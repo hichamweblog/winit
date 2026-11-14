@@ -1,5 +1,7 @@
 # Winit — Production-Readiness Review & Improvement Plan
 
+> Historical review from 7 November 2026. It records the project state at that time, when it used SQLite; the project later moved to Supabase/PostgreSQL. Findings and deployment assumptions below are historical, not current-state guidance.
+
 **Review date:** 7 November 2026  
 **Reviewed commit:** `f6bbc52dacf16931f6ab490a1e890f7c4e66e7b2`  
 **Scope:** UI, UX, Arabic RTL/responsive behavior, accessibility, domain logic, API, persistence, security/privacy, and release operations.  

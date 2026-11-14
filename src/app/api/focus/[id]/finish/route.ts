@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
+import { z } from 'zod';
 import { db } from '@/db';
 import { focusSessions } from '@/db/schema';
 import { ApiError, json, readJson, withApi } from '@/lib/server/http';
@@ -10,6 +11,15 @@ import { guardMutation, stamp } from '@/lib/server/api-helpers';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const focusFinishRequest = focusFinishInput.extend({
+  actualSeconds: z.number().int().min(0).max(2_147_483_647),
+});
+
+function focusActualSeconds(reportedSeconds: number, startedAt: Date, now = Date.now()) {
+  const elapsed = Math.max(0, Math.floor((now - startedAt.getTime()) / 1000) + 5);
+  return Math.min(reportedSeconds, elapsed);
+}
+
 export const POST = withApi<{ id: string }>('focus.finish', async (request: NextRequest, { params }) => {
   const { id: sessionId } = await params;
   const identity = await requireIdentity(request);
@@ -17,23 +27,20 @@ export const POST = withApi<{ id: string }>('focus.finish', async (request: Next
   const ws = identity.workspaceId;
   const uid = identity.userId;
 
-  const input = await readJson(request, focusFinishInput);
+  const input = await readJson(request, focusFinishRequest);
   const [existing] = await db
     .select()
     .from(focusSessions)
     .where(and(eq(focusSessions.id, sessionId), eq(focusSessions.workspaceId, ws)));
 
-  if (!existing || existing.isCompleted) {
+  if (!existing || existing.isCompleted || existing.endedAt) {
     throw new ApiError(404, 'جلسة التركيز غير موجودة أو منتهية', 'not_found');
   }
   if (existing.userId !== uid) {
     throw new ApiError(403, 'غير مصرح بإنهاء هذه الجلسة', 'forbidden');
   }
 
-  // Never trust a client-reported duration beyond the wall-clock elapsed time
-  // (plus a small grace for clock skew and a paused tab).
-  const elapsed = Math.max(0, Math.floor((Date.now() - existing.startedAt.getTime()) / 1000)) + 5;
-  const actualSeconds = Math.min(input.actualSeconds, elapsed, 4 * 3600);
+  const actualSeconds = focusActualSeconds(input.actualSeconds, existing.startedAt);
 
   const [session] = await db
     .update(focusSessions)
@@ -49,6 +56,7 @@ export const POST = withApi<{ id: string }>('focus.finish', async (request: Next
         eq(focusSessions.workspaceId, ws),
         eq(focusSessions.userId, uid),
         eq(focusSessions.isCompleted, false),
+        isNull(focusSessions.endedAt),
       ),
     )
     .returning();

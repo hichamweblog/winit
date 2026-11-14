@@ -10,6 +10,7 @@ export type TaskModalProps = {
   projects: Project[];
   selectedProject: string | null;
   today: string;
+  initialDueDate?: string;
   task: Task | null;
   onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -20,6 +21,7 @@ export function TaskModal({
   projects,
   selectedProject,
   today,
+  initialDueDate,
   task,
   onClose,
   onSubmit,
@@ -29,7 +31,7 @@ export function TaskModal({
   const [notes, setNotes] = useState(task?.notes ?? '');
   const [projectId, setProjectId] = useState(task?.projectId ?? selectedProject ?? '');
   const [priority, setPriority] = useState(task?.priority ?? 'none');
-  const [dueDate, setDueDate] = useState(task?.dueDate ?? (selectedProject ? '' : today));
+  const [dueDate, setDueDate] = useState(task?.dueDate ?? initialDueDate ?? (selectedProject ? '' : today));
   const [estimatedPomodoros, setEstimatedPomodoros] = useState(String(task?.estimatedPomodoros ?? 1));
   const [tags, setTags] = useState(task?.tags ?? '');
   const [status, setStatus] = useState(task?.status ?? 'todo');
@@ -39,7 +41,7 @@ export function TaskModal({
     notes !== (task?.notes ?? '') ||
     projectId !== (task?.projectId ?? selectedProject ?? '') ||
     priority !== (task?.priority ?? 'none') ||
-    dueDate !== (task?.dueDate ?? (selectedProject ? '' : today)) ||
+    dueDate !== (task?.dueDate ?? initialDueDate ?? (selectedProject ? '' : today)) ||
     estimatedPomodoros !== String(task?.estimatedPomodoros ?? 1) ||
     tags !== (task?.tags ?? '') ||
     (task ? status !== task.status : false);
@@ -87,7 +89,9 @@ export function TaskModal({
             <X size={18} />
           </button>
         </div>
+        <label className="sr-only" htmlFor="task-title">عنوان المهمة</label>
         <input
+          id="task-title"
           className="task-title-input"
           dir="auto"
           autoFocus
@@ -98,7 +102,9 @@ export function TaskModal({
           maxLength={240}
           required
         />
+        <label className="sr-only" htmlFor="task-notes">ملاحظات المهمة</label>
         <textarea
+          id="task-notes"
           className="task-notes-input"
           dir="auto"
           name="notes"

@@ -12,7 +12,7 @@ import {
 } from './icons';
 
 export type JournalInput = Pick<JournalEntry, 'entryDate' | 'content'> & Pick<JournalEntry, 'title' | 'mood'>;
-export type JournalPage = { entries: JournalEntry[]; total: number; offset: number; limit: number };
+export type JournalPage = { entries: JournalEntry[]; total: number; offset: number; limit: number; nextCursor: string | null };
 export type View = 'today' | 'upcoming' | 'inbox' | 'all' | 'calendar' | 'habits' | 'journal' | 'stats' | 'settings';
 export type Dataset = { projects: Project[]; tasks: Task[]; habits: Habit[]; logs: Log[]; focusSessions: FocusSession[]; today: string };
 

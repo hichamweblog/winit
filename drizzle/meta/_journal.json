@@ -15,6 +15,13 @@
       "when": 1794375646520,
       "tag": "0001_hot_slapstick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794678316596,
+      "tag": "0002_icy_greymalkin",
+      "breakpoints": true
     }
   ]
 }

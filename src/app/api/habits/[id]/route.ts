@@ -5,6 +5,7 @@ import { habitLogs, habits } from '@/db/schema';
 import { json, readJson, withApi } from '@/lib/server/http';
 import { requireIdentity } from '@/lib/server/auth';
 import { habitPatch } from '@/lib/server/dto';
+import { normalizeHabitTarget } from '@/lib/core';
 import { guardMutation, notFound } from '@/lib/server/api-helpers';
 
 export const runtime = 'nodejs';
@@ -17,9 +18,20 @@ export const PATCH = withApi<{ id: string }>('habits.patch', async (request: Nex
   const ws = identity.workspaceId;
 
   const input = await readJson(request, habitPatch);
+  const [existing] = await db
+    .select()
+    .from(habits)
+    .where(and(eq(habits.id, habitId), eq(habits.workspaceId, ws)));
+  if (!existing) throw notFound('العادة');
+  const recordType = input.recordType ?? existing.recordType;
   const [habit] = await db
     .update(habits)
-    .set(input)
+    .set({
+      ...input,
+      ...(recordType === 'check'
+        ? { targetValue: normalizeHabitTarget(recordType, input.targetValue ?? existing.targetValue) }
+        : {}),
+    })
     .where(and(eq(habits.id, habitId), eq(habits.workspaceId, ws)))
     .returning();
 

@@ -14,11 +14,15 @@ export const GET = withApi('overview.get', async (request: NextRequest) => {
   const identity = await requireIdentity(request);
   const ws = identity.workspaceId;
   const today = queryDate(request, 'date', localDateKey());
-  const fromDate = queryDate(request, 'from', `${today.slice(0, 7)}-01`);
+  const requestedFromDate = queryDate(request, 'from', `${today.slice(0, 7)}-01`);
+  const minimumFromDate = shiftDays(today, -89);
+  const fromDate = requestedFromDate < minimumFromDate ? minimumFromDate : requestedFromDate;
   enforceRateLimit(request, 'read', 600, 60 * 1000);
 
   const cutoffDate = shiftDays(today, -90);
   const cutoffDateObj = new Date(`${cutoffDate}T00:00:00Z`);
+  const focusFromDate = new Date(`${shiftDays(fromDate, -1)}T00:00:00Z`);
+  const focusThroughDate = new Date(`${shiftDays(today, 2)}T00:00:00Z`);
 
   const [projectRows, taskRows, habitRows, logRows, focusRows] = await Promise.all([
     db
@@ -57,13 +61,12 @@ export const GET = withApi('overview.get', async (request: NextRequest) => {
         and(
           eq(focusSessions.workspaceId, ws),
           or(
-            eq(focusSessions.isCompleted, false),
-            gte(focusSessions.startedAt, new Date(`${cutoffDate}T00:00:00Z`)),
+            and(eq(focusSessions.isCompleted, false), isNull(focusSessions.endedAt)),
+            and(gte(focusSessions.startedAt, focusFromDate), lte(focusSessions.startedAt, focusThroughDate)),
           ),
         ),
       )
-      .orderBy(desc(focusSessions.startedAt))
-      .limit(300),
+      .orderBy(desc(focusSessions.startedAt)),
   ]);
 
   return json({

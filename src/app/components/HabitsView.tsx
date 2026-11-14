@@ -159,52 +159,45 @@ export function HabitsView({
                 onReorder(nextHabits);
               }}
             >
-              <div
-                className="habit-card-summary row-interactive"
-                tabIndex={0}
-                role="button"
-                aria-expanded={isExpanded}
-                aria-controls={`habit-details-${habit.id}`}
-                aria-label={`تفاصيل عادة ${habit.name}`}
-                onClick={() => toggleExpand(habit.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    toggleExpand(habit.id);
-                  }
-                }}
-              >
-                <div className="habit-summary-main">
-                  <span
-                    className="habit-drag-handle"
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`إعادة ترتيب عادة ${habit.name}`}
-                    title="اسحب لإعادة الترتيب (أو الأسهم)"
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => {
-                      if (e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        moveHabit(index, 'up');
-                      } else if (e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        moveHabit(index, 'down');
-                      }
-                    }}
-                  >
-                    <GripVertical size={16} />
-                  </span>
+              <div className="habit-card-summary row-interactive">
+                <button
+                  type="button"
+                  className="habit-drag-handle"
+                  aria-label={`إعادة ترتيب عادة ${habit.name}`}
+                  title="اسحب لإعادة الترتيب (أو الأسهم)"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      moveHabit(index, 'up');
+                    } else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      moveHabit(index, 'down');
+                    }
+                  }}
+                >
+                  <GripVertical size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="habit-summary-main"
+                  style={{ font: 'inherit', color: 'inherit', textAlign: 'start', padding: 0 }}
+                  aria-expanded={isExpanded}
+                  aria-controls={`habit-details-${habit.id}`}
+                  aria-label={`تفاصيل عادة ${habit.name}`}
+                  onClick={() => toggleExpand(habit.id)}
+                >
                   <span
                     className="habit-icon"
                     style={{ color: goalStyle(habit.color).onSoft, background: goalStyle(habit.color).soft }}
                   >
                     <Icon size={18} />
                   </span>
-                  <div className="habit-summary-info">
+                  <span className="habit-summary-info">
                     <strong className="habit-summary-title">
                       <bdi>{habit.name}</bdi>
                     </strong>
-                    <div className="habit-summary-meta-row">
+                    <span className="habit-summary-meta-row">
                       {done ? (
                         <span className="habit-summary-badge habit-badge-done">
                           <Check size={12} /> اكتمل هدف اليوم
@@ -224,11 +217,11 @@ export function HabitsView({
                           <Clock3 size={11} /> {habit.reminderTime}
                         </span>
                       )}
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </button>
 
-                <div className="habit-summary-side" onClick={(e) => e.stopPropagation()}>
+                <div className="habit-summary-side">
                   <RowActions className="habit-summary-actions">
                     <button
                       type="button"

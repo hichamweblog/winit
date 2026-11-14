@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { habitLogs, habits } from '@/db/schema';
-import { json, readJson, withApi } from '@/lib/server/http';
+import { ApiError, json, readJson, withApi } from '@/lib/server/http';
 import { requireIdentity } from '@/lib/server/auth';
 import { habitLogInput } from '@/lib/server/dto';
 import { guardMutation, newId, notFound, stamp } from '@/lib/server/api-helpers';
@@ -23,6 +23,9 @@ export const POST = withApi<{ id: string }>('habits.log', async (request: NextRe
     .from(habits)
     .where(and(eq(habits.id, habitId), eq(habits.workspaceId, ws)));
   if (!habit) throw notFound('العادة');
+  if (habit.recordType === 'check' && input.value > 1) {
+    throw new ApiError(400, 'قيمة العادة البسيطة يجب أن تكون 0 أو 1', 'invalid_habit_value');
+  }
 
   if (input.value === 0) {
     await db

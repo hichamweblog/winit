@@ -34,7 +34,7 @@ function toDate(key: string) {
 export default function CalendarView({ tasks, projects, today, month, setMonth, onEdit, onAdd }: {
   tasks: Task[]; projects: Project[]; today: string;
   month: Date; setMonth: (next: Date) => void;
-  onEdit: (task: Task) => void; onAdd: () => void;
+  onEdit: (task: Task) => void; onAdd: (date: string) => void;
 }) {
   const [selected, setSelected] = useState<string>(today);
 
@@ -89,7 +89,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
             {monthCount ? <><bdi>{formatArNumber(monthCount)}</bdi> مهمة في {monthLabel}</> : `لا مهام مستحقة في ${monthLabel}`}
           </p>
         </div>
-        <button className="primary-button" onClick={onAdd}><Plus size={17} />مهمة جديدة</button>
+        <button className="primary-button" onClick={() => onAdd(selected)}><Plus size={17} />مهمة جديدة</button>
       </div>
 
       <div className="calendar-layout">
@@ -180,7 +180,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
             <div className="empty-state agenda-empty">
               <b>يوم خالٍ</b>
               <span>لا مهام مستحقة. مساحة مفتوحة لما يهمّك.</span>
-              <button className="ghost-button" onClick={onAdd}><Plus size={15} />أضف مهمة</button>
+              <button className="ghost-button" onClick={() => onAdd(selected)}><Plus size={15} />أضف مهمة</button>
             </div>
           )}
         </section>

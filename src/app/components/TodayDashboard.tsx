@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import type { FocusSession, Habit, Log, Project, Task } from '@/lib/types';
 import type { View } from '../types';
 import { ArrowLeft, NotebookPen, Play, Plus, Timer } from '../icons';
@@ -64,6 +65,14 @@ export function TodayDashboard(props: DashboardProps) {
     onEditTask,
     onDeleteTask,
   } = props;
+
+  const [clockNow, setClockNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!activeSession) return;
+    setClockNow(Date.now());
+    const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [activeSession?.id]);
 
   const sorted = [...todayTasks].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
   const doneHabits = todayLogs.filter(({ habit, log }) => log && log.value >= habit.targetValue).length;
@@ -208,12 +217,14 @@ export function TodayDashboard(props: DashboardProps) {
                 {activeSession
                   ? activeSession.mode === 'stopwatch'
                     ? formatClock(
-                        Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000)
+                        Math.floor((clockNow - new Date(activeSession.startedAt).getTime()) / 1000)
                       )
                     : formatClock(
                         getRemainingSeconds(
                           new Date(activeSession.startedAt).getTime(),
-                          activeSession.plannedSeconds
+                          activeSession.plannedSeconds,
+                          0,
+                          clockNow
                         )
                       )
                   : '25:00'}

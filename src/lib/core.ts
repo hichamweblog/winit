@@ -1,4 +1,5 @@
 import type { Priority, Task } from '@/db/schema';
+import type { Habit } from './types';
 
 export const PRIORITY_ORDER: Record<Priority, number> = {
   high: 0,
@@ -6,6 +7,10 @@ export const PRIORITY_ORDER: Record<Priority, number> = {
   low: 2,
   none: 3,
 };
+
+export function normalizeHabitTarget(recordType: Habit['recordType'], targetValue: number): number {
+  return recordType === 'check' ? 1 : targetValue;
+}
 
 export function localDateKey(date = new Date()): string {
   const year = date.getFullYear();

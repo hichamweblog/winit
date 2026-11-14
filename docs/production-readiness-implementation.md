@@ -1,5 +1,7 @@
 # Implementation record — habit history, icons, and production readiness
 
+> Historical implementation record. It describes the project state before its migration from SQLite to Supabase/PostgreSQL; SQLite-specific operational notes below are not current deployment guidance.
+
 This document records the four changes requested after the Calm Sea adoption, what
 was verified, and **what is still not done**. It is the companion to
 [`production-readiness-review.md`](./production-readiness-review.md) (the gap

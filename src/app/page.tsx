@@ -58,6 +58,7 @@ function WinitApp() {
   const [selectedProject, setSelectedProjectState] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [taskInitialDueDate, setTaskInitialDueDate] = useState<string | undefined>();
   const [showHabitAdd, setShowHabitAdd] = useState(false);
   const [showProjectAdd, setShowProjectAdd] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -70,6 +71,9 @@ function WinitApp() {
   const [pomodoroMinutes, setPomodoroMinutes] = useState(25);
   const [showFocus, setShowFocus] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [mobileLayout, setMobileLayout] = useState(false);
+  const mobileMenuTrigger = useRef<HTMLElement | null>(null);
+  const sidebarRef = useRef<HTMLElement | null>(null);
   const [notice, setNotice] = useState<{ message: string; kind: 'success' | 'error' } | null>(null);
   const notify = (message: string, kind: 'success' | 'error' = 'success') => setNotice({ message, kind });
   const [focusTaskId, setFocusTaskId] = useState('');
@@ -79,6 +83,7 @@ function WinitApp() {
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [journalTotal, setJournalTotal] = useState(0);
+  const [journalNextCursor, setJournalNextCursor] = useState<string | null>(null);
   const [journalSearch, setJournalSearch] = useState('');
   const [journalQuery, setJournalQuery] = useState('');
   const [journalLoading, setJournalLoading] = useState(false);
@@ -94,19 +99,30 @@ function WinitApp() {
     url.searchParams.set('view', next);
     if (projectId) url.searchParams.set('project', projectId);
     else url.searchParams.delete('project');
-    window.history.replaceState(null, '', url);
+    if (`${url.pathname}${url.search}` !== `${window.location.pathname}${window.location.search}`) {
+      window.history.pushState(null, '', url);
+    }
   }, []);
   const setView = useCallback((next: View) => navigate(next), [navigate]);
+  const closeMobileMenu = useCallback((restoreFocus = true) => {
+    const wasOpen = mobileMenu;
+    setMobileMenu(false);
+    if (wasOpen && restoreFocus) window.requestAnimationFrame(() => mobileMenuTrigger.current?.focus());
+  }, [mobileMenu]);
+  const openMobileMenu = useCallback((trigger?: HTMLElement) => {
+    mobileMenuTrigger.current = trigger ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    setMobileMenu(true);
+  }, []);
   const switchView = useCallback((next: View, projectId: string | null = null) => {
     navigate(next, projectId);
-    setMobileMenu(false);
-  }, [navigate]);
+    closeMobileMenu();
+  }, [closeMobileMenu, navigate]);
 
   const refresh = useCallback(async (retryCount = 1) => {
     try {
       const now = new Date();
       const todayKey = localDateKey(now);
-      const fromKey = localDateKey(addDays(new Date(`${todayKey}T12:00:00`), -20));
+      const fromKey = localDateKey(addDays(new Date(`${todayKey}T12:00:00`), -89));
       const dataset = await api<Dataset>(`/api/overview?date=${encodeURIComponent(todayKey)}&from=${encodeURIComponent(fromKey)}`);
       setData(dataset);
     } catch (error) {
@@ -119,16 +135,18 @@ function WinitApp() {
     }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
-  const loadJournal = useCallback(async (offset = 0, append = false) => {
+  const loadJournal = useCallback(async (cursor: string | null = null, append = false) => {
     const requestId = ++journalRequestId.current;
     setJournalLoading(true);
     try {
-      const params = new URLSearchParams({ offset: String(offset) });
+      const params = new URLSearchParams();
+      if (cursor) params.set('before', cursor);
       if (journalQuery) params.set('q', journalQuery);
       const page = await api<JournalPage>(`/api/journal?${params}`);
       if (requestId !== journalRequestId.current) return;
       setJournalEntries((current) => append ? [...current, ...page.entries] : page.entries);
       setJournalTotal(page.total);
+      setJournalNextCursor(page.nextCursor);
     } catch (error) {
       if (requestId === journalRequestId.current) notify(error instanceof Error ? error.message : 'تعذر تحميل اليوميات', 'error');
     } finally {
@@ -153,8 +171,47 @@ function WinitApp() {
     return () => window.removeEventListener('popstate', syncRoute);
   }, []);
   useEffect(() => {
+    const media = window.matchMedia('(max-width: 1099px)');
+    const syncLayout = () => {
+      setMobileLayout(media.matches);
+      if (!media.matches) setMobileMenu(false);
+    };
+    syncLayout();
+    media.addEventListener('change', syncLayout);
+    return () => media.removeEventListener('change', syncLayout);
+  }, []);
+  useEffect(() => {
+    if (!mobileMenu || !mobileLayout) return;
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+    const focusable = () => [...sidebar.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+      .filter((node) => node.offsetParent !== null);
+    focusable()[0]?.focus();
+    const trapFocus = (event: KeyboardEvent) => {
+      if (document.querySelector('.modal-backdrop [role="dialog"], .modal-backdrop [role="alertdialog"]')) return;
+      if (event.key !== 'Tab') return;
+      const controls = focusable();
+      if (!controls.length) {
+        event.preventDefault();
+        sidebar.focus();
+        return;
+      }
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !sidebar.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !sidebar.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', trapFocus);
+    return () => document.removeEventListener('keydown', trapFocus);
+  }, [mobileMenu, mobileLayout]);
+  useEffect(() => {
     const handleGlobalKeys = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && mobileMenu) { setMobileMenu(false); return; }
+      if (event.key === 'Escape' && mobileMenu) { closeMobileMenu(); return; }
       if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey) || showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor) return;
       const target = event.target as HTMLElement | null;
       if (target?.closest('[role="dialog"]') || target?.matches('input, textarea, select, [contenteditable="true"]')) return;
@@ -162,7 +219,7 @@ function WinitApp() {
     };
     window.addEventListener('keydown', handleGlobalKeys);
     return () => window.removeEventListener('keydown', handleGlobalKeys);
-  }, [mobileMenu, showAdd, showHabitAdd, showProjectAdd, showFocus, showJournalEditor]);
+  }, [closeMobileMenu, mobileMenu, showAdd, showHabitAdd, showProjectAdd, showFocus, showJournalEditor]);
   useEffect(() => {
     const mode = document.documentElement.dataset.mode ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     setDarkMode(mode === 'dark');
@@ -219,7 +276,11 @@ function WinitApp() {
     finally { setBusy(false); }
   };
 
-  const openTaskEditor = (task: Task | null = null) => { setEditingTask(task); setShowAdd(true); };
+  const openTaskEditor = (task: Task | null = null, initialDueDate?: string) => {
+    setEditingTask(task);
+    setTaskInitialDueDate(initialDueDate);
+    setShowAdd(true);
+  };
   const deleteTask = async (taskId: string) => {
     const task = tasks.find((item) => item.id === taskId);
     const okToDelete = await confirm({
@@ -504,7 +565,8 @@ function WinitApp() {
   const finishFocus = async (completed: boolean) => {
     if (!activeSession) return;
     const elapsed = Math.max(0, Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000));
-    await mutate(`/api/focus/${activeSession.id}/finish`, 'POST', { actualSeconds: Math.min(elapsed, activeSession.plannedSeconds), completed });
+    const actualSeconds = activeSession.mode === 'pomodoro' ? Math.min(elapsed, activeSession.plannedSeconds) : elapsed;
+    await mutate(`/api/focus/${activeSession.id}/finish`, 'POST', { actualSeconds, completed });
   };
   const saveJournal = async (input: JournalInput, entryId?: string) => {
     setJournalSaving(true);
@@ -545,20 +607,31 @@ function WinitApp() {
     if (view === 'all') return active;
     return active;
   }, [tasks, view, selectedProject, today]);
+  const hasActiveModal = showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor || Boolean(confirmDialog);
 
   if (!data && notice) return <div className="app-error"><h1>تعذر فتح مساحتك.</h1><p>{notice.message}</p><button className="primary-button" onClick={() => { setNotice(null); void refresh(); }}>أعد المحاولة</button></div>;
   if (!data) return <div className="app-loading" aria-label="جارٍ تحميل مساحة العمل"><div className="loading-skeleton loading-title" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-panel" /></div>;
 
   return (
     <div className="app-shell">
-      <aside id="app-sidebar" className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`} aria-label="القائمة الرئيسية">
-        <div className="brand-row"><WinItLogo height={32} /><button className="icon-button sidebar-close" onClick={() => setMobileMenu(false)} aria-label="إغلاق القائمة"><X size={18} /></button></div>
-        <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? 'مساحة تجريبية' : auth.user?.name ?? 'حسابي'}</bdi></b><small><bdi>{auth.user?.demo ? 'مشتركة، غير خاصة' : auth.user?.email ?? 'نسخة خاصة بك'}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => void auth.signOut()} aria-label="تسجيل الخروج" title="تسجيل الخروج"><Logout size={16} /></button>}</div>
+      <aside
+        ref={sidebarRef}
+        id="app-sidebar"
+        className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}
+        aria-label="القائمة الرئيسية"
+        aria-hidden={mobileLayout && !mobileMenu ? true : undefined}
+        aria-modal={mobileLayout && mobileMenu && !hasActiveModal ? true : undefined}
+        role={mobileLayout && mobileMenu ? 'dialog' : undefined}
+        inert={mobileLayout && !mobileMenu}
+        tabIndex={-1}
+      >
+        <div className="brand-row"><WinItLogo height={32} /><button className="icon-button sidebar-close" onClick={() => closeMobileMenu()} aria-label="إغلاق القائمة"><X size={18} /></button></div>
+        <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? 'مساحة تجريبية' : auth.user?.name ?? 'حسابي'}</bdi></b><small><bdi>{auth.user?.demo ? 'مشتركة، غير خاصة' : auth.user?.email ?? 'نسخة خاصة بك'}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => { closeMobileMenu(); void auth.signOut(); }} aria-label="تسجيل الخروج" title="تسجيل الخروج"><Logout size={16} /></button>}</div>
         <nav className="main-nav" aria-label="التنقل بين الصفحات">
           {views.map((item, index) => {
             const Icon = item.icon; const active = view === item.id && !selectedProject;
-            const count = index === 0 ? todayTasks.length : index === 2 ? tasks.filter((t) => t.status !== 'completed' && !t.projectId).length : null;
-            return <button key={item.id} className={`nav-item ${active ? 'nav-active' : ''}`} onClick={() => switchView(item.id)}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{count ? <i className="nav-count">{count}</i> : null}</button>;
+                         const count = index === 0 ? todayTasks.length : index === 2 ? tasks.filter((t) => t.status !== 'completed' && !t.projectId).length : null;
+            return <button key={item.id} className={`nav-item ${active ? 'nav-active' : ''}`} onClick={() => switchView(item.id)} aria-current={active ? 'page' : undefined}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{count ? <i className="nav-count">{count}</i> : null}</button>;
           })}
         </nav>
         <div className="project-head"><div className="nav-label">المشاريع</div><button className="tiny-add" aria-label="إضافة مشروع" onClick={() => { setEditingProject(null); setShowProjectAdd(true); }}><Plus size={16} /></button></div>
@@ -648,7 +721,7 @@ function WinitApp() {
                     <ArrowDown size={11} />
                   </button>
                 </span>
-                <button className={`project-item ${active ? 'project-active' : ''}`} onClick={() => switchView('all', project.id)}>
+                <button className={`project-item ${active ? 'project-active' : ''}`} onClick={() => switchView('all', project.id)} aria-current={active ? 'page' : undefined}>
                   <span className="project-icon" style={{ color: goalStyle(project.color).onSoft, backgroundColor: goalStyle(project.color).soft }}><Icon size={14} /></span>
                   <span className="project-item-name" title={project.name}><bdi aria-hidden="true">{truncateWords(project.name)}</bdi><span className="sr-only">{project.name}</span></span>
                   <span className="project-count">{count}</span>
@@ -661,14 +734,14 @@ function WinitApp() {
         </nav>
         <div className="sidebar-bottom"><div className="sidebar-quote"><p>خطوة صغيرة كل يوم<br />تصنع طريقاً عظيماً.</p><span>استمر، أنت في الطريق الصحيح</span></div></div>
       </aside>
-      {mobileMenu && <button className="mobile-scrim" aria-label="إغلاق القائمة" onClick={() => setMobileMenu(false)} />}
+      {mobileMenu && <button className="mobile-scrim" aria-label="إغلاق القائمة" onClick={() => closeMobileMenu()} />}
 
-      <main className="main-area">
-        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="فتح القائمة" aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date" title={`${gregorianDate} الموافق ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
+      <main className="main-area" aria-hidden={mobileLayout && mobileMenu ? true : undefined} inert={mobileLayout && mobileMenu}>
+        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label="فتح القائمة" aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date" title={`${gregorianDate} الموافق ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
         <div className="page-content">
           {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
-          {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalEntries.length, true)} />}
-          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
+          {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} hasMore={journalNextCursor !== null} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalNextCursor, true)} />}
+          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
         </div>
         <footer className="app-footer"><span>مصمّم لأيامك، لا لمزيد من الضجيج.</span><span>أنجز ما يهمّك</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
@@ -678,12 +751,12 @@ function WinitApp() {
         )}
         <nav className="mobile-tabs" aria-label="التنقل الرئيسي" style={{ gridTemplateColumns: `repeat(${mobileViews.length + 1}, minmax(0, 1fr))` }}>
           {mobileViews.map((id) => { const item = mobileViewOptions.find((option) => option.id === id); if (!item) return null; const Icon = item.icon; return <button key={id} className={view === id && !selectedProject ? 'mobile-tab-active' : ''} onClick={() => switchView(id)} aria-current={view === id && !selectedProject ? 'page' : undefined}><Icon size={19} /><span>{item.label}</span></button>; })}
-          <button className={selectedProject || !mobileViews.includes(view) ? 'mobile-tab-active' : ''} onClick={() => setMobileMenu(true)} aria-label="المزيد من القوائم" aria-expanded={mobileMenu}><MoreHorizontal size={20} /><span>المزيد</span></button>
+          <button className={selectedProject || !mobileViews.includes(view) ? 'mobile-tab-active' : ''} onClick={(event) => openMobileMenu(event.currentTarget)} aria-label="المزيد من القوائم" aria-expanded={mobileMenu} aria-controls="app-sidebar" aria-current={selectedProject || !mobileViews.includes(view) ? 'page' : undefined}><MoreHorizontal size={20} /><span>المزيد</span></button>
         </nav>
       </main>
 
       {confirmDialog}
-      {showAdd && <TaskModal key={editingTask?.id ?? 'new'} projects={projects} selectedProject={selectedProject} today={today} task={editingTask} onClose={() => { setShowAdd(false); setEditingTask(null); }} onSubmit={addTask} busy={busy} />}
+      {showAdd && <TaskModal key={editingTask?.id ?? 'new'} projects={projects} selectedProject={selectedProject} today={today} initialDueDate={taskInitialDueDate} task={editingTask} onClose={() => { setShowAdd(false); setEditingTask(null); setTaskInitialDueDate(undefined); }} onSubmit={addTask} busy={busy} />}
       {showHabitAdd && <HabitModal key={editingHabit?.id ?? 'new'} habit={editingHabit} onClose={() => { setShowHabitAdd(false); setEditingHabit(null); }} onSubmit={saveHabit} busy={busy} />}
       {showProjectAdd && <ProjectModal key={editingProject?.id ?? 'new'} project={editingProject} onClose={() => { setShowProjectAdd(false); setEditingProject(null); }} onSubmit={addProject} onDelete={(target) => { setShowProjectAdd(false); setEditingProject(null); void deleteProject(target); }} busy={busy} />}
       {showJournalEditor && <JournalEditor key={editingJournal?.id ?? 'new'} entry={editingJournal} today={today} busy={journalSaving} onClose={() => setShowJournalEditor(false)} onSave={saveJournal} />}

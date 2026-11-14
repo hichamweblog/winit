@@ -5,7 +5,7 @@ import { habitLogs, habits } from '@/db/schema';
 import { enforceRateLimit, json, readJson, withApi } from '@/lib/server/http';
 import { requireIdentity } from '@/lib/server/auth';
 import { habitInput } from '@/lib/server/dto';
-import { localDateKey } from '@/lib/core';
+import { localDateKey, normalizeHabitTarget } from '@/lib/core';
 import { guardMutation, newId, queryDate } from '@/lib/server/api-helpers';
 
 export const runtime = 'nodejs';
@@ -49,7 +49,7 @@ export const POST = withApi('habits.create', async (request: NextRequest) => {
       name: input.name,
       description: input.description ?? null,
       recordType: input.recordType,
-      targetValue: input.targetValue,
+      targetValue: normalizeHabitTarget(input.recordType, input.targetValue),
       unit: input.unit ?? 'مرة',
       color: input.color ?? '#2A7A55',
       icon: input.icon ?? 'target',
