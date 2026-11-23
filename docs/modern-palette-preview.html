@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Winit · Coastal Sky + Tajawal</title>
+  <link rel="stylesheet" href="/node_modules/@fontsource/tajawal/400.css">
+  <link rel="stylesheet" href="/node_modules/@fontsource/tajawal/500.css">
+  <link rel="stylesheet" href="/node_modules/@fontsource/tajawal/700.css">
+  <style>
+    :root {
+      font-family: Tajawal, Tahoma, system-ui, sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --canvas: #F3FAFD; --surface: #FFFFFF; --surface-2: #D1F0FF;
+      --ink: #123047; --muted: #415B6C; --line: #B8D8E5;
+      --fun: #1A6DAD; --shakespeare: #46B4D2; --malibu: #7ADAF5;
+      --onahau: #D1F0FF; --colonial: #FFECBD;
+      --sidebar: #1A6DAD; --sidebar-hover: #155A91;
+      --shadow: 0 8px 24px rgba(18, 69, 106, .10);
+      color: var(--ink); background: var(--canvas);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--canvas); }
+    button { font: inherit; }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 224px minmax(0, 1fr); }
+    aside { padding: 22px 15px; color: #fff; background: var(--sidebar); display: flex; flex-direction: column; gap: 25px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 21px; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--fun); background: #fff; }
+    .workspace { padding: 12px; border: 1px solid rgba(255,255,255,.45); border-radius: 12px; color: var(--onahau); font-size: 13px; line-height: 1.5; }
+    .workspace b { display: block; color: #fff; font-size: 14px; }
+    nav { display: grid; gap: 6px; }
+    nav button { min-height: 44px; padding: 0 11px; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 9px; background: transparent; color: var(--onahau); text-align: left; font-size: 14px; }
+    nav button[aria-current="page"] { background: var(--onahau); color: #104D7B; font-weight: 700; box-shadow: inset 3px 0 0 var(--malibu); }
+    .side-note { margin-top: auto; color: var(--onahau); font-size: 12px; line-height: 1.6; }
+    main { min-width: 0; }
+    .topbar { height: 56px; padding: 0 clamp(18px, 3vw, 38px); display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 13px; }
+    .crumbs, .user { display: flex; align-items: center; gap: 9px; }
+    .user-dot { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--onahau); color: var(--ink); font-weight: 700; }
+    .content { width: min(1240px, 100%); margin: auto; padding: 30px clamp(18px, 3vw, 38px) 44px; }
+    .palette-label { margin-bottom: 16px; display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .swatches { display: inline-flex; align-items: center; gap: 0; }
+    .swatches i { width: 22px; height: 22px; border: 2px solid var(--canvas); border-radius: 50%; margin-left: -5px; }
+    .swatches i:first-child { margin-left: 0; background: var(--fun); }
+    .swatches i:nth-child(2) { background: var(--shakespeare); }
+    .swatches i:nth-child(3) { background: var(--malibu); }
+    .swatches i:nth-child(4) { background: var(--onahau); }
+    .swatches i:nth-child(5) { background: var(--colonial); }
+    .hero { padding: clamp(24px, 4vw, 40px); display: flex; align-items: end; justify-content: space-between; gap: 22px; border-radius: 18px; color: white; background: var(--fun); box-shadow: var(--shadow); }
+    .eyebrow { margin: 0 0 10px; color: var(--onahau); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+    h1 { max-width: 700px; margin: 0; font-size: clamp(28px, 4vw, 44px); line-height: 1.13; }
+    .hero-copy { margin: 11px 0 0; color: var(--onahau); font-size: 16px; }
+    .arabic-sample { width: fit-content; max-width: 100%; margin: 14px 0 0 auto; padding-top: 9px; border-top: 1px solid rgba(255,255,255,.45); color: #fff; font-size: 19px; font-weight: 700; line-height: 1.6; }
+    .cta { min-height: 46px; flex: none; padding: 0 17px; border: 0; border-radius: 10px; background: #fff; color: var(--fun); font-size: 15px; font-weight: 700; cursor: pointer; }
+    .metrics { margin: 19px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .metric { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+    .metric:nth-child(1) { background: var(--onahau); }
+    .metric:nth-child(2) { background: var(--colonial); }
+    .metric:nth-child(3) { background: var(--malibu); }
+    .metric-label { color: var(--muted); font-size: 13px; font-weight: 600; }
+    .metric strong { display: block; margin-top: 7px; color: var(--ink); font-size: clamp(22px, 2.3vw, 30px); line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .metric small { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(245px, .8fr); gap: 15px; }
+    .panel { min-width: 0; padding: 19px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); box-shadow: var(--shadow); }
+    .panel-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    h2 { margin: 0; font-size: 18px; }
+    .sub { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .select { min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 12px; }
+    .chart { width: 100%; height: 185px; margin-top: 8px; overflow: visible; }
+    .chart .gridline { stroke: var(--line); stroke-dasharray: 3 4; }
+    .chart .area { fill: color-mix(in srgb, var(--fun) 13%, transparent); }
+    .chart .line { fill: none; stroke: var(--fun); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .chart text { fill: var(--muted); font: 12px Tajawal, sans-serif; }
+    .task { min-height: 54px; display: flex; align-items: center; gap: 11px; border-top: 1px solid var(--line); font-size: 14px; }
+    .check { width: 18px; height: 18px; flex: none; border: 1.5px solid var(--muted); border-radius: 50%; }
+    .task-copy { min-width: 0; flex: 1; }
+    .task-copy b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .task-copy small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .pill { padding: 5px 9px; border-radius: 999px; background: var(--onahau); color: #104D7B; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .activity { display: grid; gap: 15px; margin-top: 17px; }
+    .activity-row { padding-left: 13px; border-left: 2px solid var(--shakespeare); color: var(--ink); font-size: 13px; line-height: 1.5; }
+    .activity-row span { display: block; color: var(--muted); font-size: 12px; }
+    .contrast-note { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: var(--onahau); color: var(--ink); font-size: 12px; line-height: 1.6; }
+    .contrast-note strong { color: var(--ink); }
+    @media (max-width: 850px) { .shell { grid-template-columns: 70px minmax(0, 1fr); } aside { align-items: center; padding-inline: 9px; } .brand-name, .workspace, nav span, .side-note { display: none; } nav button { width: 48px; justify-content: center; padding: 0; font-size: 0; } nav button[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--malibu); } .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 560px) { .shell { display: block; } aside { display: none; } .topbar { height: 50px; } .content { padding-top: 18px; } .hero { align-items: start; flex-direction: column; } .metrics { gap: 8px; } .metric { padding: 13px; } .metric strong { font-size: 22px; } .grid { gap: 10px; } .panel { padding: 15px; } .chart { height: 155px; } }
+    @media (prefers-reduced-motion: no-preference) { .cta { transition: transform .14s ease; } .cta:hover { transform: translateY(-1px); } }
+    :focus-visible { outline: 3px solid var(--colonial); outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside aria-label="Main navigation">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">W</span><span class="brand-name">winit</span></div>
+      <div class="workspace"><b>My workspace</b>Personal space · Administrator</div>
+      <nav aria-label="Main navigation">
+        <button aria-current="page"><span aria-hidden="true">▦</span><span>Today</span></button>
+        <button><span aria-hidden="true">◷</span><span>Upcoming</span></button>
+        <button><span aria-hidden="true">☷</span><span>Tasks</span></button>
+        <button><span aria-hidden="true">◇</span><span>Habits</span></button>
+        <button><span aria-hidden="true">▤</span><span>Journal</span></button>
+      </nav>
+      <div class="side-note">Small steps. Bright days.<br>Make space for what matters.</div>
+    </aside>
+    <main>
+      <header class="topbar"><div class="crumbs"><span>Winit</span><span aria-hidden="true">›</span><strong>Overview</strong></div><div class="user"><span>Demo workspace</span><span class="user-dot" aria-label="Your account">AD</span></div></header>
+      <div class="content">
+        <div class="palette-label"><span class="swatches" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>Selected palette · Fun Blue / Shakespeare / Malibu / Onahau / Colonial White</div>
+        <section class="hero" aria-labelledby="hero-title">
+          <div><p class="eyebrow">Your day, at a glance</p><h1 id="hero-title">Make room for what matters.</h1><p class="hero-copy">A short list, a steady rhythm, and time to focus.</p><p class="arabic-sample" lang="ar" dir="rtl">خطوة صغيرة كل يوم تصنع فرقًا.</p></div>
+          <button class="cta" type="button">＋&nbsp; Start focus</button>
+        </section>
+        <section class="metrics" aria-label="Your week at a glance">
+          <article class="metric"><span class="metric-label">Tasks completed</span><strong>18</strong><small>↑ 4 more than last week</small></article>
+          <article class="metric"><span class="metric-label">Focus time</span><strong>6h 20m</strong><small>↑ 12% this week</small></article>
+          <article class="metric"><span class="metric-label">Habit streak</span><strong>9 days</strong><small>Keep your rhythm going</small></article>
+          <article class="metric"><span class="metric-label">Weekly goal</span><strong>72%</strong><small>3 sessions to go</small></article>
+        </section>
+        <div class="grid">
+          <section class="panel" aria-labelledby="queue-title">
+            <div class="panel-head"><div><h2 id="queue-title">Today's focus</h2><p class="sub">A clear, friendly plan for your day</p></div><button class="select" type="button">View all</button></div>
+            <svg class="chart" viewBox="0 0 700 190" role="img" aria-label="Focus time grew steadily through the week">
+              <line class="gridline" x1="30" y1="35" x2="680" y2="35"/><line class="gridline" x1="30" y1="80" x2="680" y2="80"/><line class="gridline" x1="30" y1="125" x2="680" y2="125"/><line class="gridline" x1="30" y1="165" x2="680" y2="165"/>
+              <path class="area" d="M30 150 C80 138 105 146 145 126 S220 134 260 104 S330 115 370 90 S440 101 480 72 S560 89 600 52 S650 54 680 32 V165 H30Z"/>
+              <path class="line" d="M30 150 C80 138 105 146 145 126 S220 134 260 104 S330 115 370 90 S440 101 480 72 S560 89 600 52 S650 54 680 32"/>
+              <text x="30" y="184">MON</text><text x="135" y="184">TUE</text><text x="240" y="184">WED</text><text x="345" y="184">THU</text><text x="450" y="184">FRI</text><text x="555" y="184">SAT</text><text x="650" y="184">SUN</text>
+            </svg>
+            <div class="task"><span class="check" aria-hidden="true"></span><span class="task-copy"><b>Review the project plan</b><small>Today · 25 minutes</small></span><span class="pill">Up next</span></div>
+            <div class="task"><span class="check" aria-hidden="true"></span><span class="task-copy"><b>Read for a little while</b><small>Today · 15 minutes</small></span><span class="pill">Habit</span></div>
+            <div class="task"><span class="check" aria-hidden="true"></span><span class="task-copy"><b>Send the weekly update</b><small>Today · 10 minutes</small></span><span class="pill">Task</span></div>
+          </section>
+          <section class="panel activity-panel" aria-labelledby="activity-title">
+            <h2 id="activity-title">Recent activity</h2><p class="sub">Your momentum, at a glance</p>
+            <div class="activity"><div class="activity-row">Focus session complete<span>Project planning · 25 min ago</span></div><div class="activity-row">Daily habit checked in<span>Reading · 2 hours ago</span></div><div class="activity-row">Weekly goal updated<span>Personal goals · Yesterday</span></div></div>
+            <div class="contrast-note"><strong>Color contrast (normal text)</strong><br>Fun Blue / white: 5.48:1 · Shakespeare / ink: 5.66:1 · Malibu / ink: 8.56:1 · Onahau / ink: 11.44:1 · Colonial White / ink: 11.68:1.</div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

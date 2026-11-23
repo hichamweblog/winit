@@ -38,14 +38,12 @@ const pairs = [
   ['--toast-action', '--text', 4.5], ['--bg', '--text', 4.5],
   ['--energy-sidebar-text', '--energy-sidebar-bg', 4.5],
   ['--energy-sidebar-muted', '--energy-sidebar-bg', 4.5],
-  ['--energy-sidebar-text', '--energy-sidebar-active', 4.5],
+  ['--energy-sidebar-active-text', '--energy-sidebar-active', 4.5],
   ['--energy-sidebar-muted', '--energy-sidebar-hover', 4.5],
-  ['--energy-sidebar-accent', '--energy-sidebar-bg', 4.5],
-  ['--text', '--energy-card-violet', 4.5], ['--text', '--energy-card-coral', 4.5], ['--text', '--energy-card-mint', 4.5],
-  ['--energy-hero-text', '--energy-hero-start', 4.5],
-  ['--energy-hero-text', '--energy-hero-mid', 4.5],
-  ['--energy-hero-text', '--energy-hero-end', 4.5],
-  ['--energy-hero-muted', '--energy-hero-mid', 4.5],
+  ['--energy-sidebar-active-text', '--energy-sidebar-accent', 4.5],
+  ['--text', '--energy-card-onahau', 4.5], ['--text', '--energy-card-malibu', 4.5], ['--text', '--energy-card-colonial', 4.5],
+  ['--energy-hero-text', '--energy-hero-bg', 4.5],
+  ['--energy-hero-muted', '--energy-hero-bg', 4.5],
 ];
 for (const kind of ['success', 'warning', 'danger', 'info']) {
   pairs.push([`--${kind}-text`, `--${kind}-bg`, 4.5], [`--on-${kind}`, `--${kind}`, 4.5]);
