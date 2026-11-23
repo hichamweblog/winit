@@ -36,6 +36,16 @@ const pairs = [
   ['--accent-2-strong', '--surface', 4.5], ['--accent-2-on-soft', '--accent-2-soft', 4.5],
   ['--accent-2-line', '--bg', 3], ['--line-strong', '--bg', 3], ['--line-strong', '--surface', 3],
   ['--toast-action', '--text', 4.5], ['--bg', '--text', 4.5],
+  ['--energy-sidebar-text', '--energy-sidebar-bg', 4.5],
+  ['--energy-sidebar-muted', '--energy-sidebar-bg', 4.5],
+  ['--energy-sidebar-text', '--energy-sidebar-active', 4.5],
+  ['--energy-sidebar-muted', '--energy-sidebar-hover', 4.5],
+  ['--energy-sidebar-accent', '--energy-sidebar-bg', 4.5],
+  ['--text', '--energy-card-violet', 4.5], ['--text', '--energy-card-coral', 4.5], ['--text', '--energy-card-mint', 4.5],
+  ['--energy-hero-text', '--energy-hero-start', 4.5],
+  ['--energy-hero-text', '--energy-hero-mid', 4.5],
+  ['--energy-hero-text', '--energy-hero-end', 4.5],
+  ['--energy-hero-muted', '--energy-hero-mid', 4.5],
 ];
 for (const kind of ['success', 'warning', 'danger', 'info']) {
   pairs.push([`--${kind}-text`, `--${kind}-bg`, 4.5], [`--on-${kind}`, `--${kind}`, 4.5]);
@@ -61,6 +71,7 @@ for (const [name, values] of Object.entries(themes)) {
 const appCss = read('src/app/globals.css');
 const layout = read('src/app/layout.tsx');
 const app = read('src/app/page.tsx');
+const locale = read('src/app/locale.tsx');
 for (const [name, selector] of [['winit-energy', 'winit-energy --default'], ['winit-energy-dark', 'winit-energy-dark --prefersdark']]) {
   if (!appCss.includes(selector)) throw new Error(`DaisyUI theme registration missing: ${name}`);
   const marker = `name: "${name}";`;
@@ -70,7 +81,13 @@ for (const [name, selector] of [['winit-energy', 'winit-energy --default'], ['wi
   if (markerIndex < 0 || blockStart < 0 || blockEnd < 0) throw new Error(`DaisyUI theme definition missing: ${name}`);
   const themeBlock = appCss.slice(markerIndex + marker.length, blockEnd);
   const values = Object.fromEntries([...themeBlock.matchAll(/(--color-[\w-]+)\s*:\s*(#[0-9A-Fa-f]{6})\s*;/g)].map((match) => [match[1], match[2]]));
-  const checks = [['--color-primary-content', '--color-primary'], ['--color-secondary-content', '--color-secondary'], ['--color-base-content', '--color-base-100']];
+  const checks = [
+    ['--color-primary-content', '--color-primary'], ['--color-secondary-content', '--color-secondary'],
+    ['--color-accent-content', '--color-accent'], ['--color-neutral-content', '--color-neutral'],
+    ['--color-info-content', '--color-info'], ['--color-success-content', '--color-success'],
+    ['--color-warning-content', '--color-warning'], ['--color-error-content', '--color-error'],
+    ['--color-base-content', '--color-base-100'], ['--color-base-content', '--color-base-200'],
+  ];
   const failures = checks.flatMap(([fg, bg]) => {
     if (!values[fg] || !values[bg]) return [`${fg}/${bg}: missing DaisyUI token`];
     const actual = contrast(values[fg], values[bg]);
@@ -81,4 +98,7 @@ for (const [name, selector] of [['winit-energy', 'winit-energy --default'], ['wi
 }
 if (!layout.includes("dataset.theme=d?'winit-energy-dark':'winit-energy'")) throw new Error('DaisyUI theme is not set before first paint');
 if (!app.includes("dataset.theme = nextMode === 'dark' ? 'winit-energy-dark' : 'winit-energy'")) throw new Error('DaisyUI theme does not follow the appearance toggle');
-console.log('DaisyUI Energized theme registration and live mode switching pass');
+if (!layout.includes('document.documentElement.dataset.language=l')) throw new Error('Saved language is not exposed before first paint');
+if (!locale.includes("document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'")) throw new Error('Locale does not set the root text direction');
+if (!read('src/app/globals.css').includes(':root[data-language="en"] .sidebar { transform: translateX(-105%); }')) throw new Error('English sidebar does not open from the LTR inline-start edge');
+console.log('DaisyUI theme switching and English LTR layout checks pass');
