@@ -6,6 +6,7 @@ import { Check, Pencil, Play, Trash2 } from '../icons';
 import { DueChip, PriorityFlag, RowActions, SessionCount } from './atoms';
 import { goalStyle } from '@/lib/goals';
 import { truncateWords } from '@/lib/label';
+import { useLocale } from '../locale';
 
 export type TaskRowProps = {
   task: Task;
@@ -26,6 +27,7 @@ export const TaskRow = memo(function TaskRow({
   onEdit,
   onDelete,
 }: TaskRowProps) {
+  const { t } = useLocale();
   const isDone = task.status === 'completed';
 
   return (
@@ -39,7 +41,7 @@ export const TaskRow = memo(function TaskRow({
           e.stopPropagation();
           onComplete();
         }}
-        aria-label={isDone ? `إلغاء إكمال ${task.title}` : `إكمال ${task.title}`}
+        aria-label={`${t(isDone ? 'إلغاء إكمال' : 'إكمال')} ${task.title}`}
       >
         <Check size={13} />
       </button>
@@ -47,7 +49,7 @@ export const TaskRow = memo(function TaskRow({
         type="button"
         className="task-body"
         onClick={onEdit}
-        aria-label={`تعديل ${task.title}`}
+        aria-label={`${t('تعديل')} ${task.title}`}
       >
         <div className="task-title-line">
           <strong className="task-title">
@@ -82,8 +84,8 @@ export const TaskRow = memo(function TaskRow({
             e.stopPropagation();
             onEdit();
           }}
-          aria-label={`تعديل ${task.title}`}
-          title="تعديل"
+          aria-label={`${t('تعديل')} ${task.title}`}
+          title={t('تعديل')}
         >
           <Pencil size={14} />
         </button>
@@ -94,8 +96,8 @@ export const TaskRow = memo(function TaskRow({
             e.stopPropagation();
             onStart();
           }}
-          aria-label={`بدء التركيز على ${task.title}`}
-          title="بدء جلسة تركيز"
+          aria-label={`${t('بدء التركيز على')} ${task.title}`}
+          title={t('بدء جلسة تركيز')}
         >
           <Play size={13} />
         </button>
@@ -107,8 +109,8 @@ export const TaskRow = memo(function TaskRow({
               e.stopPropagation();
               onDelete();
             }}
-            aria-label={`حذف ${task.title}`}
-            title="حذف"
+            aria-label={`${t('حذف')} ${task.title}`}
+            title={t('حذف')}
           >
             <Trash2 size={14} />
           </button>

@@ -10,8 +10,10 @@
  */
 import { useState } from 'react';
 import { useAuth } from './AuthGate';
+import { useLocale } from '../locale';
+import PwaInstall from './PwaInstall';
 import {
-  Check, DeviceMobile, Download, Logout, Moon, Stopwatch, Sun, Trash, User,
+  Check, DeviceMobile, Download, Languages, Logout, Moon, Stopwatch, Sun, Trash, User,
 } from '../icons';
 import type { AppIcon } from '../icons';
 import { formatArNumber } from '@/lib/core';
@@ -49,6 +51,7 @@ export default function SettingsView({
   onDeleteAccount?: () => void;
 }) {
   const { user, signOut } = useAuth();
+  const { language, setLanguage, t } = useLocale();
   const [signingOut, setSigningOut] = useState(false);
 
   const toggleView = (id: string, checked: boolean) => {
@@ -60,37 +63,52 @@ export default function SettingsView({
     <section className="settings-page">
       <div className="page-title-row">
         <div>
-          <h1>الإعدادات</h1>
-          <p>كل تفضيلات التطبيق في مكان واحد. التغييرات تُحفظ فورًا.</p>
+          <h1>{t('الإعدادات')}</h1>
+          <p>{t('كل تفضيلات التطبيق في مكان واحد. التغييرات تُحفظ فورًا.')}</p>
         </div>
       </div>
 
+      <section className="panel settings-group" aria-labelledby="settings-language">
+        <h2 id="settings-language">{t('اللغة')}</h2>
+        <SettingRow icon={<Languages size={17} />} title={t('إعدادات اللغة')} description={t('اختر لغة واجهة التطبيق.')}>
+          <div className="segmented-control" role="group" aria-label={t('إعدادات اللغة')}>
+            <button type="button" className={language === 'ar' ? 'segment-active' : ''} aria-pressed={language === 'ar'} onClick={() => setLanguage('ar')}>{t('العربية')}</button>
+            <button type="button" className={language === 'en' ? 'segment-active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>English</button>
+          </div>
+        </SettingRow>
+      </section>
+
+      <section className="panel settings-group" aria-labelledby="settings-install">
+        <h2 id="settings-install">{t('التطبيق')}</h2>
+        <PwaInstall />
+      </section>
+
       <section className="panel settings-group" aria-labelledby="settings-appearance">
-        <h2 id="settings-appearance">المظهر</h2>
+        <h2 id="settings-appearance">{t('المظهر')}</h2>
         <SettingRow
           icon={darkMode ? <Moon size={17} /> : <Sun size={17} />}
-          title="المظهر الداكن"
-          description="يتبع تفضيل نظامك عند أول زيارة، ثم يحفظ اختيارك."
+          title={t('المظهر الداكن')}
+          description={t('يتبع تفضيل نظامك عند أول زيارة، ثم يحفظ اختيارك.')}
         >
           <button
             type="button"
             className="switch"
             role="switch"
             aria-checked={darkMode}
-            aria-label="المظهر الداكن"
+            aria-label={t('المظهر الداكن')}
             onClick={onToggleTheme}
           ><i /></button>
         </SettingRow>
       </section>
 
       <section className="panel settings-group" aria-labelledby="settings-focus">
-        <h2 id="settings-focus">التركيز</h2>
+        <h2 id="settings-focus">{t('التركيز')}</h2>
         <SettingRow
           icon={<Stopwatch size={17} />}
-          title="مدة جلسة التركيز"
-          description="المدة الافتراضية عند بدء جلسة بومودورو."
+          title={t('مدة جلسة التركيز')}
+          description={t('المدة الافتراضية عند بدء جلسة بومودورو.')}
         >
-          <div className="segmented-control" role="group" aria-label="مدة جلسة التركيز بالدقائق">
+          <div className="segmented-control" role="group" aria-label={t('مدة جلسة التركيز بالدقائق')}>
             {POMODORO_PRESETS.map((minutes) => (
               <button
                 key={minutes}
@@ -103,15 +121,15 @@ export default function SettingsView({
           </div>
         </SettingRow>
         {!POMODORO_PRESETS.includes(pomodoroMinutes) && (
-          <p className="setting-note">المدة الحالية <bdi>{formatArNumber(pomodoroMinutes)}</bdi> دقيقة. اختر إحدى المدد أعلاه لتغييرها.</p>
+          <p className="setting-note">{t('المدة الحالية')} <bdi>{formatArNumber(pomodoroMinutes)}</bdi> {t('دقيقة. اختر إحدى المدد أعلاه لتغييرها.')}</p>
         )}
       </section>
 
       <section className="panel settings-group" aria-labelledby="settings-nav">
-        <h2 id="settings-nav"><DeviceMobile size={16} />شريط الهاتف</h2>
-        <p className="settings-helper">اختر حتى أربعة أقسام تظهر بجانب «المزيد» في أسفل الشاشة.</p>
+        <h2 id="settings-nav"><DeviceMobile size={16} />{t('شريط الهاتف')}</h2>
+        <p className="settings-helper">{t('اختر حتى أربعة أقسام تظهر بجانب «المزيد» في أسفل الشاشة.')}</p>
         <fieldset className="nav-choice-grid">
-          <legend className="sr-only">أقسام شريط الهاتف</legend>
+          <legend className="sr-only">{t('أقسام شريط الهاتف')}</legend>
           {mobileViewOptions.map((item) => {
             const Icon = item.icon;
             const checked = mobileViews.includes(item.id);
@@ -126,51 +144,51 @@ export default function SettingsView({
                   onChange={(event) => toggleView(item.id, event.target.checked)}
                 />
                 <Icon size={17} />
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
                 <i aria-hidden="true">{checked ? <Check size={14} /> : null}</i>
               </label>
             );
           })}
         </fieldset>
-        <p className="setting-note" aria-live="polite"><bdi>{formatArNumber(mobileViews.length)}</bdi> / {formatArNumber(MAX_MOBILE_VIEWS)} أقسام</p>
+        <p className="setting-note" aria-live="polite"><bdi>{formatArNumber(mobileViews.length)}</bdi> / {formatArNumber(MAX_MOBILE_VIEWS)} {t('أقسام')}</p>
       </section>
 
       <section className="panel settings-group" aria-labelledby="settings-account">
-        <h2 id="settings-account"><User size={16} />الحساب</h2>
+        <h2 id="settings-account"><User size={16} />{t('الحساب')}</h2>
         {user ? (
           <>
-            <SettingRow icon={<User size={17} />} title={user.name || user.email} description={user.demo ? 'مساحة تجريبية مشتركة — البيانات غير خاصة.' : user.email}>
-              <span className="account-badge">{user.demo ? 'تجريبي' : 'خاص'}</span>
+            <SettingRow icon={<User size={17} />} title={user.name || user.email} description={user.demo ? t('مساحة تجريبية مشتركة — البيانات غير خاصة.') : user.email}>
+              <span className="account-badge">{user.demo ? t('تجريبي') : t('خاص')}</span>
             </SettingRow>
             {!user.demo && (
-              <SettingRow icon={<Logout size={17} />} title="تسجيل الخروج" description="سيُطلب منك تسجيل الدخول في المرة القادمة.">
+              <SettingRow icon={<Logout size={17} />} title={t('تسجيل الخروج')} description={t('سيُطلب منك تسجيل الدخول في المرة القادمة.')}>
                 <button
                   className="danger-button"
                   disabled={signingOut}
                   onClick={async () => { setSigningOut(true); try { await signOut(); } finally { setSigningOut(false); } }}
-                >{signingOut ? 'جارٍ الخروج…' : 'تسجيل الخروج'}</button>
+                >{signingOut ? t('جارٍ الخروج…') : t('تسجيل الخروج')}</button>
               </SettingRow>
             )}
             {!user.demo && onExportData && (
-              <SettingRow icon={<Download size={17} />} title="تصدير البيانات" description="تنزيل نسخة كاملة من بياناتك بصيغة JSON (متوافق مع GDPR).">
+              <SettingRow icon={<Download size={17} />} title={t('تصدير البيانات')} description={t('تنزيل نسخة كاملة من بياناتك بصيغة JSON (متوافق مع GDPR).')}>
                 <button
                   type="button"
                   className="ghost-button"
                   onClick={onExportData}
-                >تصدير JSON</button>
+                >{t('تصدير JSON')}</button>
               </SettingRow>
             )}
             {!user.demo && onDeleteAccount && (
-              <SettingRow icon={<Trash size={17} />} title="حذف الحساب" description="حذف حسابك نهائياً وكافة بياناتك ومساحتك دون إمكانية استرجاع.">
+              <SettingRow icon={<Trash size={17} />} title={t('حذف الحساب')} description={t('حذف حسابك نهائياً وكافة بياناتك ومساحتك دون إمكانية استرجاع.') }>
                 <button
                   type="button"
                   className="danger-button"
                   onClick={onDeleteAccount}
-                >حذف الحساب</button>
+                >{t('حذف الحساب')}</button>
               </SettingRow>
             )}
           </>
-        ) : <p className="panel-empty">لا توجد جلسة نشطة.</p>}
+        ) : <p className="panel-empty">{t('لا توجد جلسة نشطة.')}</p>}
       </section>
     </section>
   );

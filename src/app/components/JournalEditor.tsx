@@ -5,9 +5,9 @@ import type { JournalEntry, JournalMood } from '@/lib/types';
 import type { JournalInput } from '../types';
 import { journalMoods } from '../types';
 import { NotebookPen, X } from '../icons';
-import { formatArNumber } from '@/lib/core';
 import { useConfirm } from './ConfirmDialog';
 import useDialogFocus from './useDialogFocus';
+import { useLocale } from '../locale';
 
 export type JournalEditorProps = {
   entry: JournalEntry | null;
@@ -18,6 +18,8 @@ export type JournalEditorProps = {
 };
 
 export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEditorProps) {
+  const { language, t } = useLocale();
+  const formatNumber = (value: number) => new Intl.NumberFormat(language === 'en' ? 'en' : 'ar-u-nu-latn').format(value);
   const [title, setTitle] = useState(entry?.title ?? '');
   const [content, setContent] = useState(entry?.content ?? '');
   const [entryDate, setEntryDate] = useState(entry?.entryDate ?? today);
@@ -35,10 +37,10 @@ export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEd
     if (busy) return;
     if (dirty) {
       const discard = await confirm({
-        title: 'تغييرات غير محفوظة',
-        message: 'لديك تغييرات لم تُحفظ في هذه التدوينة. إن أغلقت المحرر الآن ستفقد ما كتبته.',
-        confirmLabel: 'أغلق دون حفظ',
-        cancelLabel: 'تابع التحرير',
+        title: t('تغييرات غير محفوظة'),
+        message: t('لديك تغييرات لم تُحفظ في هذه التدوينة. إن أغلقت المحرر الآن ستفقد ما كتبته.'),
+        confirmLabel: t('أغلق دون حفظ'),
+        cancelLabel: t('تابع التحرير'),
       });
       if (!discard) return;
     }
@@ -74,13 +76,13 @@ export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEd
           <span className="modal-icon">
             <NotebookPen size={17} />
           </span>
-          <span id="journal-editor-heading">{entry ? 'تعديل التدوينة' : 'تدوينة جديدة'}</span>
-          <button type="button" className="icon-button" onClick={close} aria-label="إغلاق المحرر" disabled={busy}>
+          <span id="journal-editor-heading">{entry ? t('تعديل التدوينة') : t('تدوينة جديدة')}</span>
+          <button type="button" className="icon-button" onClick={close} aria-label={t('إغلاق المحرر')} disabled={busy}>
             <X size={18} />
           </button>
         </div>
         <label className="journal-field-label" htmlFor="journal-title">
-          عنوان اختياري
+          {t('عنوان اختياري')}
         </label>
         <input
           id="journal-title"
@@ -90,11 +92,11 @@ export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEd
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           maxLength={120}
-          placeholder="كلمة تلخّص يومك"
+          placeholder={t('كلمة تلخّص يومك')}
         />
         <div className="journal-date-field">
           <label className="journal-field-label" htmlFor="journal-date">
-            تاريخ التدوينة
+            {t('تاريخ التدوينة')}
           </label>
           <input
             id="journal-date"
@@ -106,7 +108,7 @@ export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEd
         </div>
         <fieldset className="journal-mood-field">
           <legend>
-            كيف كان شعورك؟ <span>اختياري</span>
+            {t('كيف كان شعورك؟')} <span>{t('اختياري')}</span>
           </legend>
           <div className="journal-mood-options">
             {journalMoods.map((option) => (
@@ -117,13 +119,13 @@ export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEd
                 aria-pressed={mood === option.id}
                 onClick={() => setMood(mood === option.id ? null : option.id)}
               >
-                {option.label}
+                {t(option.label)}
               </button>
             ))}
           </div>
         </fieldset>
         <label className="journal-field-label" htmlFor="journal-content">
-          ما الذي تود تدوينه؟
+          {t('ما الذي تود تدوينه؟')}
         </label>
         <textarea
           id="journal-content"
@@ -133,14 +135,14 @@ export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEd
           onChange={(event) => setContent(event.target.value)}
           maxLength={20000}
           required
-          placeholder="اكتب بحرية. لا تحتاج إلى صياغة مثالية…"
+          placeholder={t('اكتب بحرية. لا تحتاج إلى صياغة مثالية…')}
         />
         <div className="journal-editor-foot">
           <span>
-            {formatArNumber(content.length)} / {formatArNumber(20000)} حرف
+            {formatNumber(content.length)} / {formatNumber(20000)} {t('حرف')}
           </span>
           <button className="primary-button" type="submit" disabled={busy || !content.trim()}>
-            {busy ? 'جارٍ الحفظ…' : 'حفظ التدوينة'}
+            {busy ? t('جارٍ الحفظ…') : t('حفظ التدوينة')}
           </button>
         </div>
       </form>

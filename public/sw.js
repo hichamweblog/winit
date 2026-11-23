@@ -1,62 +1,57 @@
-/**
- * Winit PWA Service Worker
- * Provides offline resilience for static assets and enables PWA installation.
- */
-const CACHE_NAME = 'winit-v2';
+/* Winit PWA worker: cache the public app shell only, never account/API responses. */
+const CACHE_NAME = 'winit-shell-v3';
 const PRECACHE_ASSETS = [
-  '/',
-  '/manifest.json',
+  '/offline.html',
   '/favicon.ico',
   '/favicon.svg',
   '/icon-192.png',
   '/icon-512.png',
+  '/icon-maskable-192.png',
+  '/icon-maskable-512.png',
   '/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS)).then(() => self.skipWaiting()),
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(PRECACHE_ASSETS))
+      .then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(
-        names.filter((n) => n.startsWith('winit-') && n !== CACHE_NAME).map((n) => caches.delete(n))
-      )
-    ).then(() => self.clients.claim()),
+    caches.keys()
+      .then((names) => Promise.all(names
+        .filter((name) => name.startsWith('winit-') && name !== CACHE_NAME)
+        .map((name) => caches.delete(name))))
+      .then(() => self.clients.claim()),
   );
 });
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
-  // Never intercept or cache API requests, auth endpoints, or non-GET requests
-  if (request.method !== 'GET' || url.pathname.startsWith('/api/')) {
+  // Navigations are network-only to avoid serving a stale or previously
+  // authenticated page to another person using this device offline.
+  if (request.mode === 'navigate') {
+    event.respondWith(fetch(request).catch(async () =>
+      (await caches.match('/offline.html')) || new Response('Offline', { status: 503 }),
+    ));
     return;
   }
 
-  // Network-first strategy with cache fallback
-  event.respondWith(
-    fetch(request)
-      .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
-        return networkResponse;
-      })
-      .catch(async () => {
-        const cached = await caches.match(request);
-        if (cached) return cached;
-        // If navigation request fails, return cached root page
-        if (request.mode === 'navigate') {
-          const home = await caches.match('/');
-          if (home) return home;
-        }
-        return new Response('Offline', { status: 503, statusText: 'Offline' });
-      }),
-  );
+  // Only cache fingerprinted Next assets and public app icons. Never cache
+  // arbitrary HTML, user-specific responses, or API payloads.
+  if (url.pathname.startsWith('/_next/static/') || /^\/(?:icon|favicon|apple-touch-icon)/.test(url.pathname)) {
+    event.respondWith(caches.match(request).then((cached) => cached || fetch(request).then((response) => {
+      if (response.ok && response.type === 'basic') {
+        const copy = response.clone();
+        void caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+      }
+      return response;
+    })));
+  }
 });

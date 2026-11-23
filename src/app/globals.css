@@ -3,7 +3,12 @@
  * signature: today's task queue and live focus timer · states: loading, empty, error, full · contrast: both modes · v3.0.0 */
 /* Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4 · weakest: S, lead with the real task queue instead of a greeting over stat cards */
 @import "tailwindcss";
+@import "@fontsource/el-messiri/arabic.css";
+@import "@fontsource/el-messiri/latin.css";
+@import "@fontsource-variable/readex-pro/wght.css";
+@import "@fontsource/noto-naskh-arabic/arabic.css";
 @import "./tokens.css";
+@import "./vibes.css";
 @import "./base.css" layer(base);
 
 :root { --font-ar: var(--font-small); }
@@ -216,7 +221,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .habit-log-editor input { width: 60px; min-height: 40px; padding-inline: var(--space-2xs); border: 1px solid var(--color-edge); border-radius: 6px; text-align: center; direction: ltr; font: var(--text-ui)/var(--lh-ui) var(--font-ui); font-variant-numeric: tabular-nums; }
 .habit-log-editor > span { color: var(--color-ink-2); font-size: var(--text-small); }
 
-.modal-backdrop { position: fixed; z-index: var(--z-modal); inset: 0; padding: var(--space-xs); display: grid; align-items: end; background: var(--scrim); }
+.modal-backdrop { position: fixed; z-index: var(--z-modal); inset: 0; padding: var(--space-xs); display: grid; justify-items: center; align-items: end; background: var(--scrim); }
 .task-modal, .focus-modal { width: 100%; max-height: 90dvh; overflow-y: auto; padding: var(--space-6); color: var(--text); background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-xl) var(--radius-xl) 0 0; box-shadow: var(--shadow-3); }
 .modal-topline { min-height: 44px; display: flex; align-items: center; gap: var(--space-xs); color: var(--color-ink); font-size: var(--text-ui); font-weight: 600; border-block-end: 1px solid var(--color-rule); }
 .modal-topline .icon-button { margin-inline-start: auto; }
@@ -236,6 +241,17 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 
 .habit-modal .modal-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .focus-modal { align-self: center; max-width: 420px; }
+.focus-modal-live { max-width: 560px; }
+.focus-live-content { padding-block: clamp(24px, 5vh, 52px); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.focus-live-state { display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--accent); font-size: var(--text-ui); font-weight: 700; }
+.focus-live-state i { width: 9px; height: 9px; background: var(--success); border-radius: 50%; box-shadow: 0 0 0 5px color-mix(in srgb, var(--success) 16%, transparent); }
+.focus-live-clock { margin-block: var(--space-sm); color: var(--accent); font: 700 clamp(3.5rem, 14vw, 6rem)/1 var(--font-ui); font-variant-numeric: tabular-nums; direction: ltr; }
+.focus-live-label { color: var(--text-muted); font-size: var(--text-small); }
+.focus-live-content h1 { max-width: 100%; margin-block-start: var(--space-lg); font-size: var(--text-h2); overflow-wrap: anywhere; }
+.focus-live-content p { margin-block-start: var(--space-2xs); color: var(--text-muted); }
+.focus-live-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--space-xs); }
+.focus-live-actions > button { min-height: 48px; }
+@media (max-width: 560px) { .focus-live-actions { display: grid; grid-template-columns: 1fr 1fr; } .focus-live-actions .ghost-button { grid-column: 1 / -1; } }
 .focus-modal-timer { padding-block: var(--space-lg); display: grid; place-items: center; }
 .modal-timer-ring { position: relative; width: 220px; aspect-ratio: 1; display: grid; place-items: center; color: var(--accent); }
 .timer-ring { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -258,6 +274,8 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .dock-timer { min-width: 6ch; text-align: center; color: var(--color-ink); font: 600 var(--text-body)/var(--lh-body) var(--font-ui); font-variant-numeric: tabular-nums; direction: ltr; }
 .dock-stop, .dock-done { min-width: 44px; min-height: 44px; padding-inline: var(--space-xs); display: flex; align-items: center; justify-content: center; gap: var(--space-2xs); color: var(--color-ink-2); border-radius: 7px; font-size: var(--text-small); white-space: nowrap; }
 .dock-done { color: var(--color-accent-strong); }
+.dock-expand { min-width: 40px; min-height: 40px; display: grid; place-items: center; color: var(--accent); border: 1px solid var(--line); border-radius: var(--radius-full); }
+.dock-expand:hover { background: var(--accent-soft); }
 .toast { position: fixed; z-index: var(--z-toast); inset-inline: 0; margin-inline: auto; width: max-content; max-width: calc(100% - 24px); inset-block-end: calc(132px + env(safe-area-inset-bottom)); min-height: 48px; padding: var(--space-xs) var(--space-sm); display: flex; align-items: center; justify-content: space-between; gap: var(--space-xs); color: var(--bg); background: var(--text); border: 0; border-radius: var(--radius-md); box-shadow: var(--shadow-2); font-size: var(--text-ui); }
 .toast-error { color: var(--bg); background: var(--danger); }
 .toast-error .toast-action { color: var(--on-danger); }
@@ -320,7 +338,9 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   .focus-dock { gap: var(--space-2xs); padding-inline: var(--space-2xs); }
   .top-avatar { display: none; }
   .dock-stop { min-width: 40px; padding-inline: var(--space-2xs); }
-  .dock-title { max-width: 90px; }
+  .dock-title { max-width: 54px; }
+  .dock-live { min-width: 22px; padding-inline: 6px; font-size: 0; }
+  .dock-expand { min-width: 36px; min-height: 36px; }
 }
 
 /* §3.3 rule 3: chrome uses Readex Pro. --font-small now aliases --font-ui,
@@ -403,6 +423,25 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .project-item-row .project-item { min-width: 0; flex: 1; }
 .project-item-name { min-width: 0; overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
 .project-target { margin-block-start: var(--space-xs); display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--color-accent-strong); font-family: var(--font-ui); font-size: var(--text-small); }
+.project-layout-switch { min-height: 44px; padding: 3px; display: inline-flex; align-items: center; gap: 2px; background: var(--color-paper-2); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.project-layout-switch button { min-height: 36px; padding-inline: var(--space-xs); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2xs); color: var(--color-ink-2); border-radius: 8px; font-size: var(--text-small); white-space: nowrap; }
+.project-layout-switch .project-layout-active { color: var(--accent); background: var(--color-paper); box-shadow: var(--shadow-1); font-weight: 700; }
+.kanban-board { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: var(--space-sm); overflow-x: auto; padding-block-end: var(--space-xs); scroll-snap-type: x proximity; }
+.kanban-column { min-width: 0; min-height: 360px; padding: var(--space-xs); background: color-mix(in srgb, var(--accent) 4%, var(--color-paper-2)); border: 1px solid var(--line); border-radius: var(--radius-lg); transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); scroll-snap-align: start; }
+.kanban-column:nth-child(2) { background: color-mix(in srgb, var(--info) 5%, var(--color-paper-2)); }
+.kanban-column:nth-child(3) { background: color-mix(in srgb, var(--success) 5%, var(--color-paper-2)); }
+.kanban-column-over { background: color-mix(in srgb, var(--accent) 12%, var(--color-paper-2)); border-color: var(--accent); }
+.kanban-column-head { min-height: 42px; margin-block-end: var(--space-xs); padding-inline: var(--space-2xs); display: flex; align-items: center; justify-content: space-between; gap: var(--space-xs); }
+.kanban-column-head h2 { margin: 0; font-size: var(--text-ui); font-weight: 700; }
+.kanban-cards { display: flex; flex-direction: column; gap: var(--space-xs); }
+.kanban-card { min-width: 0; padding: var(--space-2xs); background: var(--color-paper); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-1); cursor: grab; }
+.kanban-card:active { cursor: grabbing; }
+.kanban-card-dragging { opacity: .48; }
+.kanban-card .task-row { border-block-end: 0; }
+.kanban-move-control { margin-block-start: var(--space-2xs); padding-block-start: var(--space-2xs); display: flex; align-items: center; justify-content: space-between; gap: var(--space-2xs); border-block-start: 1px solid var(--line); color: var(--color-ink-2); font-size: var(--text-small); }
+.kanban-move-control select { min-height: 36px; max-width: 60%; padding-inline: var(--space-2xs); border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; }
+.kanban-column-empty { min-height: 92px; margin: 0; display: grid; place-items: center; color: var(--text-muted); border: 1px dashed var(--line-strong); border-radius: var(--radius-md); font-size: var(--text-small); }
+@media (max-width: 850px) { .kanban-board { grid-template-columns: repeat(3, minmax(260px, 82vw)); } .project-layout-switch button { min-width: 42px; } }
 .project-manage { width: 36px; height: 36px; display: grid; place-items: center; flex: none; color: var(--color-muted); border-radius: 8px; }
 .project-manage:hover, .project-manage:focus-visible { color: var(--color-accent-strong); background: var(--color-paper-2); }
 .project-remove:hover, .project-remove:focus-visible { color: var(--color-error); }
@@ -776,6 +815,9 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   align-items: center;
   margin-block-end: var(--space-4);
 }
+.auth-language-picker { margin-block-end: var(--space-3); display: flex; justify-content: flex-end; gap: var(--space-1); }
+.auth-language-picker button { min-width: 42px; min-height: 36px; padding-inline: var(--space-2); color: var(--text-muted); border: 1px solid var(--line); border-radius: var(--radius-full); font-size: var(--text-small); }
+.auth-language-picker button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
 .auth-card h1 { margin: 0 0 var(--space-2); font: 700 var(--text-h1)/var(--lh-h1) var(--font-display); color: var(--text); }
 .auth-lede { margin: 0 0 var(--space-5); color: var(--text-muted); font-size: var(--text-ui); line-height: var(--lh-body); }
 .auth-field { display: block; margin-block-end: var(--space-4); }
@@ -1050,6 +1092,15 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .setting-copy span { color: var(--color-ink-2); font-size: var(--text-small); }
 .setting-control { flex: none; margin-inline-start: auto; }
 .setting-note { margin: 0; color: var(--text-muted); font-size: var(--text-small); }
+.pwa-install-row { display: flex; align-items: center; gap: var(--space-sm); padding-block: var(--space-xs); border-block-start: 1px solid var(--color-rule); }
+.pwa-install-row .setting-copy { flex: 1 1 220px; min-inline-size: 0; }
+.pwa-install-help { color: var(--text-muted) !important; }
+.pwa-install-button { flex: none; min-block-size: 44px; white-space: nowrap; }
+@media (max-width: 560px) {
+  .pwa-install-row { align-items: flex-start; flex-wrap: wrap; }
+  .pwa-install-row .setting-icon { margin-block-start: 2px; }
+  .pwa-install-button { margin-inline-start: calc(34px + var(--space-sm)); }
+}
 .account-badge { padding: var(--space-3xs) var(--space-xs); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--color-accent-ink); font-size: var(--text-micro); }
 .ghost-button.danger-button { color: var(--danger-text); background: var(--danger-bg); }
 .ghost-button.danger-button:hover:not(:disabled) { background: var(--danger); color: var(--on-danger); }

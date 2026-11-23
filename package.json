@@ -20,12 +20,15 @@
     "sessions:purge": "tsx src/db/purge-sessions.ts",
     "test": "tsx --test src/lib/*.test.ts src/lib/server/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "test:design": "node scripts/design-system-gate.mjs",
+    "test:design": "node scripts/design-system-gate.mjs && node scripts/energized-palette-gate.mjs && node scripts/pwa-gate.mjs",
     "check": "npm run typecheck && npm test && npm run test:design",
     "test:api": "node scripts/api-smoke.mjs",
     "db:clean-demo": "node scripts/clean-demo.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/readex-pro": "^5.3.0",
+    "@fontsource/el-messiri": "^5.3.0",
+    "@fontsource/noto-naskh-arabic": "^5.3.0",
     "@tabler/icons-react": "^3.50.0",
     "drizzle-orm": "^0.45.4",
     "next": "15.5.29",

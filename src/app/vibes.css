@@ -1,0 +1,106 @@
+/* Winit Energized palette: electric violet + coral + cool lavender.
+   Added as a semantic theme layer so the audited Calm Sea token set remains
+   available as the reference while the product ships with a brighter identity. */
+:root[data-vibe="energy"] {
+  color-scheme: light;
+  --bg: #F4F4FF;
+  --surface: #FAFAFF;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #EAEAF8;
+  --text: #17192F;
+  --text-muted: #5B6077;
+  --text-disabled: #8A8EAA;
+  --line: #D9DAF0;
+  --line-strong: #74789D;
+  --accent: #5145E5;
+  --accent-hover: #453AD3;
+  --accent-pressed: #382EBF;
+  --accent-soft: #E9E7FF;
+  --on-accent: #FFFFFF;
+  --accent-gradient: linear-gradient(125deg, #5145E5 0%, #6255E8 100%);
+  --accent-2: #FF8055;
+  --accent-2-strong: #C44622;
+  --accent-2-soft: #FFE8DF;
+  --on-accent-2: #24130D;
+  --accent-2-on-soft: #A53B1B;
+  --accent-2-line: #B34120;
+  --toast-action: #FF8055;
+  --success: #168052;
+  --success-bg: #DDF4E9;
+  --success-text: #176744;
+  --on-success: #FFFFFF;
+  --warning: #916100;
+  --warning-bg: #FFF1C9;
+  --warning-text: #7D5400;
+  --on-warning: #FFFFFF;
+  --info: #326EBA;
+  --info-bg: #E0EDFF;
+  --info-text: #2D65A5;
+  --on-info: #FFFFFF;
+  --shadow-1: 0 1px 2px rgba(36, 31, 91, .05);
+  --shadow-2: 0 8px 24px rgba(69, 58, 160, .10);
+  --shadow-3: 0 18px 48px rgba(55, 46, 130, .16);
+}
+
+:root[data-vibe="energy"][data-mode="dark"],
+:root[data-vibe="energy"][data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101125;
+  --surface: #181A31;
+  --surface-raised: #20233B;
+  --surface-sunken: #0B0D1E;
+  --text: #F0F0FF;
+  --text-muted: #B0B2CC;
+  --text-disabled: #737894;
+  --line: #343752;
+  --line-strong: #7880AE;
+  --accent: #A39AFF;
+  --accent-hover: #B4ACFF;
+  --accent-pressed: #C5BDFF;
+  --accent-soft: #29264C;
+  --on-accent: #18152F;
+  --accent-gradient: linear-gradient(125deg, #A39AFF 0%, #B2A9FF 100%);
+  --accent-2: #FF946E;
+  --accent-2-strong: #FF946E;
+  --accent-2-soft: #492C28;
+  --on-accent-2: #26140E;
+  --accent-2-on-soft: #FFAB8D;
+  --accent-2-line: #FFAB8D;
+  --toast-action: #A53B1B;
+  --success: #63D6A0;
+  --success-bg: #1D3D36;
+  --success-text: #73D9A6;
+  --on-success: #09271A;
+  --warning: #F3C867;
+  --warning-bg: #423A25;
+  --warning-text: #F1C65A;
+  --on-warning: #30220B;
+  --info: #83B9F4;
+  --info-bg: #263B58;
+  --info-text: #91C3FA;
+  --on-info: #0A2038;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .36);
+  --shadow-2: 0 8px 26px rgba(0, 0, 0, .34);
+  --shadow-3: 0 18px 52px rgba(0, 0, 0, .48);
+}
+
+:root[data-vibe="energy"] .welcome-row {
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 22px;
+  background: linear-gradient(118deg, color-mix(in srgb, var(--accent) 11%, var(--surface-raised)), color-mix(in srgb, var(--accent-2) 8%, var(--surface-raised)));
+}
+:root[data-vibe="energy"] .welcome-row h1 { color: var(--text); }
+:root[data-vibe="energy"] .primary-button { background: var(--accent-gradient); font-weight: 650; box-shadow: 0 5px 14px color-mix(in srgb, var(--accent) 25%, transparent); }
+:root[data-vibe="energy"] .primary-button:hover:not(:disabled) { background: var(--accent-gradient); filter: brightness(1.06); transform: translateY(-1px); }
+:root[data-vibe="energy"] .focus-dock { border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); box-shadow: 0 12px 34px color-mix(in srgb, var(--accent) 18%, transparent); }
+:root[data-vibe="energy"] .focus-modal .modal-timer-ring { filter: drop-shadow(0 10px 22px color-mix(in srgb, var(--accent) 22%, transparent)); }
+:root[data-vibe="energy"] .nav-item.nav-active, :root[data-vibe="energy"] .project-item.project-active { box-shadow: inset 3px 0 0 var(--accent); }
+:root[data-vibe="energy"] .task-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+:root[data-vibe="energy"] .fab-add { background: var(--accent-gradient); box-shadow: 0 9px 22px color-mix(in srgb, var(--accent) 36%, transparent); }
+:root[data-vibe="energy"] .mobile-tab-active { color: var(--accent); }
+:root[data-vibe="energy"] .settings-group { border-color: color-mix(in srgb, var(--accent) 11%, var(--line)); }
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-vibe="energy"] .primary-button, :root[data-vibe="energy"] .fab-add { transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease; }
+}

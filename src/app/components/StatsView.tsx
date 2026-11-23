@@ -9,10 +9,11 @@
  * sight and the numbers are never colour-only.
  */
 import { useMemo, useState } from 'react';
+import { useLocale } from '../locale';
 import { Check, Flame, Stopwatch, Target, TrendingUp, Trophy } from '../icons';
 import { PriorityFlag } from './atoms';
 import { habitIconFor } from '../habit-icons';
-import { AR_LOCALE, addDays, formatArNumber, formatDuration, getWeekStart, localDateKey } from '@/lib/core';
+import { AR_LOCALE, addDays, formatDuration, getWeekStart, localDateKey } from '@/lib/core';
 import { goalStyle } from '@/lib/goals';
 import { PRIORITIES } from '@/lib/semantics';
 import {
@@ -27,8 +28,8 @@ const RANGES: { id: Range; label: string }[] = [
   { id: 90, label: '90 يومًا' },
 ];
 
-const shortDate = (key: string) =>
-  new Intl.DateTimeFormat(AR_LOCALE, { day: 'numeric', month: 'short' }).format(new Date(`${key}T12:00:00`));
+const shortDate = (key: string, language: 'ar' | 'en') =>
+  new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : AR_LOCALE, { day: 'numeric', month: 'short' }).format(new Date(`${key}T12:00:00`));
 
 function Kpi({ icon, value, label, hint }: { icon: React.ReactNode; value: string; label: string; hint?: string }) {
   return (
@@ -44,6 +45,15 @@ function Kpi({ icon, value, label, hint }: { icon: React.ReactNode; value: strin
 export default function StatsView({ tasks, sessions, habits, logs, today }: {
   tasks: Task[]; sessions: FocusSession[]; habits: Habit[]; logs: Log[]; today: string;
 }) {
+  const { language, t } = useLocale();
+  const formatNumber = (value: number) => new Intl.NumberFormat(language === 'en' ? 'en' : AR_LOCALE).format(value);
+  const formatStatDuration = (seconds: number) => {
+    if (language === 'ar') return formatDuration(seconds);
+    const totalMinutes = Math.floor(Math.max(0, seconds) / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+  };
   const [range, setRange] = useState<Range>(30);
   const from = localDateKey(addDays(new Date(`${today}T12:00:00`), -(range - 1)));
 
@@ -65,44 +75,44 @@ export default function StatsView({ tasks, sessions, habits, logs, today }: {
     <section className="stats-page">
       <div className="page-title-row">
         <div>
-          <h1>إحصائيات</h1>
-          <p>من {shortDate(from)} إلى {shortDate(today)}</p>
+          <h1>{t('إحصائيات')}</h1>
+          <p>{language === 'en' ? `${shortDate(from, language)} to ${shortDate(today, language)}` : `من ${shortDate(from, language)} إلى ${shortDate(today, language)}`}</p>
         </div>
-        <div className="segmented-control" role="group" aria-label="النطاق الزمني">
+        <div className="segmented-control" role="group" aria-label={t('النطاق الزمني')}>
           {RANGES.map((option) => (
             <button
               key={option.id}
               className={range === option.id ? 'segment-active' : ''}
               aria-pressed={range === option.id}
               onClick={() => setRange(option.id)}
-            >{option.label}</button>
+            >{language === 'en' ? `${option.id} days` : option.label}</button>
           ))}
         </div>
       </div>
 
-      <section className="stats-grid" aria-label="ملخص الفترة">
-        <Kpi icon={<Stopwatch size={18} />} value={formatDuration(summary.focusSeconds)} label="وقت التركيز" hint={`${formatArNumber(summary.sessionCount)} جلسة مكتملة`} />
-        <Kpi icon={<Check size={18} />} value={formatArNumber(summary.completedTasks)} label="مهام أُنجزت" hint={`${formatArNumber(Math.round(summary.completionRate * 100))}٪ من مهام الفترة`} />
-        <Kpi icon={<Target size={18} />} value={`${formatArNumber(Math.round(summary.habitConsistency * 100))}٪`} label="ثبات العادات" hint={`${formatArNumber(habits.length)} عادة متابَعة`} />
-        <Kpi icon={<Flame size={18} />} value={formatArNumber(streak)} label="أطول سلسلة أيام" hint={`${formatArNumber(summary.activeDays)} يوم نشط`} />
+      <section className="stats-grid" aria-label={t('ملخص الفترة')}>
+        <Kpi icon={<Stopwatch size={18} />} value={formatStatDuration(summary.focusSeconds)} label={t('وقت التركيز')} hint={language === 'en' ? `${summary.sessionCount} completed sessions` : `${formatNumber(summary.sessionCount)} جلسة مكتملة`} />
+        <Kpi icon={<Check size={18} />} value={formatNumber(summary.completedTasks)} label={t('مهام أُنجزت')} hint={language === 'en' ? `${Math.round(summary.completionRate * 100)}% of tasks in range` : `${formatNumber(Math.round(summary.completionRate * 100))}٪ من مهام الفترة`} />
+        <Kpi icon={<Target size={18} />} value={`${formatNumber(Math.round(summary.habitConsistency * 100))}${language === 'en' ? '%' : '٪'}`} label={t('ثبات العادات')} hint={language === 'en' ? `${habits.length} habits tracked` : `${formatNumber(habits.length)} عادة متابَعة`} />
+        <Kpi icon={<Flame size={18} />} value={formatNumber(streak)} label={t('أطول سلسلة أيام')} hint={language === 'en' ? `${summary.activeDays} active days` : `${formatNumber(summary.activeDays)} يوم نشط`} />
       </section>
 
       {empty ? (
         <div className="empty-page">
-          <h3>لا بيانات في هذه الفترة بعد</h3>
-          <p>أنجز مهمة أو ابدأ جلسة تركيز، وستظهر أرقامك هنا.</p>
+          <h3>{t('لا بيانات في هذه الفترة بعد')}</h3>
+          <p>{t('أنجز مهمة أو ابدأ جلسة تركيز، وستظهر أرقامك هنا.')}</p>
         </div>
       ) : (
         <>
           <div className="stats-two-col">
             <figure className="panel chart-panel">
               <figcaption>
-                <h2><TrendingUp size={16} />التركيز اليومي</h2>
-                <span className="chart-caption">أعلى يوم: {summary.bestDay ? `${shortDate(summary.bestDay.date)} · ${formatDuration(summary.bestDay.seconds)}` : '—'}</span>
+                <h2><TrendingUp size={16} />{t('التركيز اليومي')}</h2>
+                <span className="chart-caption">{t('أعلى يوم:')} {summary.bestDay ? `${shortDate(summary.bestDay.date, language)} · ${formatStatDuration(summary.bestDay.seconds)}` : '—'}</span>
               </figcaption>
-              <div className="bar-chart" role="img" aria-label={`التركيز اليومي خلال ${range} يومًا. المجموع ${formatDuration(summary.focusSeconds)}. أعلى يوم ${summary.bestDay ? `${shortDate(summary.bestDay.date)} بمقدار ${formatDuration(summary.bestDay.seconds)}` : 'لا يوجد'}.`}>
+              <div className="bar-chart" role="img" aria-label={language === 'en' ? `Daily focus over ${range} days. Total ${formatStatDuration(summary.focusSeconds)}. Best day ${summary.bestDay ? `${shortDate(summary.bestDay.date, language)} at ${formatStatDuration(summary.bestDay.seconds)}` : 'none'}.` : `التركيز اليومي خلال ${range} يومًا. المجموع ${formatStatDuration(summary.focusSeconds)}. أعلى يوم ${summary.bestDay ? `${shortDate(summary.bestDay.date, language)} بمقدار ${formatStatDuration(summary.bestDay.seconds)}` : 'لا يوجد'}.`}>
                 {buckets.map((bucket) => (
-                  <span className="bar-slot" key={bucket.date} title={`${shortDate(bucket.date)}: ${formatDuration(bucket.seconds)}`}>
+                  <span className="bar-slot" key={bucket.date} title={`${shortDate(bucket.date, language)}: ${formatStatDuration(bucket.seconds)}`}>
                     <i
                       className="bar-fill"
                       data-current={bucket.date === today ? 'true' : undefined}
@@ -111,17 +121,17 @@ export default function StatsView({ tasks, sessions, habits, logs, today }: {
                   </span>
                 ))}
               </div>
-              <div className="chart-axis"><span>{shortDate(from)}</span><span>{shortDate(today)}</span></div>
+              <div className="chart-axis"><span>{shortDate(from, language)}</span><span>{shortDate(today, language)}</span></div>
             </figure>
 
             <figure className="panel chart-panel">
               <figcaption>
-                <h2><Stopwatch size={16} />آخر 8 أسابيع</h2>
-                <span className="chart-caption">هذا الأسبوع: {formatDuration(thisWeek.reduce((sum, bucket) => sum + bucket.seconds, 0))}</span>
+                <h2><Stopwatch size={16} />{t('آخر 8 أسابيع')}</h2>
+                <span className="chart-caption">{t('هذا الأسبوع:')} {formatStatDuration(thisWeek.reduce((sum, bucket) => sum + bucket.seconds, 0))}</span>
               </figcaption>
-              <div className="bar-chart bar-chart-weeks" role="img" aria-label={`التركيز الأسبوعي: ${weeks.map((week, index) => `${index === weeks.length - 1 ? 'هذا الأسبوع' : `أسبوع ${shortDate(week.start)}`} ${formatDuration(week.seconds)}`).join('، ')}.`}>
+              <div className="bar-chart bar-chart-weeks" role="img" aria-label={language === 'en' ? `Weekly focus: ${weeks.map((week, index) => `${index === weeks.length - 1 ? 'This week' : `Week of ${shortDate(week.start, language)}`} ${formatStatDuration(week.seconds)}`).join(', ')}.` : `التركيز الأسبوعي: ${weeks.map((week, index) => `${index === weeks.length - 1 ? 'هذا الأسبوع' : `أسبوع ${shortDate(week.start, language)}`} ${formatStatDuration(week.seconds)}`).join('، ')}.`}>
                 {weeks.map((week, index) => (
-                  <span className="bar-slot" key={week.start} title={`${shortDate(week.start)}: ${formatDuration(week.seconds)}`}>
+                  <span className="bar-slot" key={week.start} title={`${shortDate(week.start, language)}: ${formatStatDuration(week.seconds)}`}>
                     <i
                       className="bar-fill"
                       data-current={index === weeks.length - 1 ? 'true' : undefined}
@@ -130,13 +140,13 @@ export default function StatsView({ tasks, sessions, habits, logs, today }: {
                   </span>
                 ))}
               </div>
-              <div className="chart-axis"><span>{shortDate(weeks[0].start)}</span><span>الآن</span></div>
+              <div className="chart-axis"><span>{shortDate(weeks[0].start, language)}</span><span>{t('الآن')}</span></div>
             </figure>
           </div>
 
           <div className="stats-two-col">
             <section className="panel chart-panel" aria-labelledby="priority-breakdown">
-              <h2 id="priority-breakdown">المهام المنجزة حسب الأولوية</h2>
+              <h2 id="priority-breakdown">{t('المهام المنجزة حسب الأولوية')}</h2>
               {priorityTotal ? (
                 <ul className="priority-breakdown">
                   {(['high', 'medium', 'low', 'none'] as const).map((id) => {
@@ -149,19 +159,19 @@ export default function StatsView({ tasks, sessions, habits, logs, today }: {
                             ? <span className="breakdown-none" role="img" aria-label={PRIORITIES.none.label}>—</span>
                             : <PriorityFlag priority={id} size={15} />}
                         </span>
-                        <span className="breakdown-track" role="img" aria-label={`${PRIORITIES[id].label}: ${formatArNumber(count)} مهمة، ${formatArNumber(percent)}٪`}>
+                        <span className="breakdown-track" role="img" aria-label={language === 'en' ? `${t(PRIORITIES[id].label)}: ${count} tasks, ${percent}%` : `${PRIORITIES[id].label}: ${formatNumber(count)} مهمة، ${formatNumber(percent)}٪`}>
                           <i style={{ inlineSize: `${percent}%`, background: PRIORITIES[id].color }} />
                         </span>
-                        <bdi className="breakdown-value">{formatArNumber(count)}</bdi>
+                        <bdi className="breakdown-value">{formatNumber(count)}</bdi>
                       </li>
                     );
                   })}
                 </ul>
-              ) : <p className="panel-empty">لا مهام منجزة في هذه الفترة.</p>}
+              ) : <p className="panel-empty">{t('لا مهام منجزة في هذه الفترة.')}</p>}
             </section>
 
             <section className="panel chart-panel" aria-labelledby="habit-standings">
-              <h2 id="habit-standings"><Trophy size={16} />ثبات العادات</h2>
+              <h2 id="habit-standings"><Trophy size={16} />{t('ثبات العادات')}</h2>
               {standings.length ? (
                 <ul className="habit-standings">
                   {standings.map(({ habit, rate, streak: habitStreak, loggedDays }) => {
@@ -172,18 +182,18 @@ export default function StatsView({ tasks, sessions, habits, logs, today }: {
                         <span className="standing-icon" style={{ color: style.onSoft, background: style.soft }} aria-hidden="true"><Icon size={15} /></span>
                         <span className="standing-copy">
                           <b><bdi>{habit.name}</bdi></b>
-                          <span className="standing-track" role="img" aria-label={`${habit.name}: ${formatArNumber(Math.round(rate * 100))}٪، ${formatArNumber(loggedDays)} يوم مسجّل`}>
+                          <span className="standing-track" role="img" aria-label={language === 'en' ? `${habit.name}: ${Math.round(rate * 100)}% consistency, ${loggedDays} logged days` : `${habit.name}: ${formatNumber(Math.round(rate * 100))}٪، ${formatNumber(loggedDays)} يوم مسجّل`}>
                             <i style={{ inlineSize: `${Math.round(rate * 100)}%`, background: style.solid }} />
                           </span>
                         </span>
-                        <span className="standing-streak" role="img" aria-label={`سلسلة حالية ${formatArNumber(habitStreak)} يوم`} title={`سلسلة حالية: ${habitStreak}`}>
-                          <Flame size={13} /><bdi>{formatArNumber(habitStreak)}</bdi>
+                        <span className="standing-streak" role="img" aria-label={language === 'en' ? `Current streak: ${habitStreak} days` : `سلسلة حالية ${formatNumber(habitStreak)} يوم`} title={language === 'en' ? `Current streak: ${habitStreak}` : `سلسلة حالية: ${habitStreak}`}>
+                          <Flame size={13} /><bdi>{formatNumber(habitStreak)}</bdi>
                         </span>
                       </li>
                     );
                   })}
                 </ul>
-              ) : <p className="panel-empty">أضف عادة لتتابع ثباتها هنا.</p>}
+              ) : <p className="panel-empty">{t('أضف عادة لتتابع ثباتها هنا.')}</p>}
             </section>
           </div>
         </>
