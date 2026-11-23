@@ -23,11 +23,11 @@
   --text-h1-compact: 1.75rem;                                       /* C6: 28px mobile */
   --text-h2: 1.5rem;          --lh-h2: 1.4;
   --text-h3: 1.125rem;        --lh-h3: 1.5;
-  --text-body-lg: 1.0625rem;  --lh-body-lg: 1.7;
-  --text-body: 0.9375rem;     --lh-body: 1.7;
-  --text-ui: 0.875rem;        --lh-ui: 1.5;
-  --text-small: 0.78125rem;   --lh-small: 1.6;   /* 12.5px — caption floor */
-  --text-micro: 0.71875rem;   --lh-micro: 1.2;   /* 11.5px — chips + mobile tab labels only */
+  --text-body-lg: 1.125rem;   --lh-body-lg: 1.65;
+  --text-body: 1rem;          --lh-body: 1.65;
+  --text-ui: 0.9375rem;       --lh-ui: 1.5;
+  --text-small: 0.875rem;     --lh-small: 1.5;   /* 14px minimum for secondary copy */
+  --text-micro: 0.8125rem;    --lh-micro: 1.3;   /* 13px chips + compact mobile labels */
   --text-reading: 1.125rem;   --lh-reading: 1.95;
   --text-reading-lg: 1.25rem; --lh-reading-lg: 2;                    /* C6 */
 
@@ -236,7 +236,7 @@
   --gap-columns: var(--space-4);
   --rule-hair: 1px;
   --row-rule-style: solid;
-  --body-weight: 400;
+  --body-weight: 500;
 
   /* Legacy z names mapped onto the §5.5 scale. Sidebar is a sheet, so it sits
      BELOW modals — this is the fix for the confirmed drawer-over-modal bug. */
