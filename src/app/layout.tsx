@@ -39,11 +39,11 @@ export const metadata: Metadata = {
 // §11.1: resolve the theme before first paint so there is no flash. Always set
 // data-mode (falling back to the OS preference) so the token layer has a single
 // dark selector to target.
-const themeBootstrap = "try{var s=localStorage.getItem('winit-mode');var d=s==='light'||s==='dark'?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.mode=d?'dark':'light';document.documentElement.dataset.theme=d?'winit-energy-dark':'winit-energy';document.documentElement.dataset.vibe='energy';var l=localStorage.getItem('winit-language');if(l==='ar'||l==='en'){document.documentElement.lang=l;document.documentElement.dir=l==='en'?'ltr':'rtl'}}catch(e){document.documentElement.dataset.mode='light';document.documentElement.dataset.theme='winit-energy';document.documentElement.dataset.vibe='energy'}";
+const themeBootstrap = "try{var s=localStorage.getItem('winit-mode');var d=s==='light'||s==='dark'?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.mode=d?'dark':'light';document.documentElement.dataset.theme=d?'winit-energy-dark':'winit-energy';document.documentElement.dataset.vibe='energy';var l=localStorage.getItem('winit-language');if(l==='ar'||l==='en'){document.documentElement.lang=l;document.documentElement.dir=l==='en'?'ltr':'rtl';document.documentElement.dataset.language=l}else{document.documentElement.dataset.language='ar'}}catch(e){document.documentElement.dataset.mode='light';document.documentElement.dataset.theme='winit-energy';document.documentElement.dataset.vibe='energy';document.documentElement.dataset.language='ar'}";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" data-language="ar" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
