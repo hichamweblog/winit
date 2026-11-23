@@ -5,6 +5,7 @@ import type { Project, Task } from '@/lib/types';
 import { ListTodo, Plus, Stopwatch, X } from '../icons';
 import { useConfirm } from './ConfirmDialog';
 import useDialogFocus from './useDialogFocus';
+import { useLocale } from '../locale';
 
 export type TaskModalProps = {
   projects: Project[];
@@ -27,6 +28,7 @@ export function TaskModal({
   onSubmit,
   busy,
 }: TaskModalProps) {
+  const { t } = useLocale();
   const [title, setTitle] = useState(task?.title ?? '');
   const [notes, setNotes] = useState(task?.notes ?? '');
   const [projectId, setProjectId] = useState(task?.projectId ?? selectedProject ?? '');
@@ -51,10 +53,10 @@ export function TaskModal({
     if (busy) return;
     if (dirty) {
       const discard = await confirm({
-        title: 'تغييرات غير محفوظة',
-        message: 'لديك تغييرات لم تُحفظ في هذه المهمة. هل تريد إغلاق النافذة وتجاهل التعديلات؟',
-        confirmLabel: 'تجاهل التغييرات',
-        cancelLabel: 'متابعة التعديل',
+        title: t('تغييرات غير محفوظة'),
+        message: t('لديك تغييرات لم تُحفظ في هذه المهمة. هل تريد إغلاق النافذة وتجاهل التعديلات؟'),
+        confirmLabel: t('تجاهل التغييرات'),
+        cancelLabel: t('متابعة التعديل'),
       });
       if (!discard) return;
     }
@@ -84,12 +86,12 @@ export function TaskModal({
           <span className="modal-icon">
             <ListTodo size={17} />
           </span>
-          <span id="task-editor-heading">{task ? 'تعديل المهمة' : 'مهمة جديدة'}</span>
-          <button type="button" className="icon-button" onClick={close} aria-label="إغلاق">
+          <span id="task-editor-heading">{task ? t('تعديل المهمة') : t('مهمة جديدة')}</span>
+          <button type="button" className="icon-button" onClick={close} aria-label={t('إغلاق')}>
             <X size={18} />
           </button>
         </div>
-        <label className="sr-only" htmlFor="task-title">عنوان المهمة</label>
+        <label className="sr-only" htmlFor="task-title">{t('عنوان المهمة')}</label>
         <input
           id="task-title"
           className="task-title-input"
@@ -98,11 +100,11 @@ export function TaskModal({
           name="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="ما الذي تود إنجازه؟"
+          placeholder={t('ما الذي تود إنجازه؟')}
           maxLength={240}
           required
         />
-        <label className="sr-only" htmlFor="task-notes">ملاحظات المهمة</label>
+        <label className="sr-only" htmlFor="task-notes">{t('ملاحظات المهمة')}</label>
         <textarea
           id="task-notes"
           className="task-notes-input"
@@ -110,14 +112,14 @@ export function TaskModal({
           name="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="أضف ملاحظة صغيرة تساعدك…"
+          placeholder={t('أضف ملاحظة صغيرة تساعدك…')}
           rows={2}
         />
         <div className="modal-fields">
           <label>
-            <span>المشروع</span>
+            <span>{t('المشروع')}</span>
             <select name="projectId" value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-              <option value="">صندوق الوارد</option>
+              <option value="">{t('صندوق الوارد')}</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -126,30 +128,30 @@ export function TaskModal({
             </select>
           </label>
           <label>
-            <span>الأولوية</span>
+            <span>{t('الأولوية')}</span>
             <select
               name="priority"
               value={priority}
               onChange={(e) => setPriority(e.target.value as Task['priority'])}
             >
-              <option value="none">بدون أولوية</option>
-              <option value="high">عالية</option>
-              <option value="medium">متوسطة</option>
-              <option value="low">منخفضة</option>
+              <option value="none">{t('بدون أولوية')}</option>
+              <option value="high">{t('عالية')}</option>
+              <option value="medium">{t('متوسطة')}</option>
+              <option value="low">{t('منخفضة')}</option>
             </select>
           </label>
           <label>
-            <span>تاريخ الاستحقاق</span>
+            <span>{t('تاريخ الاستحقاق')}</span>
             <input name="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </label>
           <label>
             <span>
               <Stopwatch size={13} aria-hidden="true" />
-              جلسات التركيز
+              {t('جلسات التركيز')}
             </span>
             <select
               name="estimatedPomodoros"
-              aria-label="عدد جلسات التركيز المتوقعة"
+              aria-label={t('عدد جلسات التركيز المتوقعة')}
               value={estimatedPomodoros}
               onChange={(e) => setEstimatedPomodoros(e.target.value)}
             >
@@ -161,33 +163,33 @@ export function TaskModal({
             </select>
           </label>
           <label className="modal-field-full">
-            <span>وسوم، مفصولة بفواصل</span>
+            <span>{t('وسوم، مفصولة بفواصل')}</span>
             <input
               name="tags"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               maxLength={300}
-              placeholder="دراسة، مراجعة"
+              placeholder={t('دراسة، مراجعة')}
             />
           </label>
           {task && (
             <label>
-              <span>الحالة</span>
+              <span>{t('الحالة')}</span>
               <select name="status" value={status} onChange={(e) => setStatus(e.target.value as Task['status'])}>
-                <option value="todo">قيد الانتظار</option>
-                <option value="in_progress">قيد التنفيذ</option>
-                <option value="completed">مكتملة</option>
+                <option value="todo">{t('قيد الانتظار')}</option>
+                <option value="in_progress">{t('قيد التنفيذ')}</option>
+                <option value="completed">{t('مكتملة')}</option>
               </select>
             </label>
           )}
         </div>
         <div className="modal-footer">
           <span>
-            <kbd>Esc</kbd> للإغلاق
+            <kbd>Esc</kbd> {t('للإغلاق')}
           </span>
           <button className="primary-button" type="submit" disabled={busy || !title.trim()}>
             <Plus size={15} />
-            {busy ? 'جارٍ الحفظ…' : task ? 'حفظ التعديلات' : 'أضف إلى يومي'}
+            {busy ? t('جارٍ الحفظ…') : task ? t('حفظ التعديلات') : t('أضف إلى يومي')}
           </button>
         </div>
       </form>

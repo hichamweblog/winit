@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale } from '../locale';
 import type { FocusSession, Habit, Log, Project, Task } from '@/lib/types';
 import type { View } from '../types';
 import { ArrowLeft, NotebookPen, Play, Plus, Timer } from '../icons';
@@ -66,6 +67,7 @@ export function TodayDashboard(props: DashboardProps) {
     onDeleteTask,
   } = props;
 
+  const { t, language } = useLocale();
   const [clockNow, setClockNow] = useState(() => Date.now());
   useEffect(() => {
     if (!activeSession) return;
@@ -84,31 +86,31 @@ export function TodayDashboard(props: DashboardProps) {
     <>
       <section className="welcome-row">
         <div>
-          <h1>صباح الخير، لنصنع يوماً جميلاً.</h1>
-          <p>رتّب أفكارك، خذ نفساً عميقاً، وابدأ بما يهمّ حقاً.</p>
+          <h1>{t('صباح الخير، لنصنع يوماً جميلاً.')}</h1>
+          <p>{t('رتّب أفكارك، خذ نفساً عميقاً، وابدأ بما يهمّ حقاً.')}</p>
         </div>
       </section>
 
       <section className="stats-grid" aria-label="ملخص اليوم">
         <div className="stat-card">
-          <span className="stat-label">المهام المكتملة</span>
+          <span className="stat-label">{t('المهام المكتملة')}</span>
           <strong className="stat-value">
             {completedToday}
-            <small> من {completedToday + todayTasks.length}</small>
+            <small> {t('من')} {completedToday + todayTasks.length}</small>
           </strong>
         </div>
         <div className="stat-card">
-          <span className="stat-label">وقت التركيز</span>
+          <span className="stat-label">{t('وقت التركيز')}</span>
           <strong className="stat-value">
             {formatDuration(todayFocusSeconds)}
-            <small> اليوم</small>
+            <small> {t('اليوم')}</small>
           </strong>
         </div>
         <div className="stat-card">
-          <span className="stat-label">العادات المكتملة</span>
+          <span className="stat-label">{t('العادات المكتملة')}</span>
           <strong className="stat-value">
             {doneHabits}
-            <small> من {habits.length}</small>
+            <small> {t('من')} {habits.length}</small>
           </strong>
         </div>
       </section>
@@ -118,12 +120,12 @@ export function TodayDashboard(props: DashboardProps) {
           <div className="panel-heading">
             <div>
               <h2>
-                مهام اليوم <CountBadge count={todayTasks.length} />
+                {t('مهام اليوم')} <CountBadge count={todayTasks.length} />
               </h2>
             </div>
             <div className="panel-heading-actions">
               <button className="text-link" onClick={() => setView('all')}>
-                كل المهام
+                {t('كل المهام')}
               </button>
               <button
                 className="icon-button soft-button add-task-compact"
@@ -157,8 +159,8 @@ export function TodayDashboard(props: DashboardProps) {
             </div>
           ) : (
             <div className="empty-state">
-              <b>قائمتك هادئة الآن</b>
-              <span>لحظة جميلة لتضيف مهمة تخدم أهدافك.</span>
+              <b>{t('قائمتك هادئة الآن')}</b>
+              <span>{t('لحظة جميلة لتضيف مهمة تخدم أهدافك.')}</span>
             </div>
           )}
         </section>
@@ -180,7 +182,7 @@ export function TodayDashboard(props: DashboardProps) {
             ))}
           </div>
           <div className="habit-note">
-            <span>لا تبحث عن الكمال، فقط عُد كل يوم.</span>
+            <span>{t('لا تبحث عن الكمال، فقط عُد كل يوم.')}</span>
           </div>
         </section>
       </div>
@@ -237,7 +239,7 @@ export function TodayDashboard(props: DashboardProps) {
         <section className="panel week-panel">
           <div className="week-heading">
             <div>
-              <h3>التركيز خلال الأسبوع</h3>
+              <h3>{t('التركيز خلال الأسبوع')}</h3>
             </div>
             <button className="text-link" onClick={() => setView('calendar')}>
               التقويم
@@ -290,8 +292,8 @@ export function TodayDashboard(props: DashboardProps) {
 
       <section className="quote-banner">
         <div>
-          <p>«أحب الأعمال إلى الله أدومها وإن قل»</p>
-          <span>تذكير لطيف: الثبات أجمل من السرعة.</span>
+          <p>{language === 'en' ? 'Small steps, repeated consistently, create lasting progress.' : '«أحب الأعمال إلى الله أدومها وإن قل»'}</p>
+          <span>{t('تذكير لطيف: الثبات أجمل من السرعة.')}</span>
         </div>
         <button className="journal-quick-link" onClick={() => switchView('journal')}>
           <NotebookPen size={15} />

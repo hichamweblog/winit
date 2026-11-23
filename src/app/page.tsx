@@ -32,13 +32,14 @@ import HabitModal from './components/HabitModal';
 import FocusModal from './components/FocusModal';
 import FocusDock from './components/FocusDock';
 import AuthGate, { useAuth } from './components/AuthGate';
+import { useLocale } from './locale';
 import { projectIconFor } from './project-icons';
 import { tasksLabel } from '@/lib/semantics';
 import { truncateWords } from '@/lib/label';
 import { api } from '@/lib/client-api';
 import type { FocusSession, Habit, JournalEntry, Log, Project, Task } from '@/lib/types';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { addDays, AR_LOCALE, formatArHijriDate, localDateKey } from '@/lib/core';
+import { addDays, AR_LOCALE, localDateKey } from '@/lib/core';
 import { goalStyle } from '@/lib/goals';
 import {
   defaultMobileViews,
@@ -52,6 +53,7 @@ import {
 
 function WinitApp() {
   const auth = useAuth();
+  const { language, t } = useLocale();
   const avatarLetter = (auth.user?.name ?? 'و').trim().charAt(0) || 'و';
   const [data, setData] = useState<Dataset | null>(null);
   const [view, setViewState] = useState<View>('today');
@@ -241,12 +243,12 @@ function WinitApp() {
 
   const today = data?.today ?? localDateKey();
   const gregorianDate = useMemo(
-    () => new Intl.DateTimeFormat(AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${today}T12:00:00`)),
-    [today]
+    () => new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${today}T12:00:00`)),
+    [today, language]
   );
   const hijriDate = useMemo(
-    () => formatArHijriDate(new Date(`${today}T12:00:00`)),
-    [today]
+    () => new Intl.DateTimeFormat(language === 'en' ? 'en-u-ca-islamic-nu-latn' : 'ar-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${today}T12:00:00`)),
+    [today, language]
   );
   const tasks = data?.tasks ?? [];
   const projects = data?.projects ?? [];
@@ -560,13 +562,14 @@ function WinitApp() {
   const startFocus = async (taskId?: string) => {
     const task = tasks.find((item) => item.id === (taskId || focusTaskId));
     const result = await mutate('/api/focus/start', 'POST', { taskId: task?.id ?? null, projectId: task?.projectId ?? null, mode: focusMode, plannedSeconds: focusMode === 'pomodoro' ? pomodoroMinutes * 60 : 4 * 60 * 60 });
-    if (result) setShowFocus(false);
+    if (result) setShowFocus(true);
   };
   const finishFocus = async (completed: boolean) => {
     if (!activeSession) return;
     const elapsed = Math.max(0, Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000));
     const actualSeconds = activeSession.mode === 'pomodoro' ? Math.min(elapsed, activeSession.plannedSeconds) : elapsed;
-    await mutate(`/api/focus/${activeSession.id}/finish`, 'POST', { actualSeconds, completed });
+    const finished = await mutate(`/api/focus/${activeSession.id}/finish`, 'POST', { actualSeconds, completed });
+    if (finished) setShowFocus(false);
   };
   const saveJournal = async (input: JournalInput, entryId?: string) => {
     setJournalSaving(true);
@@ -597,7 +600,8 @@ function WinitApp() {
     } catch (error) { notify(error instanceof Error ? error.message : 'تعذر حذف التدوينة', 'error'); }
   };
 
-  const heading = selectedProject ? getProject(selectedProject)?.name ?? 'المشروع' : view === 'today' ? 'اليوم' : view === 'upcoming' ? 'القادم' : view === 'inbox' ? 'صندوق الوارد' : view === 'all' ? 'كل المهام' : view === 'stats' ? 'إحصائيات' : view === 'settings' ? 'الإعدادات' : view === 'calendar' ? 'التقويم' : view === 'habits' ? 'عاداتي' : view === 'journal' ? 'اليوميات' : 'المشروع';
+  const headingArabic = selectedProject ? getProject(selectedProject)?.name ?? 'المشروع' : view === 'today' ? 'اليوم' : view === 'upcoming' ? 'القادم' : view === 'inbox' ? 'صندوق الوارد' : view === 'all' ? 'كل المهام' : view === 'stats' ? 'إحصائيات' : view === 'settings' ? 'الإعدادات' : view === 'calendar' ? 'التقويم' : view === 'habits' ? 'عاداتي' : view === 'journal' ? 'اليوميات' : 'المشروع';
+  const heading = selectedProject ? headingArabic : t(headingArabic);
   const filteredTasks = useMemo(() => {
     const active = tasks.filter((task) => task.status !== 'completed');
     if (selectedProject) return active.filter((task) => task.projectId === selectedProject);
@@ -609,8 +613,8 @@ function WinitApp() {
   }, [tasks, view, selectedProject, today]);
   const hasActiveModal = showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor || Boolean(confirmDialog);
 
-  if (!data && notice) return <div className="app-error"><h1>تعذر فتح مساحتك.</h1><p>{notice.message}</p><button className="primary-button" onClick={() => { setNotice(null); void refresh(); }}>أعد المحاولة</button></div>;
-  if (!data) return <div className="app-loading" aria-label="جارٍ تحميل مساحة العمل"><div className="loading-skeleton loading-title" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-panel" /></div>;
+  if (!data && notice) return <div className="app-error"><h1>{t('تعذر فتح مساحتك.')}</h1><p>{notice.message}</p><button className="primary-button" onClick={() => { setNotice(null); void refresh(); }}>{t('أعد المحاولة')}</button></div>;
+  if (!data) return <div className="app-loading" aria-label={t('جارٍ تحميل مساحة العمل')}><div className="loading-skeleton loading-title" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-panel" /></div>;
 
   return (
     <div className="app-shell">
@@ -618,24 +622,24 @@ function WinitApp() {
         ref={sidebarRef}
         id="app-sidebar"
         className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}
-        aria-label="القائمة الرئيسية"
+        aria-label={t('القائمة الرئيسية')}
         aria-hidden={mobileLayout && !mobileMenu ? true : undefined}
         aria-modal={mobileLayout && mobileMenu && !hasActiveModal ? true : undefined}
         role={mobileLayout && mobileMenu ? 'dialog' : undefined}
         inert={mobileLayout && !mobileMenu}
         tabIndex={-1}
       >
-        <div className="brand-row"><WinItLogo height={32} /><button className="icon-button sidebar-close" onClick={() => closeMobileMenu()} aria-label="إغلاق القائمة"><X size={18} /></button></div>
-        <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? 'مساحة تجريبية' : auth.user?.name ?? 'حسابي'}</bdi></b><small><bdi>{auth.user?.demo ? 'مشتركة، غير خاصة' : auth.user?.email ?? 'نسخة خاصة بك'}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => { closeMobileMenu(); void auth.signOut(); }} aria-label="تسجيل الخروج" title="تسجيل الخروج"><Logout size={16} /></button>}</div>
-        <nav className="main-nav" aria-label="التنقل بين الصفحات">
+        <div className="brand-row"><WinItLogo height={32} /><button className="icon-button sidebar-close" onClick={() => closeMobileMenu()} aria-label={t('إغلاق القائمة')}><X size={18} /></button></div>
+        <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? t('مساحة تجريبية') : auth.user?.name ?? t('حسابي')}</bdi></b><small><bdi>{auth.user?.demo ? t('مشتركة، غير خاصة') : auth.user?.email ?? t('نسخة خاصة بك')}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => { closeMobileMenu(); void auth.signOut(); }} aria-label={t('تسجيل الخروج')} title={t('تسجيل الخروج')}><Logout size={16} /></button>}</div>
+        <nav className="main-nav" aria-label={t('التنقل بين الصفحات')}>
           {views.map((item, index) => {
             const Icon = item.icon; const active = view === item.id && !selectedProject;
                          const count = index === 0 ? todayTasks.length : index === 2 ? tasks.filter((t) => t.status !== 'completed' && !t.projectId).length : null;
-            return <button key={item.id} className={`nav-item ${active ? 'nav-active' : ''}`} onClick={() => switchView(item.id)} aria-current={active ? 'page' : undefined}><Icon size={17} strokeWidth={1.8} /><span>{item.label}</span>{count ? <i className="nav-count">{count}</i> : null}</button>;
+            return <button key={item.id} className={`nav-item ${active ? 'nav-active' : ''}`} onClick={() => switchView(item.id)} aria-current={active ? 'page' : undefined}><Icon size={17} strokeWidth={1.8} /><span>{t(item.label)}</span>{count ? <i className="nav-count">{count}</i> : null}</button>;
           })}
         </nav>
-        <div className="project-head"><div className="nav-label">المشاريع</div><button className="tiny-add" aria-label="إضافة مشروع" onClick={() => { setEditingProject(null); setShowProjectAdd(true); }}><Plus size={16} /></button></div>
-        <nav className="project-nav" aria-label="قائمة المشاريع">
+        <div className="project-head"><div className="nav-label">{t('المشاريع')}</div><button className="tiny-add" aria-label={t('إضافة مشروع')} onClick={() => { setEditingProject(null); setShowProjectAdd(true); }}><Plus size={16} /></button></div>
+        <nav className="project-nav" aria-label={t('قائمة المشاريع')}>
           {projects.map((project, index) => {
             const Icon = projectIconFor(project.icon);
             const active = selectedProject === project.id;
@@ -732,26 +736,26 @@ function WinitApp() {
             );
           })}
         </nav>
-        <div className="sidebar-bottom"><div className="sidebar-quote"><p>خطوة صغيرة كل يوم<br />تصنع طريقاً عظيماً.</p><span>استمر، أنت في الطريق الصحيح</span></div></div>
+        <div className="sidebar-bottom"><div className="sidebar-quote"><p>{t('خطوة صغيرة كل يوم تصنع طريقاً عظيماً.')}</p><span>{t('استمر، أنت في الطريق الصحيح')}</span></div></div>
       </aside>
-      {mobileMenu && <button className="mobile-scrim" aria-label="إغلاق القائمة" onClick={() => closeMobileMenu()} />}
+      {mobileMenu && <button className="mobile-scrim" aria-label={t('إغلاق القائمة')} onClick={() => closeMobileMenu()} />}
 
       <main className="main-area" aria-hidden={mobileLayout && mobileMenu ? true : undefined} inert={mobileLayout && mobileMenu}>
-        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label="فتح القائمة" aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date" title={`${gregorianDate} الموافق ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
+        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('فتح القائمة')} aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date" title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? t('التبديل إلى المظهر الفاتح') : t('التبديل إلى المظهر الداكن')} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
         <div className="page-content">
           {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} hasMore={journalNextCursor !== null} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalNextCursor, true)} />}
-          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
+          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} projectTasks={selectedProject ? tasks.filter((item) => item.projectId === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} onStatusChange={(id, status) => void mutate(`/api/tasks/${id}`, 'PATCH', { status })} />)}
         </div>
-        <footer className="app-footer"><span>مصمّم لأيامك، لا لمزيد من الضجيج.</span><span>أنجز ما يهمّك</span></footer>
+        <footer className="app-footer"><span>{t('مصمّم لأيامك، لا لمزيد من الضجيج.')}</span><span>{t('أنجز ما يهمّك')}</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
             keyboard shortcut hint. Hidden on views that have their own add. */}
         {(view === 'today' || view === 'upcoming' || view === 'inbox' || view === 'all' || selectedProject) && (
-          <button className="fab-add" onClick={() => openTaskEditor()} aria-label="أضف مهمة جديدة"><Plus size={24} /></button>
+          <button className="fab-add" onClick={() => openTaskEditor()} aria-label={t('أضف مهمة جديدة')}><Plus size={24} /></button>
         )}
-        <nav className="mobile-tabs" aria-label="التنقل الرئيسي" style={{ gridTemplateColumns: `repeat(${mobileViews.length + 1}, minmax(0, 1fr))` }}>
-          {mobileViews.map((id) => { const item = mobileViewOptions.find((option) => option.id === id); if (!item) return null; const Icon = item.icon; return <button key={id} className={view === id && !selectedProject ? 'mobile-tab-active' : ''} onClick={() => switchView(id)} aria-current={view === id && !selectedProject ? 'page' : undefined}><Icon size={19} /><span>{item.label}</span></button>; })}
-          <button className={selectedProject || !mobileViews.includes(view) ? 'mobile-tab-active' : ''} onClick={(event) => openMobileMenu(event.currentTarget)} aria-label="المزيد من القوائم" aria-expanded={mobileMenu} aria-controls="app-sidebar" aria-current={selectedProject || !mobileViews.includes(view) ? 'page' : undefined}><MoreHorizontal size={20} /><span>المزيد</span></button>
+        <nav className="mobile-tabs" aria-label={t('التنقل الرئيسي')} style={{ gridTemplateColumns: `repeat(${mobileViews.length + 1}, minmax(0, 1fr))` }}>
+          {mobileViews.map((id) => { const item = mobileViewOptions.find((option) => option.id === id); if (!item) return null; const Icon = item.icon; return <button key={id} className={view === id && !selectedProject ? 'mobile-tab-active' : ''} onClick={() => switchView(id)} aria-current={view === id && !selectedProject ? 'page' : undefined}><Icon size={19} /><span>{t(item.label)}</span></button>; })}
+          <button className={selectedProject || !mobileViews.includes(view) ? 'mobile-tab-active' : ''} onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('المزيد من القوائم')} aria-expanded={mobileMenu} aria-controls="app-sidebar" aria-current={selectedProject || !mobileViews.includes(view) ? 'page' : undefined}><MoreHorizontal size={20} /><span>{t('المزيد')}</span></button>
         </nav>
       </main>
 
@@ -760,8 +764,8 @@ function WinitApp() {
       {showHabitAdd && <HabitModal key={editingHabit?.id ?? 'new'} habit={editingHabit} onClose={() => { setShowHabitAdd(false); setEditingHabit(null); }} onSubmit={saveHabit} busy={busy} />}
       {showProjectAdd && <ProjectModal key={editingProject?.id ?? 'new'} project={editingProject} onClose={() => { setShowProjectAdd(false); setEditingProject(null); }} onSubmit={addProject} onDelete={(target) => { setShowProjectAdd(false); setEditingProject(null); void deleteProject(target); }} busy={busy} />}
       {showJournalEditor && <JournalEditor key={editingJournal?.id ?? 'new'} entry={editingJournal} today={today} busy={journalSaving} onClose={() => setShowJournalEditor(false)} onSave={saveJournal} />}
-      {showFocus && <FocusModal tasks={tasks.filter((t) => t.status !== 'completed')} selectedId={focusTaskId} setSelectedId={setFocusTaskId} mode={focusMode} setMode={setFocusMode} pomodoroMinutes={pomodoroMinutes} setPomodoroMinutes={setTimerMinutes} onClose={() => setShowFocus(false)} onStart={() => void startFocus()} />} 
-      {activeSession && <FocusDock session={activeSession} tasks={tasks} busy={busy} onFinish={(completed = true) => void finishFocus(completed)} onStop={() => void finishFocus(false)} />}
+      {showFocus && <FocusModal tasks={tasks.filter((t) => t.status !== 'completed')} selectedId={focusTaskId} setSelectedId={setFocusTaskId} mode={focusMode} setMode={setFocusMode} pomodoroMinutes={pomodoroMinutes} setPomodoroMinutes={setTimerMinutes} session={activeSession} busy={busy} onFinish={(completed) => void finishFocus(completed)} onClose={() => setShowFocus(false)} onStart={() => void startFocus()} />}
+      {activeSession && !showFocus && <FocusDock session={activeSession} tasks={tasks} busy={busy} onFinish={(completed = true) => void finishFocus(completed)} onStop={() => void finishFocus(false)} onExpand={() => setShowFocus(true)} />}
       {notice && <div className={`toast toast-${notice.kind}`} role={notice.kind === 'error' ? 'alert' : 'status'} aria-live={notice.kind === 'error' ? 'assertive' : 'polite'}>{notice.message}<button onClick={() => setNotice(null)} aria-label="إغلاق"><X size={15} /></button></div>}
     </div>
   );

@@ -15,13 +15,14 @@
  */
 import { useMemo, useState } from 'react';
 import { DayPicker, type DayButtonProps } from 'react-day-picker';
-import { ar } from 'react-day-picker/locale';
+import { ar, enGB } from 'react-day-picker/locale';
 import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus } from '../icons';
 import { PriorityFlag, RowActions, SessionCount } from './atoms';
 import { AR_LOCALE, formatArNumber, localDateKey } from '@/lib/core';
 import { tasksLabel } from '@/lib/semantics';
 import { goalStyle } from '@/lib/goals';
 import type { Project, Task } from '@/lib/types';
+import { useLocale } from '../locale';
 
 /** Saturday, matching the rest of the app's week strip. */
 const WEEK_STARTS_ON = 6;
@@ -36,6 +37,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
   month: Date; setMonth: (next: Date) => void;
   onEdit: (task: Task) => void; onAdd: (date: string) => void;
 }) {
+  const { language, t } = useLocale();
   const [selected, setSelected] = useState<string>(today);
 
   /** Open task count per day, and the highest-priority colour to dot the cell. */
@@ -49,7 +51,9 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
   }, [tasks]);
 
   const dayTasks = byDay.get(selected) ?? [];
-  const monthLabel = new Intl.DateTimeFormat(AR_LOCALE, { month: 'long', year: 'numeric' }).format(month);
+  const weekStartsOn = language === 'en' ? 1 : WEEK_STARTS_ON;
+  const locale = language === 'en' ? 'en-GB' : AR_LOCALE;
+  const monthLabel = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(month);
   const monthKeys = [...byDay.keys()].filter((key) => {
     const d = toDate(key);
     return d.getFullYear() === month.getFullYear() && d.getMonth() === month.getMonth();
@@ -66,7 +70,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
   function DayCell({ day, modifiers, ...buttonProps }: DayButtonProps) {
     const key = localDateKey(day.date);
     const count = byDay.get(key)?.length ?? 0;
-    const label = new Intl.DateTimeFormat(AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(day.date);
+    const label = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(day.date);
     return (
       <button
         {...buttonProps}
@@ -84,16 +88,16 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
     <section className="calendar-page">
       <div className="page-title-row">
         <div>
-          <h1>التقويم</h1>
+          <h1>{t('التقويم')}</h1>
           <p aria-label={`${monthLabel}: ${tasksLabel(monthCount)}`}>
-            {monthCount ? <><bdi>{formatArNumber(monthCount)}</bdi> مهمة في {monthLabel}</> : `لا مهام مستحقة في ${monthLabel}`}
+            {monthCount ? <><bdi>{formatArNumber(monthCount)}</bdi> {t('مهمة في')} {monthLabel}</> : `${t('لا مهام مستحقة في')} ${monthLabel}`}
           </p>
         </div>
-        <button className="primary-button" onClick={() => onAdd(selected)}><Plus size={17} />مهمة جديدة</button>
+        <button className="primary-button" onClick={() => onAdd(selected)}><Plus size={17} />{t('مهمة جديدة')}</button>
       </div>
 
       <div className="calendar-layout">
-        <section className="panel calendar-panel" aria-label="اختيار يوم">
+        <section className="panel calendar-panel" aria-label={t('اختيار يوم')}>
           <div className="calendar-toolbar">
             <div className="calendar-nav">
               <button className="icon-button" onClick={() => shiftMonth(-1)} aria-label="الشهر السابق"><ChevronRight size={18} /></button>
@@ -105,9 +109,9 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
 
           <DayPicker
             mode="single"
-            dir="rtl"
-            locale={ar}
-            weekStartsOn={WEEK_STARTS_ON}
+            dir={language === 'en' ? 'ltr' : 'rtl'}
+            locale={language === 'en' ? enGB : ar}
+            weekStartsOn={weekStartsOn}
             month={month}
             onMonthChange={setMonth}
             selected={toDate(selected)}
@@ -135,22 +139,24 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
             }}
             formatters={{
               // Western digits everywhere, per the app's numeral rule.
-              formatWeekdayName: (date) => ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'][date.getDay()],
+              formatWeekdayName: (date) => language === 'en'
+                ? new Intl.DateTimeFormat('en-GB', { weekday: 'short' }).format(date)
+                : ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'][date.getDay()],
             }}
             components={{ DayButton: DayCell }}
           />
 
           <div className="calendar-legend">
-            <span><i className="cal-legend-dot" />مهام مستحقة</span>
-            <span><i className="cal-legend-today" />اليوم</span>
+            <span><i className="cal-legend-dot" />{t('مهام مستحقة')}</span>
+            <span><i className="cal-legend-today" />{t('اليوم')}</span>
           </div>
         </section>
 
-        <section className="panel calendar-agenda" aria-label="مهام اليوم المحدد">
+        <section className="panel calendar-agenda" aria-label={t('مهام اليوم المحدد')}>
           <div className="agenda-head">
-            <h2>{selected === today ? 'اليوم' : new Intl.DateTimeFormat(AR_LOCALE, { weekday: 'long' }).format(toDate(selected))}</h2>
+            <h2>{selected === today ? t('اليوم') : new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(toDate(selected))}</h2>
             <span className="agenda-date">
-              <bdi>{new Intl.DateTimeFormat(AR_LOCALE, { day: 'numeric', month: 'long' }).format(toDate(selected))}</bdi>
+              <bdi>{new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(toDate(selected))}</bdi>
               <span className="count-badge" role="img" aria-label={tasksLabel(dayTasks.length)}><bdi>{formatArNumber(dayTasks.length)}</bdi></span>
             </span>
           </div>
@@ -170,7 +176,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
                       </span>
                     </button>
                     <RowActions>
-                      <button className="icon-button row-action" onClick={() => onEdit(task)} aria-label={`تعديل ${task.title}`} title="تعديل"><Pencil size={14} /></button>
+                      <button className="icon-button row-action" onClick={() => onEdit(task)} aria-label={`${t('تعديل')} ${task.title}`} title={t('تعديل')}><Pencil size={14} /></button>
                     </RowActions>
                   </li>
                 );
@@ -178,9 +184,9 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
             </ul>
           ) : (
             <div className="empty-state agenda-empty">
-              <b>يوم خالٍ</b>
-              <span>لا مهام مستحقة. مساحة مفتوحة لما يهمّك.</span>
-              <button className="ghost-button" onClick={() => onAdd(selected)}><Plus size={15} />أضف مهمة</button>
+              <b>{t('يوم خالٍ')}</b>
+              <span>{t('لا مهام مستحقة. مساحة مفتوحة لما يهمّك.')}</span>
+              <button className="ghost-button" onClick={() => onAdd(selected)}><Plus size={15} />{t('أضف مهمة')}</button>
             </div>
           )}
         </section>

@@ -13,7 +13,7 @@
 :root {
   /* ---- fonts ---- */
   --font-heading: "El Messiri", Tahoma, "Segoe UI", serif;            /* C5: no Naskh fallback in chrome */
-  --font-ui: "Readex Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-ui: "Readex Pro Variable", "Readex Pro", "Segoe UI", Tahoma, system-ui, sans-serif;
   --font-reading: "Noto Naskh Arabic", "Amiri", Tahoma, serif;
 
   /* ---- type scale ---- */

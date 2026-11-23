@@ -1,9 +1,28 @@
 import type { MetadataRoute } from 'next';
 
-/**
- * Manifest is consolidated into public/manifest.json (Option A).
- * layout.tsx explicitly links to /manifest.json.
- */
+/** Web App Manifest served at /manifest.webmanifest (the URL Next links to). */
 export default function manifest(): MetadataRoute.Manifest {
-  return {};
+  return {
+    id: '/',
+    name: 'Winit — Focus, habits and goals',
+    short_name: 'Winit',
+    description: 'A calm space to plan tasks, build habits and focus on what matters.',
+    start_url: '/',
+    scope: '/',
+    display: 'standalone',
+    orientation: 'portrait-primary',
+    background_color: '#0B1A20',
+    theme_color: '#0B1A20',
+    dir: 'auto',
+    lang: 'en',
+    categories: ['productivity', 'utilities'],
+    prefer_related_applications: false,
+    icons: [
+      { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+      { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+    ],
+  };
 }

@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { FocusSession, Task } from '@/lib/types';
-import { Check, Pause } from '../icons';
+import { Check, ChevronUp, Pause } from '../icons';
 import { formatClock, getRemainingSeconds } from '@/lib/core';
+import { useLocale } from '../locale';
 
 export type FocusDockProps = {
   session: FocusSession;
@@ -11,9 +12,11 @@ export type FocusDockProps = {
   busy: boolean;
   onFinish: (completed?: boolean) => void;
   onStop: () => void;
+  onExpand: () => void;
 };
 
-export function FocusDock({ session, tasks, busy, onFinish, onStop }: FocusDockProps) {
+export function FocusDock({ session, tasks, busy, onFinish, onStop, onExpand }: FocusDockProps) {
+  const { t } = useLocale();
   const [tick, setTick] = useState(Date.now());
 
   useEffect(() => {
@@ -45,20 +48,23 @@ export function FocusDock({ session, tasks, busy, onFinish, onStop }: FocusDockP
     <div className="focus-dock">
       <span className="dock-live">
         <i />
-        تركيز
+        {t('تركيز')}
       </span>
-      <span className="dock-title">{task?.title ?? 'جلسة تركيز مستقلة'}</span>
+      <span className="dock-title">{task?.title ?? t('جلسة تركيز مستقلة')}</span>
       <b className="dock-timer">{display}</b>
-      <button className="dock-stop" onClick={onStop} disabled={busy} title="إنهاء الجلسة" aria-label="إنهاء جلسة التركيز">
+      <button type="button" className="dock-expand" onClick={onExpand} title={t('تكبير المؤقت')} aria-label={t('تكبير المؤقت')}>
+        <ChevronUp size={16} />
+      </button>
+      <button className="dock-stop" onClick={onStop} disabled={busy} title={t('إنهاء الجلسة')} aria-label={t('إنهاء جلسة التركيز')}>
         <Pause size={14} fill="currentColor" />
-        <span>إنهاء</span>
+        <span>{t('إنهاء')}</span>
       </button>
       <button
         className="dock-done"
         onClick={() => onFinish(true)}
         disabled={busy}
-        title="إكمال الجلسة"
-        aria-label="إكمال جلسة التركيز"
+        title={t('إكمال الجلسة')}
+        aria-label={t('إكمال جلسة التركيز')}
       >
         <Check size={15} />
       </button>
