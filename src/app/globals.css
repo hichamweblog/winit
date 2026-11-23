@@ -1,5 +1,5 @@
 /* Hallmark · shape: app screen · genre: modern-minimal · themes: sticker sheet / spore cellar · modes: light+dark · scope: app
- * type: Tajawal display / Readex Pro closest match to Reader Pro / Noto Naskh Arabic small · nav: mobile tabs + desktop rail
+ * type: Tajawal display+UI / Noto Naskh Arabic reading · nav: mobile tabs + desktop rail
  * signature: today's task queue and live focus timer · states: loading, empty, error, full · contrast: both modes · v3.0.0 */
 /* Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4 · weakest: S, lead with the real task queue instead of a greeting over stat cards */
 @import "tailwindcss";
@@ -10,19 +10,19 @@
   name: "winit-energy";
   default: true;
   color-scheme: light;
-  --color-base-100: #F6F6FC;
-  --color-base-200: #E2E2F0;
-  --color-base-300: #D4D4E8;
-  --color-base-content: #1A1A2E;
-  --color-primary: #4353D0;
+  --color-base-100: #FFFFFF;
+  --color-base-200: #D1F0FF;
+  --color-base-300: #B6E5F4;
+  --color-base-content: #123047;
+  --color-primary: #1A6DAD;
   --color-primary-content: #FFFFFF;
-  --color-secondary: #D46090;
-  --color-secondary-content: #200E16;
-  --color-accent: #168052;
-  --color-accent-content: #FFFFFF;
-  --color-neutral: #252558;
-  --color-neutral-content: #EEEEF8;
-  --color-info: #2B66B1;
+  --color-secondary: #46B4D2;
+  --color-secondary-content: #123047;
+  --color-accent: #7ADAF5;
+  --color-accent-content: #123047;
+  --color-neutral: #104D7B;
+  --color-neutral-content: #FFFFFF;
+  --color-info: #1A6DAD;
   --color-info-content: #FFFFFF;
   --color-success: #168052;
   --color-success-content: #FFFFFF;
@@ -39,20 +39,20 @@
   name: "winit-energy-dark";
   prefersdark: true;
   color-scheme: dark;
-  --color-base-100: #16162A;
-  --color-base-200: #0E0E1E;
-  --color-base-300: #2C2C44;
-  --color-base-content: #EDEDF8;
-  --color-primary: #8A99F4;
-  --color-primary-content: #0F1028;
-  --color-secondary: #FFA0C6;
-  --color-secondary-content: #260E18;
-  --color-accent: #63D6A0;
-  --color-accent-content: #09271A;
-  --color-neutral: #1E1E36;
-  --color-neutral-content: #EDEDF8;
-  --color-info: #83B9F4;
-  --color-info-content: #0A2038;
+  --color-base-100: #102D3B;
+  --color-base-200: #0B1F2B;
+  --color-base-300: #2A5265;
+  --color-base-content: #EDF9FE;
+  --color-primary: #7ADAF5;
+  --color-primary-content: #0B2D3F;
+  --color-secondary: #46B4D2;
+  --color-secondary-content: #062B3B;
+  --color-accent: #D1F0FF;
+  --color-accent-content: #123047;
+  --color-neutral: #173A4C;
+  --color-neutral-content: #EDF9FE;
+  --color-info: #7ADAF5;
+  --color-info-content: #0B2D3F;
   --color-success: #63D6A0;
   --color-success-content: #09271A;
   --color-warning: #F3C867;
@@ -64,13 +64,8 @@
   --radius-box: 0.875rem;
   --border: 1px;
 }
-@import "@fontsource/cairo/arabic.css";
-@import "@fontsource/cairo/latin.css";
-@import "@fontsource/rubik/arabic.css";
-@import "@fontsource/rubik/latin.css";
-@import "@fontsource/el-messiri/arabic.css";
-@import "@fontsource/el-messiri/latin.css";
-@import "@fontsource-variable/readex-pro/wght.css";
+@import "@fontsource/tajawal/arabic.css";
+@import "@fontsource/tajawal/latin.css";
 @import "@fontsource/noto-naskh-arabic/arabic.css";
 @import "./tokens.css";
 @import "./vibes.css";
@@ -412,8 +407,8 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   .dock-expand { min-width: 36px; min-height: 36px; }
 }
 
-/* §3.3 rule 3: chrome uses Readex Pro. --font-small now aliases --font-ui,
-   and the Naskh selector list that used to live here has been removed. */
+/* App chrome uses Tajawal. Long-form reading may opt into Noto Naskh Arabic;
+   it does not leak into navigation, buttons, or form controls. */
 
 .sidebar { overflow-y: auto; overscroll-behavior: contain; }
 .journal-prompt { margin-block-end: var(--space-md); padding: var(--space-md); display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); color: var(--color-ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }

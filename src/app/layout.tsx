@@ -5,8 +5,8 @@ import './globals.css';
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0B1A20' },
+    { media: '(prefers-color-scheme: light)', color: '#F3FAFD' },
+    { media: '(prefers-color-scheme: dark)', color: '#081E2B' },
   ],
   width: 'device-width',
   initialScale: 1,

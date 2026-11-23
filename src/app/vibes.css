@@ -1,31 +1,32 @@
-/* Winit Soft Iris (قزحية) palette: periwinkle blue + soft pink + lavender.
-   Applied as the active product vibe with Cairo display and Rubik UI. */
+/* Winit Coastal Sky: the supplied five-color palette, tuned for readable text.
+   Fun Blue is reserved for white-on-color actions; brighter cyans are used with
+   dark ink; Onahau and Colonial White are calm surfaces, not text colors. */
 :root[data-vibe="energy"] {
-  --font-heading: "Cairo", Tahoma, "Segoe UI", sans-serif;
-  --font-ui: "Rubik", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
+  --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
   color-scheme: light;
-  --bg: #EEEEF8;
-  --surface: #F6F6FC;
+  --bg: #F3FAFD;
+  --surface: #FFFFFF;
   --surface-raised: #FFFFFF;
-  --surface-sunken: #E2E2F0;
-  --text: #1A1A2E;
-  --text-muted: #565672;
-  --text-disabled: #8D8EA6;
-  --line: #D4D4E8;
-  --line-strong: #727294;
-  --accent: #4353D0;
-  --accent-hover: #3645BC;
-  --accent-pressed: #2A37A5;
-  --accent-soft: #DFE3F7;
+  --surface-sunken: #D1F0FF;
+  --text: #123047;
+  --text-muted: #415B6C;
+  --text-disabled: #738B98;
+  --line: #B8D8E5;
+  --line-strong: #4B7183;
+  --accent: #1A6DAD;
+  --accent-hover: #155A91;
+  --accent-pressed: #104D7B;
+  --accent-soft: #D1F0FF;
   --on-accent: #FFFFFF;
-  --accent-gradient: linear-gradient(125deg, #4353D0 0%, #5A6CE0 100%);
-  --accent-2: #D46090;
-  --accent-2-strong: #A8366C;
-  --accent-2-soft: #F8E2EC;
-  --on-accent-2: #200E16;
-  --accent-2-on-soft: #9C2E62;
-  --accent-2-line: #A8366C;
-  --toast-action: #FFA0C6;
+  --accent-gradient: linear-gradient(125deg, #1A6DAD 0%, #1A6DAD 100%);
+  --accent-2: #46B4D2;
+  --accent-2-strong: #155A75;
+  --accent-2-soft: #D1F0FF;
+  --on-accent-2: #123047;
+  --accent-2-on-soft: #104D7B;
+  --accent-2-line: #155A75;
+  --toast-action: #7ADAF5;
   --success: #168052;
   --success-bg: #DDF4E9;
   --success-text: #176744;
@@ -34,57 +35,56 @@
   --warning-bg: #FFF1C9;
   --warning-text: #7D5400;
   --on-warning: #FFFFFF;
-  --info: #2B66B1;
-  --info-bg: #DFEBFA;
-  --info-text: #245A9E;
+  --info: #1A6DAD;
+  --info-bg: #D1F0FF;
+  --info-text: #104D7B;
   --on-info: #FFFFFF;
-  --energy-sidebar-bg: #252558;
-  --energy-sidebar-hover: #32326E;
-  --energy-sidebar-active: #4353D0;
-  --energy-sidebar-accent: #B6C0FF;
+  --energy-sidebar-bg: #1A6DAD;
+  --energy-sidebar-hover: #155A91;
+  --energy-sidebar-active: #D1F0FF;
+  --energy-sidebar-accent: #7ADAF5;
   --energy-sidebar-text: #FFFFFF;
-  --energy-sidebar-muted: #C8CEF6;
-  --energy-sidebar-border: #474780;
-  --energy-card-violet: #DFE3F7;
-  --energy-card-coral: #F8E2EC;
-  --energy-card-mint: #DDF4E9;
-  --energy-hero-start: #222252;
-  --energy-hero-mid: #35409E;
-  --energy-hero-end: #4353D0;
+  --energy-sidebar-muted: #D1F0FF;
+  --energy-sidebar-active-text: #104D7B;
+  --energy-sidebar-border: #46B4D2;
+  --energy-card-onahau: #D1F0FF;
+  --energy-card-malibu: #7ADAF5;
+  --energy-card-colonial: #FFECBD;
+  --energy-hero-bg: #1A6DAD;
   --energy-hero-text: #FFFFFF;
-  --energy-hero-muted: #E2E6FF;
-  --shadow-1: 0 1px 2px rgba(28, 28, 46, .06);
-  --shadow-2: 0 8px 24px rgba(42, 42, 96, .10);
-  --shadow-3: 0 18px 48px rgba(35, 35, 80, .16);
+  --energy-hero-muted: #D1F0FF;
+  --shadow-1: 0 1px 2px rgba(18, 48, 71, .06);
+  --shadow-2: 0 8px 24px rgba(18, 69, 106, .10);
+  --shadow-3: 0 18px 48px rgba(18, 48, 71, .16);
 }
 
 :root[data-vibe="energy"][data-mode="dark"],
 :root[data-vibe="energy"][data-theme="dark"] {
-  --font-heading: "Cairo", Tahoma, "Segoe UI", sans-serif;
-  --font-ui: "Rubik", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
+  --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
   color-scheme: dark;
-  --bg: #0E0E1E;
-  --surface: #16162A;
-  --surface-raised: #1E1E36;
-  --surface-sunken: #080814;
-  --text: #EDEDF8;
-  --text-muted: #A4A4C2;
-  --text-disabled: #666682;
-  --line: #2C2C44;
-  --line-strong: #6E6E92;
-  --accent: #8A99F4;
-  --accent-hover: #9EA9F8;
-  --accent-pressed: #B2BCFC;
-  --accent-soft: #242446;
-  --on-accent: #0F1028;
-  --accent-gradient: linear-gradient(125deg, #8A99F4 0%, #9DAAF6 100%);
-  --accent-2: #FFA0C6;
-  --accent-2-strong: #FFA0C6;
-  --accent-2-soft: #442234;
-  --on-accent-2: #260E18;
-  --accent-2-on-soft: #FFAFD0;
-  --accent-2-line: #FFA0C6;
-  --toast-action: #3342B0;
+  --bg: #081E2B;
+  --surface: #102D3B;
+  --surface-raised: #17394A;
+  --surface-sunken: #071824;
+  --text: #EDF9FE;
+  --text-muted: #B7CFD8;
+  --text-disabled: #78929B;
+  --line: #2A5265;
+  --line-strong: #74A6B8;
+  --accent: #7ADAF5;
+  --accent-hover: #9BE6F8;
+  --accent-pressed: #C1F0FA;
+  --accent-soft: #123B4D;
+  --on-accent: #0B2D3F;
+  --accent-gradient: linear-gradient(125deg, #7ADAF5 0%, #7ADAF5 100%);
+  --accent-2: #46B4D2;
+  --accent-2-strong: #7ADAF5;
+  --accent-2-soft: #123B4D;
+  --on-accent-2: #062B3B;
+  --accent-2-on-soft: #A5E9F8;
+  --accent-2-line: #7ADAF5;
+  --toast-action: #1A6DAD;
   --success: #63D6A0;
   --success-bg: #1D3D36;
   --success-text: #73D9A6;
@@ -93,82 +93,75 @@
   --warning-bg: #423A25;
   --warning-text: #F1C65A;
   --on-warning: #30220B;
-  --info: #83B9F4;
-  --info-bg: #263B58;
-  --info-text: #91C3FA;
-  --on-info: #0A2038;
-  --energy-sidebar-bg: #101026;
-  --energy-sidebar-hover: #1C1C3C;
-  --energy-sidebar-active: #2A2A54;
-  --energy-sidebar-accent: #8A99F4;
-  --energy-sidebar-text: #EDEDF8;
-  --energy-sidebar-muted: #A4A4C2;
-  --energy-sidebar-border: #2E2E50;
-  --energy-card-violet: #242446;
-  --energy-card-coral: #442234;
-  --energy-card-mint: #1D3D36;
-  --energy-hero-start: #101026;
-  --energy-hero-mid: #242456;
-  --energy-hero-end: #3A4598;
+  --info: #7ADAF5;
+  --info-bg: #123B4D;
+  --info-text: #A5E9F8;
+  --on-info: #0B2D3F;
+  --energy-sidebar-bg: #0C344B;
+  --energy-sidebar-hover: #10445D;
+  --energy-sidebar-active: #D1F0FF;
+  --energy-sidebar-accent: #7ADAF5;
+  --energy-sidebar-text: #EDF9FE;
+  --energy-sidebar-muted: #D1F0FF;
+  --energy-sidebar-active-text: #104D7B;
+  --energy-sidebar-border: #285B70;
+  --energy-card-onahau: #153B4F;
+  --energy-card-malibu: #14465B;
+  --energy-card-colonial: #453B26;
+  --energy-hero-bg: #104D7B;
   --energy-hero-text: #FFFFFF;
-  --energy-hero-muted: #E0E4FF;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, .36);
-  --shadow-2: 0 8px 26px rgba(0, 0, 0, .34);
-  --shadow-3: 0 18px 52px rgba(0, 0, 0, .48);
+  --energy-hero-muted: #D1F0FF;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .38);
+  --shadow-2: 0 8px 26px rgba(0, 0, 0, .36);
+  --shadow-3: 0 18px 52px rgba(0, 0, 0, .5);
 }
 
 :root[data-vibe="energy"] .sidebar {
   --color-paper: var(--energy-sidebar-bg);
-  --color-paper-2: var(--energy-sidebar-active);
+  --color-paper-2: var(--energy-sidebar-hover);
   --color-paper-3: var(--energy-sidebar-hover);
   --color-ink: var(--energy-sidebar-text);
   --color-ink-2: var(--energy-sidebar-muted);
   --color-muted: var(--energy-sidebar-muted);
-  --color-rule: color-mix(in srgb, var(--energy-sidebar-text) 24%, transparent);
+  --color-rule: color-mix(in srgb, var(--energy-sidebar-text) 28%, transparent);
   --color-edge: var(--energy-sidebar-border);
   --color-accent: var(--energy-sidebar-accent);
   --color-accent-strong: var(--energy-sidebar-text);
-  --color-accent-ink: #101028;
+  --color-accent-ink: #104D7B;
   --line: var(--energy-sidebar-border);
   color: var(--energy-sidebar-text);
-  background: linear-gradient(180deg, var(--energy-sidebar-bg), var(--energy-sidebar-hover));
+  background: var(--energy-sidebar-bg);
   border-color: var(--energy-sidebar-border);
 }
+:root[data-vibe="energy"] .sidebar .nav-active,
+:root[data-vibe="energy"] .sidebar .project-active {
+  color: var(--energy-sidebar-active-text);
+  background: var(--energy-sidebar-active);
+}
+:root[data-vibe="energy"] .sidebar .nav-active svg { color: var(--energy-sidebar-active-text); }
+
 :root[data-vibe="energy"] .welcome-row {
-  position: relative;
-  overflow: hidden;
   padding: clamp(22px, 3.5vw, 36px);
-  border: 1px solid color-mix(in srgb, var(--energy-hero-text) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--energy-hero-text) 26%, transparent);
   border-radius: 22px;
-  background: linear-gradient(115deg, var(--energy-hero-start), var(--energy-hero-mid) 56%, var(--energy-hero-end));
+  background: var(--energy-hero-bg);
   box-shadow: var(--shadow-2);
 }
-:root[data-vibe="energy"] .welcome-row::after {
-  content: "";
-  position: absolute;
-  inset-block-start: -72px;
-  inset-inline-end: -42px;
-  width: 210px;
-  aspect-ratio: 1;
-  border: 1px solid color-mix(in srgb, var(--energy-hero-text) 20%, transparent);
-  border-radius: 50%;
-  box-shadow: 0 0 0 24px color-mix(in srgb, var(--energy-hero-text) 7%, transparent), 0 0 0 48px color-mix(in srgb, var(--energy-hero-text) 5%, transparent);
-  pointer-events: none;
-}
-:root[data-vibe="energy"] .welcome-row h1 { position: relative; z-index: 1; color: var(--energy-hero-text); }
-:root[data-vibe="energy"] .welcome-row p { position: relative; z-index: 1; color: var(--energy-hero-muted); }
-:root[data-vibe="energy"] .stat-card:nth-child(1) { background: var(--energy-card-violet); border-color: color-mix(in srgb, var(--accent) 22%, var(--line)); }
-:root[data-vibe="energy"] .stat-card:nth-child(2) { background: var(--energy-card-coral); border-color: color-mix(in srgb, var(--accent-2) 24%, var(--line)); }
-:root[data-vibe="energy"] .stat-card:nth-child(3) { background: var(--energy-card-mint); border-color: color-mix(in srgb, var(--success) 22%, var(--line)); }
-:root[data-vibe="energy"] .primary-button { background: var(--accent-gradient); font-weight: 650; box-shadow: 0 5px 14px color-mix(in srgb, var(--accent) 25%, transparent); }
-:root[data-vibe="energy"] .primary-button:hover:not(:disabled) { background: var(--accent-gradient); filter: brightness(1.06); transform: translateY(-1px); }
-:root[data-vibe="energy"] .focus-dock { border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); box-shadow: 0 12px 34px color-mix(in srgb, var(--accent) 18%, transparent); }
+:root[data-vibe="energy"] .welcome-row h1 { color: var(--energy-hero-text); }
+:root[data-vibe="energy"] .welcome-row p { color: var(--energy-hero-muted); }
+:root[data-vibe="energy"] .stat-card:nth-child(1) { background: var(--energy-card-onahau); border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); }
+:root[data-vibe="energy"] .stat-card:nth-child(2) { background: var(--energy-card-colonial); border-color: color-mix(in srgb, #A06C16 28%, var(--line)); }
+:root[data-vibe="energy"] .stat-card:nth-child(3) { background: var(--energy-card-malibu); border-color: color-mix(in srgb, var(--accent-2) 32%, var(--line)); }
+:root[data-vibe="energy"] .primary-button { background: var(--accent); font-weight: 650; box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 23%, transparent); }
+:root[data-vibe="energy"] .primary-button:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+:root[data-vibe="energy"] .primary-button:disabled { opacity: 1; color: var(--text-muted); background: var(--surface-sunken); border: 1px solid var(--line-strong); box-shadow: none; }
+:root[data-vibe="energy"] .focus-dock { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); box-shadow: 0 12px 34px color-mix(in srgb, var(--accent) 16%, transparent); }
 :root[data-vibe="energy"] .focus-modal .modal-timer-ring { filter: drop-shadow(0 10px 22px color-mix(in srgb, var(--accent) 22%, transparent)); }
 :root[data-vibe="energy"] .nav-item.nav-active, :root[data-vibe="energy"] .project-item.project-active { box-shadow: inset 3px 0 0 var(--accent); }
 :root[data-vibe="energy"] .task-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
-:root[data-vibe="energy"] .fab-add { background: var(--accent-gradient); box-shadow: 0 9px 22px color-mix(in srgb, var(--accent) 36%, transparent); }
+:root[data-vibe="energy"] .fab-add { background: var(--accent); box-shadow: 0 9px 22px color-mix(in srgb, var(--accent) 30%, transparent); }
 :root[data-vibe="energy"] .mobile-tab-active { color: var(--accent); }
-:root[data-vibe="energy"] .settings-group { border-color: color-mix(in srgb, var(--accent) 11%, var(--line)); }
+:root[data-vibe="energy"] .settings-group { border-color: color-mix(in srgb, var(--accent) 16%, var(--line)); }
 
 @media (prefers-reduced-motion: no-preference) {
   :root[data-vibe="energy"] .primary-button, :root[data-vibe="energy"] .fab-add { transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease; }
