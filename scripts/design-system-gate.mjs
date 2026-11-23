@@ -150,11 +150,29 @@ for (const file of cssFiles) {
 }
 
 const globals = read('src/app/globals.css');
+const typography = read('src/app/tokens.css');
+const typeScale = [
+  ['body', /--text-body:\s*1rem\s*;/],
+  ['ui', /--text-ui:\s*0\.9375rem\s*;/],
+  ['small', /--text-small:\s*0\.875rem\s*;/],
+  ['micro', /--text-micro:\s*0\.8125rem\s*;/],
+  ['weight', /--body-weight:\s*500\s*;/],
+];
+const missingType = typeScale.filter(([, pattern]) => !pattern.test(typography)).map(([name]) => name);
+if (missingType.length) fail('mobile-type-scale', `missing readable body/UI size or weight: ${missingType.join(', ')}`);
+else ok('mobile-type-scale', '16px body, 15px UI, 14px secondary, 13px compact, 500 body weight');
 if (/font-family:\s*var\(--font-(small|reading|ar)\)/.test(globals)) {
   // --font-small aliases --font-ui, so it is allowed; --font-reading is not.
   if (/font-family:\s*var\(--font-reading\)/.test(globals)) fail('naskh-chrome', '--font-reading used outside .reading-body');
   else ok('naskh-chrome', 'no Naskh in chrome');
 } else ok('naskh-chrome', 'no Naskh in chrome');
+
+if (/\.kpi-icon\s*\{[^}]*color:\s*var\(--accent\)/s.test(globals)) ok('kpi-icon-contrast', 'KPI icons use the theme accent on accent-soft');
+else fail('kpi-icon-contrast', 'KPI icons must use the high-contrast theme accent');
+if (/\.stats-page \.segmented-control\s*\{[^}]*width:\s*100%/s.test(globals) && /\.segmented-control button\s*\{[^}]*min-block-size:\s*44px/s.test(globals)) ok('mobile-stats-controls', 'stats range controls fill phone width and meet 44px targets');
+else fail('mobile-stats-controls', 'stats range controls need full-width phone layout and 44px targets');
+if (/\.toast\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto/s.test(globals)) ok('toast-layout', 'notifications keep message and close action on one compact row');
+else fail('toast-layout', 'notifications need a compact non-obstructive row layout');
 
 const base = read('src/app/base.css');
 if (!/\.reading-body\s*\{[^}]*--font-reading/.test(base)) fail('reading-body', '.reading-body must own --font-reading');
