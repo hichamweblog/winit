@@ -3,6 +3,67 @@
  * signature: today's task queue and live focus timer · states: loading, empty, error, full · contrast: both modes · v3.0.0 */
 /* Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4 · weakest: S, lead with the real task queue instead of a greeting over stat cards */
 @import "tailwindcss";
+@plugin "daisyui" {
+  themes: winit-energy --default, winit-energy-dark --prefersdark;
+}
+@plugin "daisyui/theme" {
+  name: "winit-energy";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #FAFAFF;
+  --color-base-200: #EAEAF8;
+  --color-base-300: #D9DAF0;
+  --color-base-content: #17192F;
+  --color-primary: #5145E5;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #FF8055;
+  --color-secondary-content: #24130D;
+  --color-accent: #168052;
+  --color-accent-content: #FFFFFF;
+  --color-neutral: #252742;
+  --color-neutral-content: #F4F4FF;
+  --color-info: #326EBA;
+  --color-info-content: #FFFFFF;
+  --color-success: #168052;
+  --color-success-content: #FFFFFF;
+  --color-warning: #916100;
+  --color-warning-content: #FFFFFF;
+  --color-error: #B3261E;
+  --color-error-content: #FFFFFF;
+  --radius-selector: 0.625rem;
+  --radius-field: 0.625rem;
+  --radius-box: 0.875rem;
+  --border: 1px;
+}
+@plugin "daisyui/theme" {
+  name: "winit-energy-dark";
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: #181A31;
+  --color-base-200: #101125;
+  --color-base-300: #292C47;
+  --color-base-content: #F0F0FF;
+  --color-primary: #A39AFF;
+  --color-primary-content: #18152F;
+  --color-secondary: #FF946E;
+  --color-secondary-content: #26140E;
+  --color-accent: #63D6A0;
+  --color-accent-content: #09271A;
+  --color-neutral: #20233B;
+  --color-neutral-content: #F0F0FF;
+  --color-info: #83B9F4;
+  --color-info-content: #0A2038;
+  --color-success: #63D6A0;
+  --color-success-content: #09271A;
+  --color-warning: #F3C867;
+  --color-warning-content: #30220B;
+  --color-error: #F2877F;
+  --color-error-content: #2A0A08;
+  --radius-selector: 0.625rem;
+  --radius-field: 0.625rem;
+  --radius-box: 0.875rem;
+  --border: 1px;
+}
 @import "@fontsource/el-messiri/arabic.css";
 @import "@fontsource/el-messiri/latin.css";
 @import "@fontsource-variable/readex-pro/wght.css";
@@ -191,7 +252,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .page-title-row h1 { font-size: var(--text-h1-compact); line-height: 1.35; }
 .page-title-row p { margin-block-start: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-ui); }
 /* §8.1 Primary: --accent / --on-accent, radius 10, no border, no scale on press. */
-.primary-button { min-height: var(--tap-min); padding-inline: var(--space-4); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); flex: none; color: var(--on-accent); background: var(--accent); border: 0; border-radius: var(--radius-md); font-size: var(--text-ui); font-weight: 500; white-space: nowrap; transition: background-color var(--dur-fast) var(--ease); }
+.primary-button { min-height: var(--tap-min); padding-inline: var(--space-4); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); flex: none; color: var(--color-primary-content, var(--on-accent)); background: var(--color-primary, var(--accent)); border: 0; border-radius: var(--radius-field, var(--radius-md)); font-size: var(--text-ui); font-weight: 600; white-space: nowrap; transition: background-color var(--dur-fast) var(--ease); }
 .task-groups { display: flex; flex-direction: column; gap: var(--space-lg); }
 .task-group { border-block-start: 1px solid var(--color-rule); }
 .group-title { min-height: 48px; display: flex; align-items: center; gap: var(--space-xs); color: var(--color-ink); font-size: var(--text-ui); font-weight: 600; }

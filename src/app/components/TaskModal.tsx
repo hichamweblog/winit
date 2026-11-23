@@ -187,7 +187,7 @@ export function TaskModal({
           <span>
             <kbd>Esc</kbd> {t('للإغلاق')}
           </span>
-          <button className="primary-button" type="submit" disabled={busy || !title.trim()}>
+          <button className="btn btn-primary primary-button" type="submit" disabled={busy || !title.trim()}>
             <Plus size={15} />
             {busy ? t('جارٍ الحفظ…') : task ? t('حفظ التعديلات') : t('أضف إلى يومي')}
           </button>

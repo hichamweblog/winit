@@ -93,7 +93,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
             {monthCount ? <><bdi>{formatArNumber(monthCount)}</bdi> {t('مهمة في')} {monthLabel}</> : `${t('لا مهام مستحقة في')} ${monthLabel}`}
           </p>
         </div>
-        <button className="primary-button" onClick={() => onAdd(selected)}><Plus size={17} />{t('مهمة جديدة')}</button>
+        <button className="btn btn-primary primary-button" onClick={() => onAdd(selected)}><Plus size={17} />{t('مهمة جديدة')}</button>
       </div>
 
       <div className="calendar-layout">

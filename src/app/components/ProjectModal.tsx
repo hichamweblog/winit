@@ -220,7 +220,7 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
           ) : (
             <span>يمكنك تعديل المشروع لاحقاً</span>
           )}
-          <button className="primary-button" type="submit" disabled={busy}>
+          <button className="btn btn-primary primary-button" type="submit" disabled={busy}>
             {busy ? 'جارٍ الحفظ…' : project ? 'حفظ التعديلات' : 'إنشاء المشروع'}
           </button>
         </div>

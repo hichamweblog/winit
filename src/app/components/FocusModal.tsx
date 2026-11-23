@@ -81,7 +81,7 @@ export function FocusModal({
             <div className="focus-live-actions">
               <button type="button" className="ghost-button" onClick={onClose}><ChevronDown size={17} />{t('تصغير إلى المؤقت المصغر')}</button>
               <button type="button" className="danger-button" disabled={busy} onClick={() => onFinish?.(false)}><Pause size={15} />{t('إنهاء الجلسة')}</button>
-              <button type="button" className="primary-button" disabled={busy} onClick={() => onFinish?.(true)}><Check size={16} />{t('إكمال الجلسة')}</button>
+              <button type="button" className="btn btn-primary primary-button" disabled={busy} onClick={() => onFinish?.(true)}><Check size={16} />{t('إكمال الجلسة')}</button>
             </div>
           </>
         ) : (
@@ -170,7 +170,7 @@ export function FocusModal({
             ))}
           </select>
         </label>
-        <button className="primary-button focus-start-wide" onClick={onStart}>
+        <button className="btn btn-primary primary-button focus-start-wide" onClick={onStart}>
           <Play size={16} fill="currentColor" />
           {t('ابدأ التركيز')}
         </button>

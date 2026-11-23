@@ -95,7 +95,7 @@ export function HabitsView({
               <span>{allExpanded ? 'طي التفاصيل' : 'عرض التفاصيل'}</span>
             </button>
           )}
-          <button className="primary-button" onClick={onAdd}>
+          <button className="btn btn-primary primary-button" onClick={onAdd}>
             <Plus size={17} />
             عادة جديدة
           </button>
@@ -430,7 +430,7 @@ export function HabitsView({
           <div className="empty-page">
             <h3>ابدأ بعادة واحدة</h3>
             <p>القرآن، الحركة، أو أي شيء تريد الاستمرار عليه.</p>
-            <button className="primary-button" onClick={onAdd}>
+            <button className="btn btn-primary primary-button" onClick={onAdd}>
               <Plus size={16} />أنشئ عادة
             </button>
           </div>

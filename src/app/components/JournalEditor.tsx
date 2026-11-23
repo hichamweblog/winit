@@ -141,7 +141,7 @@ export function JournalEditor({ entry, today, busy, onClose, onSave }: JournalEd
           <span>
             {formatNumber(content.length)} / {formatNumber(20000)} {t('حرف')}
           </span>
-          <button className="primary-button" type="submit" disabled={busy || !content.trim()}>
+          <button className="btn btn-primary primary-button" type="submit" disabled={busy || !content.trim()}>
             {busy ? t('جارٍ الحفظ…') : t('حفظ التدوينة')}
           </button>
         </div>

@@ -264,6 +264,7 @@ function WinitApp() {
   const toggleTheme = () => {
     const nextMode = darkMode ? 'light' : 'dark';
     document.documentElement.dataset.mode = nextMode;
+    document.documentElement.dataset.theme = nextMode === 'dark' ? 'winit-energy-dark' : 'winit-energy';
     try { window.localStorage.setItem('winit-mode', nextMode); } catch { /* keep the current-page choice if storage is unavailable */ }
     setDarkMode(nextMode === 'dark');
   };
@@ -613,7 +614,7 @@ function WinitApp() {
   }, [tasks, view, selectedProject, today]);
   const hasActiveModal = showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor || Boolean(confirmDialog);
 
-  if (!data && notice) return <div className="app-error"><h1>{t('تعذر فتح مساحتك.')}</h1><p>{notice.message}</p><button className="primary-button" onClick={() => { setNotice(null); void refresh(); }}>{t('أعد المحاولة')}</button></div>;
+  if (!data && notice) return <div className="app-error"><h1>{t('تعذر فتح مساحتك.')}</h1><p>{notice.message}</p><button className="btn btn-primary primary-button" onClick={() => { setNotice(null); void refresh(); }}>{t('أعد المحاولة')}</button></div>;
   if (!data) return <div className="app-loading" aria-label={t('جارٍ تحميل مساحة العمل')}><div className="loading-skeleton loading-title" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-panel" /></div>;
 
   return (

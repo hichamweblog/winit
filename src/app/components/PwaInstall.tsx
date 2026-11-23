@@ -57,7 +57,7 @@ export default function PwaInstall() {
         {!installed && !ios && !promptEvent && <span className="pwa-install-help">{t('يمكنك تثبيت التطبيق من قائمة المتصفح.')}</span>}
       </div>
       {promptEvent && !installed && (
-        <button type="button" className="primary-button pwa-install-button" disabled={busy} onClick={() => void install()}>
+        <button type="button" className="btn btn-primary primary-button pwa-install-button" disabled={busy} onClick={() => void install()}>
           {busy ? '…' : t('تثبيت التطبيق')}
         </button>
       )}
