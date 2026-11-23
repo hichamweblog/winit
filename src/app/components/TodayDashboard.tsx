@@ -200,7 +200,7 @@ export function TodayDashboard(props: DashboardProps) {
                 : 'جلسة واحدة هادئة قد تغيّر شكل يومك.'}
             </p>
             <button
-              className="primary-button focus-cta-position"
+              className="btn btn-primary primary-button focus-cta-position"
               disabled={Boolean(activeSession)}
               onClick={() => {
                 if (!activeSession) setShowFocus(true);

@@ -93,7 +93,7 @@ function ConfirmDialog({ options, onResult }: { options: Pending; onResult: (ok:
           >{cancelLabel ?? 'إلغاء'}</button>
           <button
             type="button"
-            className={`primary-button ${danger ? 'danger-solid-button' : ''}`}
+            className={`btn btn-primary primary-button ${danger ? 'danger-solid-button' : ''}`}
             data-autofocus={danger ? undefined : ''}
             onClick={() => onResult(true)}
           >{confirmLabel ?? (danger ? 'حذف' : 'تأكيد')}</button>

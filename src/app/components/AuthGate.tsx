@@ -172,7 +172,7 @@ function AuthScreen({ onSignedIn }: { demoMode: boolean; onSignedIn: () => void 
 
           {error && <p className="auth-error" role="alert">{error}</p>}
 
-          <button type="submit" className="primary-button auth-submit" disabled={busy}>
+          <button type="submit" className="btn btn-primary primary-button auth-submit" disabled={busy}>
             {busy ? <Loader size={16} className="auth-spinner" /> : null}
             {busy ? t('جارٍ التحقق…') : t(mode === 'login' ? 'تسجيل الدخول' : 'إنشاء الحساب')}
           </button>

@@ -57,3 +57,28 @@ for (const [name, values] of Object.entries(themes)) {
     process.exitCode = 1;
   } else console.log(`${name} Energized palette: ${pairs.length}/${pairs.length} contrast pairs pass`);
 }
+
+const appCss = read('src/app/globals.css');
+const layout = read('src/app/layout.tsx');
+const app = read('src/app/page.tsx');
+for (const [name, selector] of [['winit-energy', 'winit-energy --default'], ['winit-energy-dark', 'winit-energy-dark --prefersdark']]) {
+  if (!appCss.includes(selector)) throw new Error(`DaisyUI theme registration missing: ${name}`);
+  const marker = `name: "${name}";`;
+  const markerIndex = appCss.indexOf(marker);
+  const blockStart = appCss.lastIndexOf('@plugin "daisyui/theme"', markerIndex);
+  const blockEnd = appCss.indexOf('\n}', markerIndex);
+  if (markerIndex < 0 || blockStart < 0 || blockEnd < 0) throw new Error(`DaisyUI theme definition missing: ${name}`);
+  const themeBlock = appCss.slice(markerIndex + marker.length, blockEnd);
+  const values = Object.fromEntries([...themeBlock.matchAll(/(--color-[\w-]+)\s*:\s*(#[0-9A-Fa-f]{6})\s*;/g)].map((match) => [match[1], match[2]]));
+  const checks = [['--color-primary-content', '--color-primary'], ['--color-secondary-content', '--color-secondary'], ['--color-base-content', '--color-base-100']];
+  const failures = checks.flatMap(([fg, bg]) => {
+    if (!values[fg] || !values[bg]) return [`${fg}/${bg}: missing DaisyUI token`];
+    const actual = contrast(values[fg], values[bg]);
+    return actual < 4.5 ? [`${fg} on ${bg} = ${actual.toFixed(2)}:1`] : [];
+  });
+  if (failures.length) throw new Error(`${name} DaisyUI contrast failed: ${failures.join('; ')}`);
+  console.log(`${name} DaisyUI theme: ${checks.length}/${checks.length} contrast pairs pass`);
+}
+if (!layout.includes("dataset.theme=d?'winit-energy-dark':'winit-energy'")) throw new Error('DaisyUI theme is not set before first paint');
+if (!app.includes("dataset.theme = nextMode === 'dark' ? 'winit-energy-dark' : 'winit-energy'")) throw new Error('DaisyUI theme does not follow the appearance toggle');
+console.log('DaisyUI Energized theme registration and live mode switching pass');

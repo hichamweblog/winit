@@ -16,7 +16,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
       <h1>حدث خطأ غير متوقع</h1>
       <p>لم تُفقد بياناتك المحفوظة. أعد المحاولة، وإن تكرر الخطأ أعد تحميل الصفحة.</p>
       {error.digest && <p className="fallback-digest">رمز المتابعة: <bdi>{error.digest}</bdi></p>}
-      <button type="button" className="primary-button" onClick={reset}><Reset size={16} />إعادة المحاولة</button>
+      <button type="button" className="btn btn-primary primary-button" onClick={reset}><Reset size={16} />إعادة المحاولة</button>
     </main>
   );
 }

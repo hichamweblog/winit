@@ -133,7 +133,7 @@ export function TaskListView({
               )}
             </>
           )}
-          <button className="primary-button" onClick={onAdd}>
+          <button className="btn btn-primary primary-button" onClick={onAdd}>
             <Plus size={17} />
             {t('مهمة جديدة')}
           </button>
@@ -180,7 +180,7 @@ export function TaskListView({
         <div className="empty-page">
           <h3>{t('لا توجد مهام هنا بعد')}</h3>
           <p>{t('أضف أول مهمة، وسنساعدك على إبقاء الصورة واضحة.')}</p>
-          <button className="primary-button" onClick={onAdd}>
+          <button className="btn btn-primary primary-button" onClick={onAdd}>
             <Plus size={16} />
             {t('أضف مهمة')}
           </button>

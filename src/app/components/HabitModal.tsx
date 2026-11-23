@@ -246,7 +246,7 @@ export function HabitModal({ habit, onClose, onSubmit, busy }: HabitModalProps) 
         <div className="modal-footer">
           <span>يمكنك تعديلها لاحقاً</span>
           <button
-            className="primary-button"
+            className="btn btn-primary primary-button"
             type="submit"
             disabled={busy || !name.trim() || (type !== 'check' && Number(target) < 1)}
           >

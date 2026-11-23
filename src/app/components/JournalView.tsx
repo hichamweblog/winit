@@ -52,7 +52,7 @@ export function JournalView({
           <h1 id="journal-heading">{t('دفتر اليوميات')}</h1>
           <p>{t('اكتب ما تريد تذكّره، بلا ضغط ولا قالب مفروض.')}</p>
         </div>
-        <button className="primary-button" onClick={onNew}>
+        <button className="btn btn-primary primary-button" onClick={onNew}>
           <NotebookPen size={17} />
           {t('تدوينة جديدة')}
         </button>
@@ -167,7 +167,7 @@ export function JournalView({
               : t('ابدأ بملاحظة صغيرة عن يومك، ثم عُد إليها وقتما تشاء.')}
           </p>
           {!search && (
-            <button className="primary-button" onClick={onNew}>
+            <button className="btn btn-primary primary-button" onClick={onNew}>
               <Plus size={16} />
               {t('اكتب أول تدوينة')}
             </button>
