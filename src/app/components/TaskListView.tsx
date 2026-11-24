@@ -8,22 +8,18 @@ import { CountBadge } from './atoms';
 import { AR_LOCALE, formatArNumber, formatDuration, PRIORITY_ORDER } from '@/lib/core';
 import { tasksLabel } from '@/lib/semantics';
 import { useLocale } from '../locale';
-import { FolderKanban, ListTodo } from '../icons';
-import KanbanBoard from './KanbanBoard';
 
 export type TaskListViewProps = {
   title: string;
   tasks: Task[];
   projects: Project[];
   project?: Project;
-  projectTasks?: Task[];
   today: string;
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
   onStart: (id: string) => void;
   onEdit: (task: Task) => void;
   onAdd: () => void;
-  onStatusChange?: (id: string, status: Task['status']) => void;
 };
 
 export function TaskListView({
@@ -31,31 +27,21 @@ export function TaskListView({
   tasks,
   projects,
   project,
-  projectTasks,
   today,
   onComplete,
   onDelete,
   onStart,
   onEdit,
   onAdd,
-  onStatusChange,
 }: TaskListViewProps) {
   const { language, t } = useLocale();
-  const [layout, setLayout] = useState<'list' | 'board'>('list');
   const [listMode, setListMode] = useState<'combined' | 'separate'>('separate');
   useEffect(() => {
-    if (!project) { setLayout('list'); setListMode('separate'); return; }
+    if (!project) { setListMode('separate'); return; }
     try {
-      setLayout(window.localStorage.getItem(`winit-project-layout:${project.id}`) === 'board' ? 'board' : 'list');
       setListMode(window.localStorage.getItem(`winit-project-list-mode:${project.id}`) === 'combined' ? 'combined' : 'separate');
-    } catch { setLayout('list'); setListMode('separate'); }
+    } catch { setListMode('separate'); }
   }, [project?.id]);
-  const changeLayout = (next: 'list' | 'board') => {
-    setLayout(next);
-    if (project) {
-      try { window.localStorage.setItem(`winit-project-layout:${project.id}`, next); } catch { /* keep current view */ }
-    }
-  };
   const changeListMode = (next: 'combined' | 'separate') => {
     setListMode(next);
     if (project) {
@@ -120,18 +106,10 @@ export function TaskListView({
         </div>
         <div className="page-title-actions">
           {project && (
-            <>
-              <div className="project-layout-switch" role="group" aria-label={t('عرض مهام المشروع')}>
-                <button type="button" className={layout === 'list' ? 'project-layout-active' : ''} aria-pressed={layout === 'list'} onClick={() => changeLayout('list')}><ListTodo size={16} />{t('قائمة')}</button>
-                <button type="button" className={layout === 'board' ? 'project-layout-active' : ''} aria-pressed={layout === 'board'} onClick={() => changeLayout('board')}><FolderKanban size={16} />{t('لوحة')}</button>
-              </div>
-              {layout === 'list' && (
-                <div className="project-layout-switch" role="group" aria-label={t('عرض مهام المشروع')}>
-                  <button type="button" className={listMode === 'combined' ? 'project-layout-active' : ''} aria-pressed={listMode === 'combined'} onClick={() => changeListMode('combined')}>{t('عرض موحد')}</button>
-                  <button type="button" className={listMode === 'separate' ? 'project-layout-active' : ''} aria-pressed={listMode === 'separate'} onClick={() => changeListMode('separate')}>{t('مقسمة حسب الموعد')}</button>
-                </div>
-              )}
-            </>
+            <div className="page-view-switch" role="group" aria-label={t('تجميع مهام المشروع')}>
+              <button type="button" className={listMode === 'combined' ? 'page-view-active' : ''} aria-pressed={listMode === 'combined'} onClick={() => changeListMode('combined')}>{t('عرض موحد')}</button>
+              <button type="button" className={listMode === 'separate' ? 'page-view-active' : ''} aria-pressed={listMode === 'separate'} onClick={() => changeListMode('separate')}>{t('مقسمة حسب الموعد')}</button>
+            </div>
           )}
           <button className="btn btn-primary primary-button" onClick={onAdd}>
             <Plus size={17} />
@@ -140,18 +118,7 @@ export function TaskListView({
         </div>
       </div>
 
-      {layout === 'board' && project ? (
-        <KanbanBoard
-          tasks={projectTasks ?? tasks}
-          projects={projects}
-          today={today}
-          onStatusChange={(id, status) => onStatusChange?.(id, status)}
-          onComplete={onComplete}
-          onDelete={onDelete}
-          onStart={onStart}
-          onEdit={onEdit}
-        />
-      ) : tasks.length ? (
+      {tasks.length ? (
         <div className="task-groups">
           {[...visibleGroups.entries()].map(([label, list]) => (
             <section className="task-group" key={label}>

@@ -72,6 +72,11 @@
 @import "./base.css" layer(base);
 
 :root { --font-ar: var(--font-small); }
+/* daisyUI paints the root canvas with its own base colour (#FFFFFF) and can
+   reserve a scrollbar gutter. In an RTL page that gutter sits on the left, so
+   the canvas showed through as a white band beside the app surface. The canvas
+   has to be the app background in both modes. */
+:root { background-color: var(--bg); }
 body { font-family: var(--font-body); }
 button { appearance: none; border: 0; background: transparent; cursor: pointer; }
 button:disabled { color: var(--color-muted); background: var(--color-paper-3); cursor: not-allowed; opacity: 0.55; }
@@ -91,11 +96,15 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   background: var(--color-paper);
   border-inline-end: 1px solid var(--color-rule);
   transform: translateX(105%);
-  transition: transform var(--dur-short) var(--ease-out);
+  /* Even a 1px sliver of the dark drawer is visible over the page gutter, so
+     the closed drawer is taken out of rendering entirely. `visibility` flips
+     after the slide-out finishes (and immediately when it opens). */
+  visibility: hidden;
+  transition: transform var(--dur-short) var(--ease-out), visibility 0s linear var(--dur-short);
   direction: inherit;
   font-weight: 600;
 }
-.sidebar-open { transform: translateX(0); }
+.sidebar-open { transform: translateX(0); visibility: visible; transition: transform var(--dur-short) var(--ease-out), visibility 0s; }
 @media (max-width: 1099px) {
   :root[data-language="en"] .sidebar { transform: translateX(-105%); }
   :root[data-language="en"] .sidebar.sidebar-open { transform: translateX(0); }
@@ -252,8 +261,12 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .mobile-tabs .mobile-tab-active::before { content: ""; position: absolute; inset-block-start: 0; inset-inline: 0; block-size: 2px; background: var(--accent); }
 
 .list-page { min-height: calc(100dvh - 116px); }
-.page-title-row { margin-block: var(--space-2xs) var(--space-lg); display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-sm); }
-.page-title-row h1 { font-size: var(--text-h1-compact); line-height: 1.35; }
+/* The header is a wrapping row: when the title and its actions cannot sit
+   side by side, the actions drop to their own line instead of pushing the
+   whole row past the gutter (which clipped them off-screen on a phone). */
+.page-title-row { margin-block: var(--space-2xs) var(--space-lg); display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-sm); }
+.page-title-row > :first-child { min-inline-size: 0; }
+.page-title-row h1 { overflow-wrap: break-word; font-size: var(--text-h1-compact); line-height: 1.35; }
 .page-title-row p { margin-block-start: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-ui); }
 /* §8.1 Primary: --accent / --on-accent, radius 10, no border, no scale on press. */
 .primary-button { min-height: var(--tap-min); padding-inline: var(--space-4); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); flex: none; color: var(--color-primary-content, var(--on-accent)); background: var(--color-primary, var(--accent)); border: 0; border-radius: var(--radius-field, var(--radius-md)); font-size: var(--text-ui); font-weight: 600; white-space: nowrap; transition: background-color var(--dur-fast) var(--ease); }
@@ -376,7 +389,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   .page-content { padding-block-end: var(--space-lg); }
 }
 @media (min-width: 1100px) {
-  .sidebar { width: var(--sidebar-width); transform: none; }
+  .sidebar { width: var(--sidebar-width); transform: none; visibility: visible; transition: none; }
   .sidebar-close, .mobile-scrim, .mobile-menu-button, .mobile-tabs { display: none; }
   .main-area { margin-inline-start: var(--sidebar-width); }
   .topbar { min-height: 64px; padding-inline: var(--gutter); }
@@ -488,25 +501,9 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .project-item-row .project-item { min-width: 0; flex: 1; }
 .project-item-name { min-width: 0; overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
 .project-target { margin-block-start: var(--space-xs); display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--color-accent-strong); font-family: var(--font-ui); font-size: var(--text-small); }
-.project-layout-switch { min-height: 44px; padding: 3px; display: inline-flex; align-items: center; gap: 2px; background: var(--color-paper-2); border: 1px solid var(--line); border-radius: var(--radius-md); }
-.project-layout-switch button { min-height: 36px; padding-inline: var(--space-xs); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2xs); color: var(--color-ink-2); border-radius: 8px; font-size: var(--text-small); white-space: nowrap; }
-.project-layout-switch .project-layout-active { color: var(--accent); background: var(--color-paper); box-shadow: var(--shadow-1); font-weight: 700; }
-.kanban-board { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: var(--space-sm); overflow-x: auto; padding-block-end: var(--space-xs); scroll-snap-type: x proximity; }
-.kanban-column { min-width: 0; min-height: 360px; padding: var(--space-xs); background: color-mix(in srgb, var(--accent) 4%, var(--color-paper-2)); border: 1px solid var(--line); border-radius: var(--radius-lg); transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); scroll-snap-align: start; }
-.kanban-column:nth-child(2) { background: color-mix(in srgb, var(--info) 5%, var(--color-paper-2)); }
-.kanban-column:nth-child(3) { background: color-mix(in srgb, var(--success) 5%, var(--color-paper-2)); }
-.kanban-column-over { background: color-mix(in srgb, var(--accent) 12%, var(--color-paper-2)); border-color: var(--accent); }
-.kanban-column-head { min-height: 42px; margin-block-end: var(--space-xs); padding-inline: var(--space-2xs); display: flex; align-items: center; justify-content: space-between; gap: var(--space-xs); }
-.kanban-column-head h2 { margin: 0; font-size: var(--text-ui); font-weight: 700; }
-.kanban-cards { display: flex; flex-direction: column; gap: var(--space-xs); }
-.kanban-card { min-width: 0; padding: var(--space-2xs); background: var(--color-paper); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-1); cursor: grab; }
-.kanban-card:active { cursor: grabbing; }
-.kanban-card-dragging { opacity: .48; }
-.kanban-card .task-row { border-block-end: 0; }
-.kanban-move-control { margin-block-start: var(--space-2xs); padding-block-start: var(--space-2xs); display: flex; align-items: center; justify-content: space-between; gap: var(--space-2xs); border-block-start: 1px solid var(--line); color: var(--color-ink-2); font-size: var(--text-small); }
-.kanban-move-control select { min-height: 36px; max-width: 60%; padding-inline: var(--space-2xs); border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; }
-.kanban-column-empty { min-height: 92px; margin: 0; display: grid; place-items: center; color: var(--text-muted); border: 1px dashed var(--line-strong); border-radius: var(--radius-md); font-size: var(--text-small); }
-@media (max-width: 850px) { .kanban-board { grid-template-columns: repeat(3, minmax(260px, 82vw)); } .project-layout-switch button { min-width: 42px; } }
+.page-view-switch { min-height: 44px; padding: 3px; display: inline-flex; align-items: center; gap: 2px; flex: none; background: var(--color-paper-2); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.page-view-switch button { min-height: 36px; padding-inline: var(--space-xs); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2xs); color: var(--color-ink-2); border-radius: 8px; font-size: var(--text-small); white-space: nowrap; }
+.page-view-switch .page-view-active { color: var(--accent); background: var(--color-paper); box-shadow: var(--shadow-1); font-weight: 700; }
 .project-manage { width: 36px; height: 36px; display: grid; place-items: center; flex: none; color: var(--color-muted); border-radius: 8px; }
 .project-manage:hover, .project-manage:focus-visible { color: var(--color-accent-strong); background: var(--color-paper-2); }
 .project-remove:hover, .project-remove:focus-visible { color: var(--color-error); }
@@ -562,7 +559,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .habit-card-details { padding: var(--space-sm) var(--space-md) var(--space-md); border-block-start: 1px solid var(--color-rule); }
 .habit-details-desc { margin-block-end: var(--space-sm); color: var(--color-ink-2); font-size: var(--text-small); line-height: var(--lh-small); }
 .habit-expand-all-btn { display: inline-flex; align-items: center; gap: var(--space-2xs); font-size: var(--text-ui); }
-.page-title-actions { display: flex; align-items: center; gap: var(--space-xs); flex-wrap: wrap; }
+.page-title-actions { display: flex; align-items: center; gap: var(--space-xs); flex-wrap: wrap; max-inline-size: 100%; }
 .project-drag-handle { width: 18px; height: 36px; display: grid; place-items: center; flex: none; color: var(--color-muted); cursor: grab; opacity: 0.35; border-radius: var(--radius-sm); transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
 .project-drag-handle:hover, .project-item-row:hover .project-drag-handle, .project-drag-handle:focus-visible { opacity: 1; color: var(--color-accent-strong); }
 .project-drag-handle:active { cursor: grabbing; }
@@ -1295,6 +1292,23 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-sm);
   }
+  /* List pages: the title keeps the first row and the view switch plus the
+     primary action get a full-width row below it. Before this, the two
+     switches and the button were squeezed into the space left of the title,
+     so they spilled past the screen edge and were cut off. */
+  .list-page .page-title-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-sm);
+  }
+  .page-title-actions { inline-size: 100%; }
+  .page-view-switch {
+    inline-size: 100%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .page-view-switch button { min-inline-size: 0; justify-content: center; padding-inline: var(--space-2xs); white-space: normal; }
   .stats-page .segmented-control {
     width: 100%;
     display: grid;
