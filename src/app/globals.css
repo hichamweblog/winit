@@ -1559,7 +1559,6 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .nav-group:first-child > .nav-label { margin-block-start: 0; }
 .settings-nav { margin-block-start: var(--space-lg); padding-block-start: var(--space-2xs); border-block-start: 1px solid var(--line); }
 
-.journal-quote { margin-block: var(--space-sm) var(--space-md); color: var(--color-ink-2); font-size: var(--text-ui); font-weight: 600; }
 
 /* The search pill is 40px tall; the coarse-pointer floor of 48px on
    .icon-button would burst it, so the clear button gets its own size. */

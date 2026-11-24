@@ -343,7 +343,6 @@ const translations: Record<string, string> = {
   'مفتوحة': 'Open',
   'نتيجة': 'results',
   'نقل إلى': 'Move to',
-  '«أحب الأعمال إلى الله أدومها وإن قل»': 'Small steps, repeated consistently, create lasting progress.',
   'أُنجزت جلسة تركيز · {count} دقيقة': 'Focus session completed · {count} min',
   'أُنهيت الجلسة دون إكمال': 'Session ended without completing',
   'بدأت جلسة التركيز': 'Focus session started',
