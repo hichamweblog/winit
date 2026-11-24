@@ -54,7 +54,7 @@ import {
 function WinitApp() {
   const auth = useAuth();
   const { language, t } = useLocale();
-  const avatarLetter = (auth.user?.name ?? 'و').trim().charAt(0) || 'و';
+  const avatarLetter = (auth.user?.name ?? 'و').trim().charAt(0) || 'و'; // i18n-exempt: fallback glyph
   const [data, setData] = useState<Dataset | null>(null);
   const [view, setViewState] = useState<View>('today');
   const [selectedProject, setSelectedProjectState] = useState<string | null>(null);
@@ -133,7 +133,7 @@ function WinitApp() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         return refresh(retryCount - 1);
       }
-      notify(error instanceof Error ? error.message : 'تعذر الاتصال', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر الاتصال'), 'error');
     }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
@@ -150,7 +150,7 @@ function WinitApp() {
       setJournalTotal(page.total);
       setJournalNextCursor(page.nextCursor);
     } catch (error) {
-      if (requestId === journalRequestId.current) notify(error instanceof Error ? error.message : 'تعذر تحميل اليوميات', 'error');
+      if (requestId === journalRequestId.current) notify(error instanceof Error ? error.message : t('تعذر تحميل اليوميات'), 'error');
     } finally {
       if (requestId === journalRequestId.current) setJournalLoading(false);
     }
@@ -275,7 +275,7 @@ function WinitApp() {
       await api(url, { method, body });
       await refresh();
       return true;
-    } catch (error) { notify(error instanceof Error ? error.message : 'تعذر حفظ التغييرات', 'error'); return false; }
+    } catch (error) { notify(error instanceof Error ? error.message : t('تعذر حفظ التغييرات'), 'error'); return false; }
     finally { setBusy(false); }
   };
 
@@ -287,9 +287,9 @@ function WinitApp() {
   const deleteTask = async (taskId: string) => {
     const task = tasks.find((item) => item.id === taskId);
     const okToDelete = await confirm({
-      title: 'حذف المهمة',
-      message: `ستُحذف مهمة «${task?.title ?? ''}» نهائياً. لا يمكن التراجع عن هذا الإجراء.`,
-      confirmLabel: 'حذف المهمة',
+      title: t('حذف المهمة'),
+      message: t('ستُحذف مهمة «{title}» نهائياً. لا يمكن التراجع عن هذا الإجراء.', { title: task?.title ?? '' }),
+      confirmLabel: t('حذف المهمة'),
     });
     if (!okToDelete) return;
     setData((prev) =>
@@ -303,7 +303,7 @@ function WinitApp() {
     );
     const ok = await mutate(`/api/tasks/${taskId}`, 'DELETE');
     if (!ok) void refresh();
-    else notify('حُذفت المهمة');
+    else notify(t('حُذفت المهمة'));
   };
 
   const addTask = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -336,7 +336,7 @@ function WinitApp() {
       setShowAdd(false);
       setEditingTask(null);
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حفظ المهمة', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حفظ المهمة'), 'error');
     } finally {
       setBusy(false);
     }
@@ -369,7 +369,7 @@ function WinitApp() {
       setShowProjectAdd(false);
       setEditingProject(null);
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حفظ المشروع', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حفظ المشروع'), 'error');
     } finally {
       setBusy(false);
     }
@@ -392,16 +392,16 @@ function WinitApp() {
       setEditingHabit(null);
       setHabitMutationCount((c) => c + 1);
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حفظ العادة', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حفظ العادة'), 'error');
     } finally {
       setBusy(false);
     }
   };
   const deleteProject = async (project: Project) => {
     const okToDelete = await confirm({
-      title: 'حذف المشروع',
-      message: `سيُحذف مشروع «${project.name}». مهامه لن تُحذف، بل تُنقل إلى صندوق الوارد.`,
-      confirmLabel: 'حذف المشروع',
+      title: t('حذف المشروع'),
+      message: t('سيُحذف مشروع «{name}». مهامه لن تُحذف، بل تُنقل إلى صندوق الوارد.', { name: project.name }),
+      confirmLabel: t('حذف المشروع'),
     });
     if (!okToDelete) return;
     const ok = await mutate(`/api/projects/${project.id}`, 'DELETE');
@@ -409,9 +409,9 @@ function WinitApp() {
   };
   const deleteHabit = async (habit: Habit) => {
     const okToDelete = await confirm({
-      title: 'حذف العادة',
-      message: `ستُحذف عادة «${habit.name}» مع كامل سجلّها التاريخي. لا يمكن التراجع.`,
-      confirmLabel: 'حذف العادة',
+      title: t('حذف العادة'),
+      message: t('ستُحذف عادة «{name}» مع كامل سجلّها التاريخي. لا يمكن التراجع.', { name: habit.name }),
+      confirmLabel: t('حذف العادة'),
     });
     if (!okToDelete) return;
     const ok = await mutate(`/api/habits/${habit.id}`, 'DELETE');
@@ -425,7 +425,7 @@ function WinitApp() {
         body: { ids: nextProjects.map((p) => p.id) },
       });
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حفظ ترتيب المشاريع', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حفظ ترتيب المشاريع'), 'error');
       void refresh();
     }
   };
@@ -436,7 +436,7 @@ function WinitApp() {
     const [moved] = updated.splice(index, 1);
     updated.splice(targetIndex, 0, moved);
     void reorderProjects(updated);
-    notify(`تم نقل مشروع «${moved.name}» ${direction === 'up' ? 'للأعلى' : 'للأسفل'}`);
+    notify(t('تم نقل مشروع «{name}» {direction}', { name: moved.name, direction: direction === 'up' ? t('للأعلى') : t('للأسفل') }));
   };
   const reorderHabits = async (nextHabits: Habit[]) => {
     setData((prev) => (prev ? { ...prev, habits: nextHabits } : prev));
@@ -446,7 +446,7 @@ function WinitApp() {
         body: { ids: nextHabits.map((h) => h.id) },
       });
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حفظ ترتيب العادات', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حفظ ترتيب العادات'), 'error');
       void refresh();
     }
   };
@@ -489,7 +489,7 @@ function WinitApp() {
         };
       });
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حفظ حالة المهمة', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حفظ حالة المهمة'), 'error');
       void refresh();
     }
   };
@@ -527,7 +527,7 @@ function WinitApp() {
       }
       setHabitMutationCount((c) => c + 1);
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر تسجيل العادة', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر تسجيل العادة'), 'error');
       void refresh();
     }
   };
@@ -541,23 +541,23 @@ function WinitApp() {
       link.download = `winit-export-${today}.json`;
       link.click();
       URL.revokeObjectURL(url);
-      notify('تم تنزيل نسخة كاملة من بياناتك بنجاح');
+      notify(t('تم تنزيل نسخة كاملة من بياناتك بنجاح'));
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر تصدير البيانات', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر تصدير البيانات'), 'error');
     }
   };
   const deleteAccount = async () => {
     const okToDelete = await confirm({
-      title: 'حذف الحساب نهائياً',
-      message: 'هل أنت متأكد من رغبتك في حذف حسابك نهائياً؟ سيتم مسح كافة البيانات والمشاريع فوراً دون إمكانية استرجاع.',
-      confirmLabel: 'حذف الحساب نهائياً',
+      title: t('حذف الحساب نهائياً'),
+      message: t('هل أنت متأكد من رغبتك في حذف حسابك نهائياً؟ سيتم مسح كافة البيانات والمشاريع فوراً دون إمكانية استرجاع.'),
+      confirmLabel: t('حذف الحساب نهائياً'),
     });
     if (!okToDelete) return;
     try {
       await api('/api/account', { method: 'DELETE' });
       window.location.reload();
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حذف الحساب', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حذف الحساب'), 'error');
     }
   };
   const startFocus = async (taskId?: string) => {
@@ -580,28 +580,28 @@ function WinitApp() {
       });
       setShowJournalEditor(false);
       setEditingJournal(null);
-      notify(entryId ? 'حُفظت تعديلاتك' : 'حُفظت التدوينة');
+      notify(entryId ? t('حُفظت تعديلاتك') : t('حُفظت التدوينة'));
       await loadJournal();
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'تعذر حفظ التدوينة', 'error');
+      notify(error instanceof Error ? error.message : t('تعذر حفظ التدوينة'), 'error');
     } finally { setJournalSaving(false); }
   };
   const deleteJournal = async (entryId: string) => {
     const okToDelete = await confirm({
-      title: 'حذف التدوينة',
-      message: 'ستُحذف هذه التدوينة نهائياً. لا يمكن التراجع عن هذا الإجراء.',
-      confirmLabel: 'حذف التدوينة',
+      title: t('حذف التدوينة'),
+      message: t('ستُحذف هذه التدوينة نهائياً. لا يمكن التراجع عن هذا الإجراء.'),
+      confirmLabel: t('حذف التدوينة'),
     });
     if (!okToDelete) return;
     try {
       await api(`/api/journal/${entryId}`, { method: 'DELETE' });
       setJournalEntries((current) => current.filter((entry) => entry.id !== entryId));
       setJournalTotal((current) => Math.max(0, current - 1));
-      notify('حُذفت التدوينة');
-    } catch (error) { notify(error instanceof Error ? error.message : 'تعذر حذف التدوينة', 'error'); }
+      notify(t('حُذفت التدوينة'));
+    } catch (error) { notify(error instanceof Error ? error.message : t('تعذر حذف التدوينة'), 'error'); }
   };
 
-  const headingArabic = selectedProject ? getProject(selectedProject)?.name ?? 'المشروع' : view === 'today' ? 'اليوم' : view === 'upcoming' ? 'القادم' : view === 'inbox' ? 'صندوق الوارد' : view === 'all' ? 'كل المهام' : view === 'stats' ? 'إحصائيات' : view === 'settings' ? 'الإعدادات' : view === 'calendar' ? 'التقويم' : view === 'habits' ? 'عاداتي' : view === 'journal' ? 'اليوميات' : 'المشروع';
+  const headingArabic = selectedProject ? getProject(selectedProject)?.name ?? t('المشروع') : view === 'today' ? t('اليوم') : view === 'upcoming' ? t('القادم') : view === 'inbox' ? t('صندوق الوارد') : view === 'all' ? t('كل المهام') : view === 'stats' ? t('إحصائيات') : view === 'settings' ? t('الإعدادات') : view === 'calendar' ? t('التقويم') : view === 'habits' ? t('عاداتي') : view === 'journal' ? t('اليوميات') : t('المشروع');
   const heading = selectedProject ? headingArabic : t(headingArabic);
   const filteredTasks = useMemo(() => {
     const active = tasks.filter((task) => task.status !== 'completed');
@@ -619,6 +619,7 @@ function WinitApp() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">{t('تجاوز إلى المحتوى')}</a>
       <aside
         ref={sidebarRef}
         id="app-sidebar"
@@ -688,8 +689,8 @@ function WinitApp() {
                   className="project-drag-handle"
                   role="button"
                   tabIndex={0}
-                  aria-label={`إعادة ترتيب مشروع ${project.name}`}
-                  title="اسحب لإعادة الترتيب (أو الأسهم)"
+                  aria-label={t('إعادة ترتيب مشروع {name}', { name: project.name })}
+                  title={t('اسحب لإعادة الترتيب (أو الأسهم)')}
                   onKeyDown={(e) => {
                     if (e.key === 'ArrowUp') {
                       e.preventDefault();
@@ -708,8 +709,8 @@ function WinitApp() {
                     className="icon-button project-reorder-btn"
                     onClick={(e) => { e.stopPropagation(); moveProject(index, 'up'); }}
                     disabled={index === 0}
-                    aria-label={`تحريك مشروع ${project.name} لأعلى`}
-                    title="تحريك لأعلى"
+                    aria-label={t('تحريك مشروع {name} لأعلى', { name: project.name })}
+                    title={t('تحريك لأعلى')}
                     style={{ width: '18px', height: '16px', minWidth: '18px', minHeight: '16px', padding: 0, opacity: index === 0 ? 0.25 : 0.75 }}
                   >
                     <ArrowUp size={11} />
@@ -719,8 +720,8 @@ function WinitApp() {
                     className="icon-button project-reorder-btn"
                     onClick={(e) => { e.stopPropagation(); moveProject(index, 'down'); }}
                     disabled={index === projects.length - 1}
-                    aria-label={`تحريك مشروع ${project.name} لأسفل`}
-                    title="تحريك لأسفل"
+                    aria-label={t('تحريك مشروع {name} لأسفل', { name: project.name })}
+                    title={t('تحريك لأسفل')}
                     style={{ width: '18px', height: '16px', minWidth: '18px', minHeight: '16px', padding: 0, opacity: index === projects.length - 1 ? 0.25 : 0.75 }}
                   >
                     <ArrowDown size={11} />
@@ -731,8 +732,8 @@ function WinitApp() {
                   <span className="project-item-name" title={project.name}><bdi aria-hidden="true">{truncateWords(project.name)}</bdi><span className="sr-only">{project.name}</span></span>
                   <span className="project-count">{count}</span>
                 </button>
-                <button className="project-manage" aria-label={`تعديل ${project.name}`} title="تعديل المشروع" onClick={() => { setEditingProject(project); setShowProjectAdd(true); }}><Pencil size={14} /></button>
-                <button className="project-manage project-remove" aria-label={`حذف ${project.name}`} title="حذف المشروع" onClick={() => void deleteProject(project)}><Trash2 size={14} /></button>
+                <button className="project-manage" aria-label={t('تعديل {name}', { name: project.name })} title={t('تعديل المشروع')} onClick={() => { setEditingProject(project); setShowProjectAdd(true); }}><Pencil size={14} /></button>
+                <button className="project-manage project-remove" aria-label={t('حذف {name}', { name: project.name })} title={t('حذف المشروع')} onClick={() => void deleteProject(project)}><Trash2 size={14} /></button>
               </div>
             );
           })}
@@ -741,14 +742,14 @@ function WinitApp() {
       </aside>
       {mobileMenu && <button className="mobile-scrim" aria-label={t('إغلاق القائمة')} onClick={() => closeMobileMenu()} />}
 
-      <main className="main-area" aria-hidden={mobileLayout && mobileMenu ? true : undefined} inert={mobileLayout && mobileMenu}>
+      <main id="main-content" tabIndex={-1} className="main-area" aria-hidden={mobileLayout && mobileMenu ? true : undefined} inert={mobileLayout && mobileMenu}>
         <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('فتح القائمة')} aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date" title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? t('التبديل إلى المظهر الفاتح') : t('التبديل إلى المظهر الداكن')} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
         <div className="page-content">
-          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
+          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, pomodoroMinutes, userName: auth.user?.name, onOpenTimer: () => setShowFocus(true) }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} hasMore={journalNextCursor !== null} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalNextCursor, true)} />}
           {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
         </div>
-        <footer className="app-footer"><span>{t('مصمّم لأيامك، لا لمزيد من الضجيج.')}</span><span>{t('أنجز ما يهمّك')}</span></footer>
+        <footer className="app-footer"><span>{t('مصمّم لأيامك، لا لمزيد من الضجيج.')}</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
             keyboard shortcut hint. Hidden on views that have their own add. */}
         {(view === 'today' || view === 'upcoming' || view === 'inbox' || view === 'all' || selectedProject) && (
@@ -767,7 +768,7 @@ function WinitApp() {
       {showJournalEditor && <JournalEditor key={editingJournal?.id ?? 'new'} entry={editingJournal} today={today} busy={journalSaving} onClose={() => setShowJournalEditor(false)} onSave={saveJournal} />}
       {showFocus && <FocusModal tasks={tasks.filter((t) => t.status !== 'completed')} selectedId={focusTaskId} setSelectedId={setFocusTaskId} mode={focusMode} setMode={setFocusMode} pomodoroMinutes={pomodoroMinutes} setPomodoroMinutes={setTimerMinutes} session={activeSession} busy={busy} onFinish={(completed) => void finishFocus(completed)} onClose={() => setShowFocus(false)} onStart={() => void startFocus()} />}
       {activeSession && !showFocus && <FocusDock session={activeSession} tasks={tasks} busy={busy} onFinish={(completed = true) => void finishFocus(completed)} onStop={() => void finishFocus(false)} onExpand={() => setShowFocus(true)} />}
-      {notice && <div className={`toast toast-${notice.kind}`} role={notice.kind === 'error' ? 'alert' : 'status'} aria-live={notice.kind === 'error' ? 'assertive' : 'polite'}>{notice.message}<button onClick={() => setNotice(null)} aria-label="إغلاق"><X size={15} /></button></div>}
+      {notice && <div className={`toast toast-${notice.kind}`} role={notice.kind === 'error' ? 'alert' : 'status'} aria-live={notice.kind === 'error' ? 'assertive' : 'polite'}>{notice.message}<button onClick={() => setNotice(null)} aria-label={t('إغلاق')}><X size={15} /></button></div>}
     </div>
   );
 }

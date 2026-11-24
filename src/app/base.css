@@ -33,6 +33,26 @@ body {
 
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
 
+/* Skip link: first focusable element, invisible until focused. */
+.skip-link {
+  position: fixed;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: var(--z-toast);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-4);
+  color: var(--bg);
+  background: var(--text);
+  border-radius: var(--radius-md);
+  font: 600 var(--text-ui) / 1 var(--font-ui);
+  transform: translateY(calc(-100% - var(--space-4)));
+  transition: transform var(--dur-fast) var(--ease);
+}
+.skip-link:focus-visible { transform: none; }
+@media (prefers-reduced-motion: reduce) { .skip-link { transition: none; } }
+
 h1, h2, h3 {
   margin: 0;
   font-family: var(--font-heading);

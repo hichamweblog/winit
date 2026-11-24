@@ -16,6 +16,8 @@ export type TaskRowProps = {
   onStart: () => void;
   onEdit: () => void;
   onDelete?: () => void;
+  /** The top row on the dashboard: actions stay visible and the row sits higher. */
+  featured?: boolean;
 };
 
 export const TaskRow = memo(function TaskRow({
@@ -26,12 +28,13 @@ export const TaskRow = memo(function TaskRow({
   onStart,
   onEdit,
   onDelete,
+  featured = false,
 }: TaskRowProps) {
   const { t } = useLocale();
   const isDone = task.status === 'completed';
 
   return (
-    <div className={`task-row row-interactive ${isDone ? 'task-done' : ''}`}>
+    <div className={`task-row row-interactive ${isDone ? 'task-done' : ''}`} data-featured={featured ? 'true' : undefined}>
       <button
         type="button"
         className="task-check"
@@ -49,7 +52,6 @@ export const TaskRow = memo(function TaskRow({
         type="button"
         className="task-body"
         onClick={onEdit}
-        aria-label={`${t('تعديل')} ${task.title}`}
       >
         <div className="task-title-line">
           <strong className="task-title">

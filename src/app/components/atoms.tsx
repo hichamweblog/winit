@@ -56,11 +56,12 @@ export function DueChip({ date, today }: { date: string; today: string }) {
   const text = isToday
     ? t('اليوم')
     : new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(new Date(`${date}T12:00:00`));
+  const longDate = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(`${date}T12:00:00`));
   const label = isToday
     ? t('مستحقة اليوم')
-    : language === 'en'
-      ? `Due ${new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(`${date}T12:00:00`))}${overdue ? ' · overdue' : ''}`
-      : `مستحقة في ${new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(`${date}T12:00:00`))}${overdue ? '، متأخرة' : ''}`;
+    : overdue
+      ? t('مستحقة في {date}، متأخرة', { date: longDate })
+      : t('مستحقة في {date}', { date: longDate });
   return (
     <span className="meta-chip" data-overdue={overdue && !isToday ? 'true' : undefined} role="img" aria-label={label} title={label}>
       <Clock3 size={12} />

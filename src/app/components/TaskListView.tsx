@@ -64,14 +64,14 @@ export function TaskListView({
     for (const task of sorted) {
       const key =
         task.dueDate && task.dueDate < today
-          ? 'متأخرة'
+          ? t('متأخرة')
           : task.dueDate === today
-          ? 'اليوم'
+          ? t('اليوم')
           : task.dueDate
           ? new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : AR_LOCALE, { weekday: 'long', day: 'numeric', month: 'long' }).format(
               new Date(`${task.dueDate}T12:00:00`)
             )
-          : 'بلا موعد';
+          : t('بلا موعد');
       const list = map.get(key) ?? [];
       list.push(task);
       map.set(key, list);
@@ -79,7 +79,7 @@ export function TaskListView({
     return map;
   }, [tasks, today, language]);
   const visibleGroups = project && listMode === 'combined'
-    ? new Map([['كل المهام', [...groups.values()].flat()]])
+    ? new Map([[t('كل المهام'), [...groups.values()].flat()]])
     : groups;
 
   return (

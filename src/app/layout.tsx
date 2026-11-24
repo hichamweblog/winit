@@ -14,8 +14,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  // i18n-exempt: server metadata, replaced at runtime by LocaleProvider's document.title.
   title: 'Winit — مساحتك للإنجاز',
-  description: 'مساحة هادئة تجمع أهدافك، عاداتك، ووقتك في مكان واحد.',
+  description: 'مساحة هادئة تجمع أهدافك، عاداتك، ووقتك في مكان واحد.', // i18n-exempt: server metadata
   applicationName: 'Winit',
   manifest: '/manifest.webmanifest',
   icons: {

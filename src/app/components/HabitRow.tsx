@@ -5,6 +5,7 @@ import type { Habit, Log } from '@/lib/types';
 import { Check } from '../icons';
 import { habitIconFor } from '../habit-icons';
 import { goalStyle } from '@/lib/goals';
+import { useLocale } from '../locale';
 
 export type HabitRowProps = {
   habit: Habit;
@@ -13,16 +14,17 @@ export type HabitRowProps = {
 };
 
 export const HabitRow = memo(function HabitRow({ habit, log, onToggle }: HabitRowProps) {
+  const { t } = useLocale();
   const done = Boolean(log && log.value >= habit.targetValue);
   const Icon = habitIconFor(habit.icon);
   const label =
     habit.recordType === 'check'
       ? done
-        ? 'تم إنجاز العادة اليوم'
-        : 'انقر لتسجيل العادة اليوم'
+        ? t('تم إنجاز العادة اليوم')
+        : t('انقر لتسجيل العادة اليوم')
       : done
-      ? 'اكتمل هدف اليوم'
-      : `${log?.value ?? 0} من ${habit.targetValue} ${habit.unit}`;
+      ? t('اكتمل هدف اليوم')
+      : t('{value} من {target} {unit}', { value: log?.value ?? 0, target: habit.targetValue, unit: habit.unit });
 
   return (
     <div className={`habit-row ${done ? 'habit-done' : ''}`}>
@@ -39,7 +41,7 @@ export const HabitRow = memo(function HabitRow({ habit, log, onToggle }: HabitRo
       <button
         className={`habit-toggle ${done ? 'done' : ''}`}
         onClick={onToggle}
-        aria-label={`تسجيل عادة ${habit.name}`}
+        aria-label={t('تسجيل عادة {name}', { name: habit.name })}
       >
         {done ? <Check size={14} /> : <span className="habit-toggle-idle" />}
       </button>

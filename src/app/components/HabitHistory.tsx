@@ -24,15 +24,16 @@ import {
 import { AR_LOCALE, formatArNumber } from '@/lib/core';
 import { goalStyle } from '@/lib/goals';
 import { api } from '@/lib/client-api';
+import { useLocale } from '../locale';
 
 type Range = { id: string; label: string; days: number };
 const RANGES: Range[] = [
   // A single month at a readable scale: fewer columns, so the cells grow and
   // carry their day number (see `[data-view="month"]` in globals.css).
-  { id: '1m', label: 'شهر', days: 30 },
-  { id: '3m', label: '3 أشهر', days: 91 },
-  { id: '6m', label: '6 أشهر', days: 182 },
-  { id: '12m', label: 'سنة', days: 364 },
+  { id: '1m', label: 'شهر', days: 30 }, // i18n-exempt: label data, rendered through t()
+  { id: '3m', label: '3 أشهر', days: 91 }, // i18n-exempt: label data
+  { id: '6m', label: '6 أشهر', days: 182 }, // i18n-exempt: label data
+  { id: '12m', label: 'سنة', days: 364 }, // i18n-exempt: label data
 ];
 
 type Payload = {
@@ -51,6 +52,7 @@ const CACHE_TTL_MS = 60_000;
 
 /** Invalidate habit history cache. Clears all entries if habitId is omitted, or only entries for the given habit. */
 export function clearCache(habitId?: string): void {
+  const { t } = useLocale();
   if (habitId) {
     for (const key of Array.from(cache.keys())) {
       if (key.startsWith(`${habitId}:`)) {
@@ -87,6 +89,7 @@ export default function HabitHistory({
   cacheKey?: string;
   invalidationToken?: string | number;
 }) {
+  const { t } = useLocale();
   const [rangeId, setRangeId] = useState('6m');
   const range = RANGES.find((r) => r.id === rangeId) ?? RANGES[1];
   const cacheKey = externalCacheKey ? `${habitId}:${range.days}:${externalCacheKey}` : `${habitId}:${range.days}`;
@@ -224,17 +227,23 @@ export default function HabitHistory({
 
   const solid = goalStyle(color).solid;
   const summary = grid
-    ? `سجل ${habitName}: ${formatArNumber(grid.stats.completedDays)} يوماً مكتملاً من ${formatArNumber(grid.stats.totalDays)} يوماً، بنسبة ${formatArNumber(grid.stats.completionRate)}%، وأطول سلسلة ${formatArNumber(grid.stats.longestStreak)} يوماً.`
-    : `سجل ${habitName}`;
+    ? t('سجل {name}: {done} يوماً مكتملاً من {total} يوماً، بنسبة {rate}%، وأطول سلسلة {streak} يوماً.', {
+        name: habitName,
+        done: formatArNumber(grid.stats.completedDays),
+        total: formatArNumber(grid.stats.totalDays),
+        rate: formatArNumber(grid.stats.completionRate),
+        streak: formatArNumber(grid.stats.longestStreak),
+      })
+    : t('سجل {name}', { name: habitName });
 
   return (
     <section className="contrib" data-view={rangeId === '1m' ? 'month' : undefined} style={{ '--contrib-goal': solid } as React.CSSProperties}>
       <div className="contrib__head">
         <h4 className="contrib__title">
-          {grid ? `${formatArNumber(grid.stats.completedDays)} يوماً مكتملاً` : 'السجل'}
-          <span className="contrib__sub"> خلال {range.label}</span>
+          {grid ? t('{count} يوماً مكتملاً', { count: formatArNumber(grid.stats.completedDays) }) : t('السجل')}
+          <span className="contrib__sub">  {t('خلال')} {t(range.label)}</span>
         </h4>
-        <div className="contrib__ranges" role="group" aria-label="نطاق السجل">
+        <div className="contrib__ranges" role="group" aria-label={t('نطاق السجل')}>
           {RANGES.map((option) => (
             <button
               key={option.id}
@@ -249,12 +258,11 @@ export default function HabitHistory({
         </div>
       </div>
 
-      {loading && <div className="contrib__skeleton" role="status" aria-label="جارٍ تحميل السجل" />}
+      {loading && <div className="contrib__skeleton" role="status" aria-label={t('جارٍ تحميل السجل')} />}
 
       {failed && !loading && (
         <p className="contrib__error" role="alert">
-          <AlertTriangle size={16} /> تعذر تحميل السجل.
-          <button type="button" className="ghost-button" onClick={retry}>إعادة المحاولة</button>
+          <AlertTriangle size={16} />  {t('تعذر تحميل السجل.')} <button type="button" className="ghost-button" onClick={retry}>{t('إعادة المحاولة')}</button>
         </p>
       )}
 
@@ -318,35 +326,35 @@ export default function HabitHistory({
 
           <div className="contrib__foot">
             <div className="contrib__legend" aria-hidden="true">
-              <span>أقل</span>
+              <span>{t('أقل')}</span>
               {[0, 1, 2, 3, 4].map((level) => (
                 <i key={level} className="contrib__cell contrib__cell--static" data-level={level} />
               ))}
-              <span>أكثر</span>
+              <span>{t('أكثر')}</span>
             </div>
             <p className="contrib__readout" role="status" aria-live="polite">
-              {readout ?? `أطول سلسلة: ${formatArNumber(grid.stats.longestStreak)} يوماً`}
+              {readout ?? t('أطول سلسلة: {count} يوماً', { count: formatArNumber(grid.stats.longestStreak) })}
             </p>
           </div>
 
           <dl className="contrib__stats">
             <div>
-              <dt>أيام مكتملة</dt>
+              <dt>{t('أيام مكتملة')}</dt>
               <dd>{formatArNumber(grid.stats.completedDays)}</dd>
             </div>
             <div>
-              <dt>نسبة الإنجاز</dt>
+              <dt>{t('نسبة الإنجاز')}</dt>
               <dd><bdi>{formatArNumber(grid.stats.completionRate)}%</bdi></dd>
             </div>
             <div>
-              <dt>السلسلة الحالية</dt>
+              <dt>{t('السلسلة الحالية')}</dt>
               <dd>
                 {grid.stats.currentStreak >= 3 && <Flame size={14} className="streak-flame" />}
                 {formatArNumber(grid.stats.currentStreak)}
               </dd>
             </div>
             <div>
-              <dt>أطول سلسلة</dt>
+              <dt>{t('أطول سلسلة')}</dt>
               <dd>{formatArNumber(grid.stats.longestStreak)}</dd>
             </div>
           </dl>

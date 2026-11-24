@@ -72,7 +72,7 @@ export function JournalView({
 
       <div className="journal-toolbar">
         <span className="journal-count">
-          {formatArNumber(total)} {language === 'en' ? (total === 1 ? t('entry') : t('entries')) : total === 1 ? 'تدوينة' : 'تدوينات'}
+          {formatArNumber(total)} {language === 'en' ? (total === 1 ? t('entry') : t('entries')) : total === 1 ? t('تدوينة') : t('تدوينات')}
         </span>
         <button
           className="ghost-button"

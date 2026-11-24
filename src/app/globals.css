@@ -1344,3 +1344,43 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   .journal-entry.reading-card { max-width: none; padding: var(--space-md); }
   .mobile-tabs button { font-weight: 500; }
 }
+
+/* ============================================================================
+   Today dashboard — decision-first layout
+   ----------------------------------------------------------------------------
+   Critique 2026-11-24: three stat cards became one quiet line, the task panel
+   became the hero, and the timer shrank to a card that opens the dock. The
+   .stat-card / .stats-grid rules above stay for the Statistics page, which
+   overrides them under .stats-page.
+   ========================================================================= */
+.welcome-name { display: block; margin-block-end: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); font-weight: 600; }
+
+.stat-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin-block-end: var(--space-md); padding-block-end: var(--space-sm); border-block-end: 1px solid var(--line); color: var(--color-ink-2); font-size: var(--text-small); }
+.stat-line b { color: var(--color-ink); font-size: var(--text-ui); font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-line-dot { inline-size: 3px; block-size: 3px; border-radius: 50%; background: var(--color-muted); opacity: .6; }
+
+.tasks-hero { padding: var(--space-md); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); }
+.tasks-hero .panel-heading { margin-block-end: var(--space-sm); }
+.tasks-hero .panel-heading h2 { font-size: var(--text-h2); }
+.hero-next { margin-block-start: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); }
+.hero-next bdi { color: var(--color-ink); font-weight: 600; }
+.task-row[data-featured='true'] { background: var(--color-paper-2); border-radius: var(--radius-md); }
+.task-row[data-featured='true'] .row-actions .row-action { opacity: 1; transform: none; }
+
+/* Compact timer card: the halos belong to the focus modal, not the dashboard. */
+.focus-mini { min-height: 0; padding: var(--space-md); align-items: flex-start; }
+.focus-mini h3 { font-size: var(--text-h3); }
+.focus-mini p { margin-block-start: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); }
+.focus-mini-clock { flex: none; display: flex; flex-direction: column; align-items: center; gap: var(--space-2xs); padding-inline-start: var(--space-md); color: var(--color-accent-strong); }
+.focus-mini-value,
+.focus-mini-clock span[role='timer'] { font-family: var(--font-ui); color: var(--color-ink); font-size: var(--text-stat); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.focus-mini-clock small { color: var(--color-ink-2); font-size: var(--text-micro); text-align: center; }
+
+.journal-strip { margin-block-start: var(--space-md); padding: var(--space-sm) var(--space-md); display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); }
+.journal-strip-copy { display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); }
+
+@media (max-width: 520px) {
+  .focus-mini { flex-direction: column; gap: var(--space-sm); }
+  .focus-mini-clock { flex-direction: row; align-items: baseline; gap: var(--space-xs); padding-inline-start: 0; }
+  .journal-strip { flex-direction: column; align-items: flex-start; }
+}

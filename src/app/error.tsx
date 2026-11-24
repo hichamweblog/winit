@@ -7,16 +7,18 @@
  */
 import { useEffect } from 'react';
 import { AlertTriangle, Reset } from './icons';
+import { useLocale } from './locale';
 
 export default function ErrorBoundary({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const { t } = useLocale();
   useEffect(() => { console.error('route error:', error); }, [error]);
   return (
     <main className="fallback-screen" role="alert">
       <span className="fallback-icon"><AlertTriangle size={24} /></span>
-      <h1>حدث خطأ غير متوقع</h1>
-      <p>لم تُفقد بياناتك المحفوظة. أعد المحاولة، وإن تكرر الخطأ أعد تحميل الصفحة.</p>
-      {error.digest && <p className="fallback-digest">رمز المتابعة: <bdi>{error.digest}</bdi></p>}
-      <button type="button" className="btn btn-primary primary-button" onClick={reset}><Reset size={16} />إعادة المحاولة</button>
+      <h1>{t('حدث خطأ غير متوقع')}</h1>
+      <p>{t('لم تُفقد بياناتك المحفوظة. أعد المحاولة، وإن تكرر الخطأ أعد تحميل الصفحة.')}</p>
+      {error.digest && <p className="fallback-digest">{t('رمز المتابعة:')} <bdi>{error.digest}</bdi></p>}
+      <button type="button" className="btn btn-primary primary-button" onClick={reset}><Reset size={16} />{t('إعادة المحاولة')}</button>
     </main>
   );
 }

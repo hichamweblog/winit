@@ -123,7 +123,7 @@ function AuthScreen({ onSignedIn }: { demoMode: boolean; onSignedIn: () => void 
       <main className="auth-card" aria-labelledby="auth-heading">
         <div className="auth-brand"><WinItLogo height={36} /></div>
         <div className="auth-language-picker" role="group" aria-label={t('إعدادات اللغة')}>
-          <button type="button" aria-pressed={language === 'ar'} onClick={() => setLanguage('ar')}>عربي</button>
+          <button type="button" aria-pressed={language === 'ar'} onClick={() => setLanguage('ar')}>{t('عربي')}</button>
           <button type="button" aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
         </div>
         <h1 id="auth-heading">{t(mode === 'login' ? 'أهلاً بعودتك' : 'أنشئ حسابك')}</h1>
