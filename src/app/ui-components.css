@@ -1,0 +1,352 @@
+/* Split out of globals.css so no stylesheet runs past 1,000 lines.
+   The import order in globals.css preserves the original cascade. */
+/* ============================================================================
+   Calm Sea component layer — the parts of §8 that had no equivalent before.
+   Appended deliberately so the migration diff stays reviewable.
+   ========================================================================= */
+
+/* ---- §8.1 button variants ---- */
+.ghost-button, .danger-button {
+  min-height: var(--tap-min); padding-inline: var(--space-4);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  flex: none; border: 0; border-radius: var(--radius-md);
+  font: 500 var(--text-ui)/var(--lh-ui) var(--font-ui); white-space: nowrap; cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.ghost-button { color: var(--accent); background: transparent; }
+
+.danger-button { color: var(--on-danger); background: var(--danger); }
+.ghost-button:disabled, .danger-button:disabled {
+  color: var(--text-disabled); background: var(--surface-sunken); border-color: transparent; cursor: not-allowed;
+}
+@media (hover: hover) {
+.ghost-button:hover:not(:disabled) { background: var(--accent-soft); }
+
+  .danger-button:hover:not(:disabled) { background: var(--danger); filter: brightness(.93); }
+}
+
+/* ---- §8.5 chips ---- */
+
+/* ---- §8.4 overdue: colour + icon + text, never colour alone ---- */
+
+/* ---- §8.2 text inputs ---- */
+
+/* ---- §8.9 reading card — the only home for Naskh ---- */
+.reading-card {
+  max-width: var(--content-max-reading);
+  padding: var(--space-5) var(--space-6);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+}
+.reading-card__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-block-end: var(--space-3); }
+.reading-card__title { font: 700 var(--text-h3)/var(--lh-h3) var(--font-heading); color: var(--accent); }
+.reading-card__meta { color: var(--text-muted); font-size: var(--text-small); }
+.reading-card__body { color: var(--text); white-space: pre-line; overflow-wrap: anywhere; }
+.reading-card__body p + p { margin-block-start: 1em; }
+.reading-card__foot { margin-block-start: var(--space-4); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+
+/* Journal entries are long-form Arabic, so they render in the reading container
+   rather than as chrome text. This is §8.9 applied to real content. */
+.journal-entry .reading-card__body {
+  margin-block: var(--space-3);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden;
+}
+.journal-entry[data-expanded="true"] .reading-card__body { display: block; -webkit-line-clamp: unset; }
+
+/* ---- §8.12 empty states: centred icon + one line + one action ---- */
+.empty-state, .empty-page { align-items: center; text-align: center; }
+.empty-page p { max-width: 42ch; }
+
+/* ---- §6.3 touch targets: 44px hit area even when the visual is smaller ---- */
+.journal-edit, .project-manage, .toast button, .journal-mood-option, .habit-log-editor input { min-block-size: var(--tap-min); }
+
+/* ---- §8.7 habit week strip ---- */
+.week-strip { display: flex; gap: var(--space-2); }
+/* §8.7: fill encodes completion; the accent ring encodes "today". They are
+   independent — an unfinished today is an outline plus a ring, never a fill. */
+.week-strip__day {
+  inline-size: 28px; block-size: 28px; flex: none;
+  display: grid; place-items: center; border-radius: 50%;
+  font: 500 var(--text-micro)/1 var(--font-ui);
+  color: var(--text-muted); background: transparent; border: 1px solid var(--line-strong);
+}
+.week-strip__day[data-state="done"] { color: var(--on-goal); background: var(--goal-solid, var(--accent)); border-color: transparent; }
+.week-strip__day[data-state="missed"] { color: var(--text); background: var(--line); border-color: transparent; }
+.week-strip__day[data-today="true"] { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Sidebar goal list: colour dot + a ONE-LINE name.
+   Deliberate deviation from Calm Sea §6.2, which asked names to wrap: wrapping
+   made rows uneven and pushed the list down. Names are now clamped to two words
+   in JS (see lib/label.ts) with CSS ellipsis as a second guard for two-word
+   names still wider than the column. The full name lives in `title` and in a
+   visually-hidden span, so hover and screen readers lose nothing.
+   Line-height stays generous so Arabic descenders are not clipped. */
+.project-item { min-block-size: var(--tap-min); block-size: auto; align-items: center; padding-block: var(--space-1); }
+.project-item-name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: var(--lh-body); }
+.project-item-row { align-items: center; }
+
+/* Today: align the stat row with the task column instead of centring it. */
+.stats-grid { margin-inline: 0; max-width: none; }
+
+/* Keyboard hints are meaningless on a touch device. */
+@media (pointer: coarse) {
+.modal-footer kbd { display: none; }
+}
+/* Compact: the 220px ring still fits a 390px sheet, but tighten the digits so
+   three-digit stopwatch minutes never overflow the 6ch container. */
+@media (max-width: 767px) {
+  .modal-timer-ring { width: 192px; }
+  .modal-timer-ring span { font-size: var(--text-stat); }
+}
+
+/* §8.7 current-week strip, Saturday-first, RTL. */
+.habit-week { display: flex; gap: var(--space-2); margin-block-start: var(--space-4); }
+.streak-flame { color: var(--accent-2-line); }
+
+/* ============================================================================
+   Habit contribution graph — GitHub-style history.
+   7 weekday rows x N week columns. RTL is inherited, so the oldest week sits at
+   the inline-start (right edge) and time flows right-to-left.
+   ========================================================================= */
+.contrib {
+  --contrib-cell: 12px;
+  --contrib-gap: 3px; --contrib-gutter: 22px;
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--line);
+}
+.contrib__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-block-end: var(--space-3); }
+.contrib__title { margin: 0; font: 600 var(--text-ui)/var(--lh-ui) var(--font-ui); color: var(--text); }
+.contrib__sub { color: var(--text-muted); font-weight: 400; }
+.contrib__ranges { display: flex; gap: var(--space-1); padding: 2px; background: var(--surface-sunken); border-radius: var(--radius-full); }
+.contrib__range {
+  min-block-size: 30px; padding-inline: var(--space-3);
+  border: 0; border-radius: var(--radius-full); background: transparent;
+  color: var(--text-muted); font: 500 var(--text-small)/1 var(--font-ui); cursor: pointer;
+}
+.contrib__range[aria-pressed="true"] { color: var(--accent); background: var(--surface); box-shadow: var(--shadow-1); }
+
+.contrib__scroll { overflow-x: auto; overscroll-behavior-inline: contain; padding-block-end: var(--space-1); }
+.contrib__frame { inline-size: max-content; min-inline-size: 100%; }
+.contrib__months {
+  display: grid;
+  grid-template-columns: repeat(var(--contrib-weeks), var(--contrib-cell));
+  gap: var(--contrib-gap);
+  margin-inline-start: var(--contrib-gutter);
+  margin-block-end: var(--space-1);
+  block-size: 18px;
+}
+.contrib__month { justify-self: start; white-space: nowrap; color: var(--text-muted); font-size: var(--text-small); line-height: 1; }
+.contrib__body { display: flex; align-items: flex-start; gap: var(--space-1); }
+.contrib__weekdays {
+  inline-size: 18px; flex: none;
+  display: grid; grid-template-rows: repeat(7, var(--contrib-cell)); gap: var(--contrib-gap);
+}
+.contrib__weekday { color: var(--text-muted); font-size: var(--text-small); line-height: var(--contrib-cell); text-align: end; }
+.contrib__grid { display: grid; grid-template-rows: repeat(7, var(--contrib-cell)); gap: var(--contrib-gap); }
+.contrib__row { display: grid; grid-template-columns: repeat(var(--contrib-weeks), var(--contrib-cell)); gap: var(--contrib-gap); }
+
+.contrib__cell {
+  inline-size: var(--contrib-cell); block-size: var(--contrib-cell);
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+/* Five levels. The exact value is always available as text, so the ramp is a
+   convenience, not the only signal (§10). */
+.contrib__cell[data-level="1"] { background: color-mix(in oklab, var(--contrib-goal) 28%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--contrib-goal) 34%, var(--line)); }
+.contrib__cell[data-level="2"] { background: color-mix(in oklab, var(--contrib-goal) 52%, var(--surface)); box-shadow: none; }
+.contrib__cell[data-level="3"] { background: color-mix(in oklab, var(--contrib-goal) 76%, var(--surface)); box-shadow: none; }
+.contrib__cell[data-level="4"] { background: var(--contrib-goal); box-shadow: none; }
+.contrib__cell[data-padding="true"] { background: transparent; box-shadow: none; }
+.contrib__cell[data-today="true"] { box-shadow: inset 0 0 0 1.5px var(--text); }
+.contrib__grid .contrib__cell:not([data-padding="true"]):hover { outline: 1.5px solid var(--text); outline-offset: 1px; }
+.contrib__grid .contrib__cell:focus-visible { outline: var(--focus-width) solid var(--accent); outline-offset: 1px; }
+.contrib__cell--static { display: block; }
+
+.contrib__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-block-start: var(--space-2); }
+.contrib__legend { display: flex; align-items: center; gap: var(--contrib-gap); color: var(--text-muted); font-size: var(--text-small); }
+.contrib__legend span { margin-inline: var(--space-1); }
+.contrib__readout { margin: 0; min-block-size: 20px; color: var(--text-muted); font-size: var(--text-small); text-align: end; }
+
+.contrib__stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-3) 0 0; }
+.contrib__stats > div { padding: var(--space-2); background: var(--surface-sunken); border-radius: var(--radius-sm); text-align: center; }
+.contrib__stats dt { color: var(--text-muted); font-size: var(--text-small); line-height: var(--lh-small); }
+.contrib__stats dd { margin: var(--space-1) 0 0; display: flex; align-items: center; justify-content: center; gap: var(--space-1); color: var(--text); font: 600 var(--text-body-lg)/1.2 var(--font-ui); font-variant-numeric: tabular-nums; }
+
+.contrib__skeleton { block-size: 132px; border-radius: var(--radius-sm); background: var(--surface-sunken); }
+.contrib__error { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; color: var(--danger-text); font-size: var(--text-small); }
+
+/* Fixed-position tooltip: coordinates come from getBoundingClientRect, so the
+   inline left/top are viewport geometry, not layout direction. */
+.contrib__tip {
+  position: fixed; z-index: var(--z-toast);
+  transform: translate(-50%, calc(-100% - 8px));
+  padding: var(--space-1) var(--space-2xs); border-radius: var(--radius-sm);
+  background: var(--text); color: var(--bg);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-small); line-height: var(--lh-small); white-space: nowrap; pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .contrib { --contrib-cell: 11px; }
+  .contrib__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .contrib__readout { text-align: start; }
+}
+
+/* ---- Sidebar project actions: revealed on hover/focus, always shown on touch ----
+   The two 36px buttons used to sit in the flow even at opacity 0, permanently
+   stealing ~80px from a ~245px sidebar and leaving only 64px for a name that
+   needs 90px — so two-word names were being ellipsised. They now overlay the
+   inline end of the row, and the count fades out beneath them. No layout
+   shift: only opacity changes, and the name keeps its full width at all times. */
+.project-item-row { position: relative; }
+/* One 80px zone at the inline end holds the count at rest and the two action
+   buttons on hover. Reserving it once (instead of letting hidden buttons take
+   80px *plus* the count) leaves ~120px for the name — enough for the longest
+   two-word Arabic name (90px) with room to spare, and the actions can never
+   cover the text because they live in the zone the text does not enter. */
+.project-item-row .project-item { padding-inline-end: var(--project-action-col); }
+/* Hover/focus swaps the count for the actions. The name yields room only while
+   the pointer is on the row, so at rest every two-word name is fully visible;
+   the title tooltip carries the full name precisely when it is shortened. */
+.project-item-row:hover .project-item,
+.project-item-row:focus-within .project-item { padding-inline-end: var(--project-actions-col); }
+.project-item-row .project-count {
+  position: absolute; inset-inline-end: 10px; inset-block-start: 50%; translate: 0 -50%;
+}
+.project-manage {
+  position: absolute; inset-block-start: 50%; translate: 0 -50%;
+  inset-inline-end: 2px;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.project-manage.project-remove { inset-inline-end: 46px; }
+.project-count { transition: opacity var(--dur-fast) var(--ease); }
+.project-item-row:hover .project-manage,
+.project-item-row:focus-within .project-manage,
+.project-manage:focus-visible { opacity: 1; }
+.project-item-row:hover .project-count,
+.project-item-row:focus-within .project-count { opacity: 0; }
+/* `pointer: coarse` is the reliable "primary input is touch" signal.
+   `hover: none` is deliberately not used: it also matches remote-desktop and
+   headless sessions where a real mouse does hover, which would defeat the
+   hide-by-default behaviour on those machines. Keyboard users are covered by
+   :focus-within above regardless of pointer type. */
+/* Touch has no hover, so the edit affordance is permanent — but only one.
+   Two 44px targets would eat 92px of a 240px rail and ellipsise every name.
+   Delete lives in the project editor instead, next to the fields it affects. */
+@media (pointer: coarse) {
+  .project-manage { opacity: 1; }
+  .project-manage.project-remove { display: none; }
+  .project-count { opacity: 0; }
+  .project-item-row .project-item { padding-inline-end: var(--project-actions-col-compact); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-manage, .project-count { transition-property: none; }
+}
+
+/* ============================================================================
+   Authentication screen, demo banner and fallback pages.
+   ========================================================================= */
+.auth-screen {
+  min-block-size: 100dvh;
+  display: grid; place-items: center;
+  padding: var(--space-5) var(--space-4);
+  background: var(--bg);
+}
+.auth-card {
+  inline-size: 100%; max-inline-size: 26rem;
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+.auth-brand {
+  display: flex;
+  align-items: center;
+  margin-block-end: var(--space-4);
+}
+.auth-language-picker { margin-block-end: var(--space-3); display: flex; justify-content: flex-end; gap: var(--space-1); }
+.auth-language-picker button { min-width: 42px; min-height: 36px; padding-inline: var(--space-2); color: var(--text-muted); border: 1px solid var(--line); border-radius: var(--radius-full); font-size: var(--text-small); }
+.auth-language-picker button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.auth-card h1 { margin: 0 0 var(--space-2); font: 700 var(--text-h1)/var(--lh-h1) var(--font-display); color: var(--text); }
+.auth-lede { margin: 0 0 var(--space-5); color: var(--text-muted); font-size: var(--text-ui); line-height: var(--lh-body); }
+.auth-field { display: block; margin-block-end: var(--space-4); }
+.auth-field > span:first-child { display: block; margin-block-end: var(--space-2); color: var(--text); font-size: var(--text-small); font-weight: 500; }
+.auth-input {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding-inline: var(--space-3);
+  min-block-size: var(--tap-min);
+  background: var(--surface-sunken);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+.auth-input:focus-within { border-color: var(--accent); outline: var(--focus-width) solid var(--accent); outline-offset: 1px; }
+.auth-input input {
+  flex: 1; min-inline-size: 0; min-block-size: 42px;
+  border: 0; background: transparent; color: var(--text);
+  font: 400 var(--text-ui)/1.4 var(--font-ui);
+}
+.auth-input input:focus { outline: none; }
+.auth-reveal {
+  flex: none; inline-size: 32px; block-size: 32px;
+  display: grid; place-items: center;
+  border: 0; border-radius: var(--radius-sm); background: transparent;
+  color: var(--text-muted); cursor: pointer;
+}
+.auth-reveal:hover { color: var(--text); background: var(--surface); }
+.auth-error {
+  margin: 0 0 var(--space-4); padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--danger-bg); color: var(--danger-text);
+  font-size: var(--text-small); line-height: var(--lh-body);
+}
+.auth-submit { inline-size: 100%; justify-content: center; gap: var(--space-2); }
+.auth-switch {
+  inline-size: 100%; min-block-size: var(--tap-min);
+  margin-block-start: var(--space-3);
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  border: 0; background: transparent; color: var(--accent);
+  font: 500 var(--text-small)/1 var(--font-ui); cursor: pointer;
+}
+.auth-switch:hover { text-decoration: underline; }
+.auth-spinner { animation: auth-spin 900ms linear infinite; }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+
+.demo-banner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+  margin: 0; padding: var(--space-2) var(--space-4);
+  background: var(--warning-bg); color: var(--warning-text);
+  border-block-end: 1px solid var(--line);
+  font-size: var(--text-small); line-height: var(--lh-body);
+}
+.demo-banner__hint { color: var(--text-muted); }
+/* The sidebar is fixed at the inline-start, so the banner has to clear it the
+   same way .main-area does — otherwise its first words sit under the sidebar. */
+@media (min-width: 1100px) {
+  .demo-banner { margin-inline-start: var(--sidebar-width); }
+}
+
+.fallback-screen {
+  min-block-size: 70dvh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--space-3); padding: var(--space-6) var(--space-4); text-align: center;
+}
+.fallback-icon {
+  inline-size: 56px; block-size: 56px; display: grid; place-items: center;
+  border-radius: var(--radius-full); background: var(--surface-sunken); color: var(--text-muted);
+}
+.fallback-screen h1 { margin: 0; font: 700 var(--text-h1)/var(--lh-h1) var(--font-display); color: var(--text); }
+.fallback-screen p { margin: 0; max-inline-size: 40ch; color: var(--text-muted); line-height: var(--lh-body); }
+.fallback-digest { font-size: var(--text-small); font-variant-numeric: tabular-nums; }
+
+.workspace-switch .sign-out { flex: none; margin-inline-start: auto; }
+.workspace-txt { min-inline-size: 0; }
+.workspace-txt b, .workspace-txt small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-spinner { animation: none; }
+}

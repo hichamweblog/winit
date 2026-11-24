@@ -1,168 +1,93 @@
-/* Winit custom four-color palette, tuned for legible text in both modes.
-   Purple is the primary/action color; green is paired with dark ink; the two
-   pale colors are surfaces and accents, never low-contrast foreground text. */
-:root[data-vibe="energy"] {
-  --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
-  --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
-  color-scheme: light;
-  --bg: #F4F7F8;
-  --surface: #FFFFFF;
-  --surface-raised: #FFFFFF;
-  --surface-sunken: #C1F0EC;
-  --text: #1D2E38;
-  --text-muted: #303A40;
-  --text-disabled: #687A83;
-  --line: #CFD8DD;
-  --line-strong: #56646B;
-  --accent: #3E3758;
-  --accent-hover: #332D49;
-  --accent-pressed: #28233A;
-  --accent-soft: #C1F0EC;
-  --on-accent: #FFFFFF;
-  --accent-gradient: linear-gradient(125deg, #3E3758 0%, #3E3758 100%);
-  --accent-2: #8AB946;
-  --accent-2-strong: #425E1F;
-  --accent-2-soft: #B0CFDD;
-  --on-accent-2: #17272F;
-  --accent-2-on-soft: #3E3758;
-  --accent-2-line: #3E3758;
-  --toast-action: #C1F0EC;
-  --success: #168052;
-  --success-bg: #DDF4E9;
-  --success-text: #176744;
-  --on-success: #FFFFFF;
-  --warning: #916100;
-  --warning-bg: #FFF1C9;
-  --warning-text: #7D5400;
-  --on-warning: #FFFFFF;
-  --info: #3E3758;
-  --info-bg: #E7E4EF;
-  --info-text: #3E3758;
-  --on-info: #FFFFFF;
-  --energy-sidebar-bg: #3E3758;
-  --energy-sidebar-hover: #332D49;
-  --energy-sidebar-active: #C1F0EC;
-  --energy-sidebar-accent: #8AB946;
-  --energy-sidebar-text: #FFFFFF;
-  --energy-sidebar-muted: #E5E1F0;
-  --energy-sidebar-active-text: #1D2E38;
-  --energy-sidebar-border: #716A88;
-  --energy-card-blue: #B0CFDD;
-  --energy-card-mint: #C1F0EC;
-  --energy-card-green: #8AB946;
-  --energy-hero-bg: #3E3758;
-  --energy-hero-text: #FFFFFF;
-  --energy-hero-muted: #C1F0EC;
-  --shadow-1: 0 1px 2px rgba(29, 46, 56, .08);
-  --shadow-2: 0 8px 24px rgba(62, 55, 88, .12);
-  --shadow-3: 0 18px 48px rgba(29, 46, 56, .18);
-}
-
-:root[data-vibe="energy"][data-mode="dark"],
-:root[data-vibe="energy"][data-theme="dark"] {
-  --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
-  --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
-  color-scheme: dark;
-  --bg: #11101B;
-  --surface: #1B1A28;
-  --surface-raised: #262437;
-  --surface-sunken: #0C0C14;
-  --text: #F4F2FA;
-  --text-muted: #C4C0D1;
-  --text-disabled: #8A849B;
-  --line: #383549;
-  --line-strong: #817C96;
-  --accent: #C1F0EC;
-  --accent-hover: #D6FAF6;
-  --accent-pressed: #ECFFFD;
-  --accent-soft: #2A2A3B;
-  --on-accent: #17272F;
-  --accent-gradient: linear-gradient(125deg, #C1F0EC 0%, #C1F0EC 100%);
-  --accent-2: #8AB946;
-  --accent-2-strong: #B0CFDD;
-  --accent-2-soft: #2B3529;
-  --on-accent-2: #17272F;
-  --accent-2-on-soft: #C1F0EC;
-  --accent-2-line: #8AB946;
-  --toast-action: #3E3758;
-  --success: #63D6A0;
-  --success-bg: #1D3D36;
-  --success-text: #73D9A6;
-  --on-success: #09271A;
-  --warning: #F3C867;
-  --warning-bg: #423A25;
-  --warning-text: #F1C65A;
-  --on-warning: #30220B;
-  --info: #B0CFDD;
-  --info-bg: #293744;
-  --info-text: #B0CFDD;
-  --on-info: #17272F;
-  --energy-sidebar-bg: #211E30;
-  --energy-sidebar-hover: #302C40;
-  --energy-sidebar-active: #C1F0EC;
-  --energy-sidebar-accent: #8AB946;
-  --energy-sidebar-text: #F4F2FA;
-  --energy-sidebar-muted: #D5D0E2;
-  --energy-sidebar-active-text: #1D2E38;
-  --energy-sidebar-border: #4C465F;
-  --energy-card-blue: #263645;
-  --energy-card-mint: #213A3C;
-  --energy-card-green: #3D4D2A;
-  --energy-hero-bg: #3E3758;
-  --energy-hero-text: #FFFFFF;
-  --energy-hero-muted: #C1F0EC;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
-  --shadow-2: 0 8px 26px rgba(0, 0, 0, .4);
-  --shadow-3: 0 18px 52px rgba(0, 0, 0, .55);
-}
+/* Usage rules for the Energized vibe. The palette itself lives in
+   tokens.css with the rest of the colour tokens; this file only says
+   where each colour lands. */
 
 :root[data-vibe="energy"] .sidebar {
-  --color-paper: var(--energy-sidebar-bg);
-  --color-paper-2: var(--energy-sidebar-hover);
-  --color-paper-3: var(--energy-sidebar-hover);
-  --color-ink: var(--energy-sidebar-text);
-  --color-ink-2: var(--energy-sidebar-muted);
-  --color-muted: var(--energy-sidebar-muted);
-  --color-rule: color-mix(in srgb, var(--energy-sidebar-text) 28%, transparent);
-  --color-edge: var(--energy-sidebar-border);
-  --color-accent: var(--energy-sidebar-accent);
+  --bg: var(--energy-sidebar-bg);
+  --surface-sunken: var(--energy-sidebar-hover);
+  --surface: var(--energy-sidebar-hover);
+  --text: var(--energy-sidebar-text);
+  --text-muted: var(--energy-sidebar-muted);
+  --line: color-mix(in srgb, var(--energy-sidebar-text) 28%, transparent);
+  --line-strong: var(--energy-sidebar-border);
+  --accent: var(--energy-sidebar-accent);
+  --accent-strong: var(--energy-sidebar-text);
   --color-primary: var(--energy-sidebar-accent);
-  --color-accent-strong: var(--energy-sidebar-text);
-  --color-accent-ink: #17272F;
-  --line: var(--energy-sidebar-border);
+  --on-accent: #17272F;
   color: var(--energy-sidebar-text);
   background: var(--energy-sidebar-bg);
   border-color: var(--energy-sidebar-border);
 }
+
+
 :root[data-vibe="energy"] .sidebar .nav-active,
 :root[data-vibe="energy"] .sidebar .project-active {
   color: var(--energy-sidebar-active-text);
   background: var(--energy-sidebar-active);
 }
+
+
 :root[data-vibe="energy"] .sidebar .nav-active svg { color: var(--energy-sidebar-active-text); }
 
+
+
 :root[data-vibe="energy"] .welcome-row {
-  padding: clamp(22px, 3.5vw, 36px);
+  padding: clamp(var(--space-lg), 3.5vw, var(--space-10));
   border: 1px solid color-mix(in srgb, var(--energy-hero-text) 26%, transparent);
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   background: var(--energy-hero-bg);
   box-shadow: var(--shadow-2);
 }
+
+
 :root[data-vibe="energy"] .welcome-row h1 { color: var(--energy-hero-text); }
+
+
 :root[data-vibe="energy"] .welcome-row p { color: var(--energy-hero-muted); }
+
+
+:root[data-vibe="energy"] .welcome-row .welcome-name { color: var(--energy-hero-muted); }
+
+
 :root[data-vibe="energy"] .stat-card:nth-child(1) { background: var(--energy-card-blue); border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); }
+
+
 :root[data-vibe="energy"] .stat-card:nth-child(2) { background: var(--energy-card-green); border-color: color-mix(in srgb, var(--accent-2) 36%, var(--line)); }
+
+
 :root[data-vibe="energy"] .stat-card:nth-child(3) { background: var(--energy-card-mint); border-color: color-mix(in srgb, var(--accent-2) 32%, var(--line)); }
+
+
 :root[data-vibe="energy"] .primary-button { background: var(--accent); font-weight: 600; box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 23%, transparent); }
+
+
 :root[data-vibe="energy"] .primary-button:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+
+
 :root[data-vibe="energy"] .primary-button:disabled { opacity: 1; color: var(--text-muted); background: var(--surface-sunken); border: 1px solid var(--line-strong); box-shadow: none; }
+
+
 :root[data-vibe="energy"] .focus-dock { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); box-shadow: 0 12px 34px color-mix(in srgb, var(--accent) 16%, transparent); }
+
+
 :root[data-vibe="energy"] .focus-modal .modal-timer-ring { filter: drop-shadow(0 10px 22px color-mix(in srgb, var(--accent) 22%, transparent)); }
+
+
 :root[data-vibe="energy"] .nav-item.nav-active, :root[data-vibe="energy"] .project-item.project-active { box-shadow: inset 3px 0 0 var(--accent); }
+
+
 :root[data-vibe="energy"] .task-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+
+
 :root[data-vibe="energy"] .fab-add { background: var(--accent); box-shadow: 0 9px 22px color-mix(in srgb, var(--accent) 30%, transparent); }
+
+
 :root[data-vibe="energy"] .mobile-tab-active { color: var(--accent); }
+
+
 :root[data-vibe="energy"] .settings-group { border-color: color-mix(in srgb, var(--accent) 16%, var(--line)); }
+
+
 
 @media (prefers-reduced-motion: no-preference) {
   :root[data-vibe="energy"] .primary-button, :root[data-vibe="energy"] .fab-add { transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease; }

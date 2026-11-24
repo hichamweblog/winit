@@ -69,11 +69,6 @@ export function JournalView({
         </button>
       </div>
 
-      {/* The daily reminder moved here from the dashboard: reflection belongs
-          with the journal, not on the screen where you decide what to do. */}
-      <p className="journal-quote">{t('«أحب الأعمال إلى الله أدومها وإن قل»')}</p>
-
-
       <div className="journal-toolbar">
         <span className="journal-count">
           {formatArNumber(total)} {language === 'en' ? (total === 1 ? t('entry') : t('entries')) : total === 1 ? t('تدوينة') : t('تدوينات')}

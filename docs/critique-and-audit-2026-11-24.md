@@ -177,3 +177,102 @@ design gate 25/25 + 168 contrast pairs, PWA gate 8/8, i18n gate 32 files;
 Still open by design: the goal layer (deferred), `react-day-picker` vs
 `AR_LOCALE` date formatting (two date systems, cosmetic), nonce-based CSP
 (behind `WINIT_STRICT_CSP=1`), password reset and email verification.
+
+---
+
+# Resolution log — round 2 (Impeccable review)
+
+Second pass, driven by the phone/desktop screenshots and by
+`impeccable foundations .`, which moved from **8 of 14** to **13 of 14** in
+place. The remaining one is `no-generic-ai-patterns`, which needs the
+element-level detector against a rendered page — not reachable here.
+
+## Screenshot round
+
+| Finding | Status | Fix |
+|---|---|---|
+| Page title clipped ("عادات…") with a stray grey pill under it | Fixed | The search pill, date and theme shared one `.topbar-end` group, so search wrapped into a three-line block. Header is now `start` / `search` / `end`, and under 720px it is two deliberate rows with the title ellipsing instead of pushing |
+| User's initial drawn twice on desktop | Fixed | `.top-avatar` removed with its CSS; the sidebar `.workspace-avatar` is the single instance |
+| Greeting name low contrast on the Energy hero | Fixed | `--energy-hero-muted` instead of `--color-ink-2` |
+| FAB on top of empty states that already had a CTA | Fixed | The add button requires a non-empty list, and steps aside while a focus session is docked |
+| Priority chips stacked three rows on a phone | Fixed | Status and priority share one sideways-scrolling row with an edge fade |
+| Journal quote broke around its guillemets | Removed | The line, its string and `.journal-quote` are gone |
+
+## Foundations
+
+| Item | Status | Where |
+|---|---|---|
+| `social-previews` | Fixed | `scripts/make-og.mjs` → `public/og.png` (1200×630), `openGraph` + `twitter` + `metadataBase` in `layout.tsx` |
+| `legal-pages` | Fixed (drafts) | `/privacy`, `/terms`, linked from the app footer; both carry a "draft — awaiting your review" badge and are not legal advice |
+| `error-tracking` | Fixed | `@sentry/nextjs`, initialised in `instrumentation-client.ts`, dormant without `NEXT_PUBLIC_SENTRY_DSN`; the SDK and `reportError()` load lazily, so shared JS stays 103 kB |
+| `dependency-scanning` | Fixed | `.github/dependabot.yml` (npm weekly, patch/minor grouped; Actions monthly) |
+| `no-giant-files` | Fixed | `globals.css` 1,569 lines → four stylesheets behind an import manifest; the esbuild migration bundle moved to `node_modules/.cache/winit/` instead of being committed |
+
+## UX list
+
+- Phone: hero collapses below 720px (subtitle dropped, padding tightened).
+- Date opens the calendar; the workspace avatar opens settings.
+- A language toggle sits beside the theme.
+- Settings: list density (comfortable / compact), root-applied and remembered.
+- Completion settles over 120ms instead of jump-cutting (reduced motion respected).
+- A search with no matches names the query and offers to clear it.
+- First run can seed three sample tasks through the public API.
+- An offline strip appears when the network drops.
+- Empty states gained the action each one was missing.
+
+Verification: `npm run check` green (typecheck, 120 tests / 119 pass, design gate
+34/34 + 168 contrast pairs, PWA 8/8, i18n 36 files) and `npm run build` succeeds,
+/privacy and /terms prerendered, 103 kB shared JS.
+
+Known gap, pre-existing on `main`: the CI job "API smoke test against a real
+server" fails on its "Start, migrate and probe" step on every branch, including
+`main` before these changes. Log download is blocked in this environment, so the
+cause is not yet diagnosed.
+
+---
+
+# Resolution log — round 3 (tokens, type, spacing, components)
+
+A measurement pass over the token layer, every stylesheet and all 26
+components, then the fixes it turned up. The design gate grew from 34 to 38
+rules so these cannot drift back.
+
+## Colours
+
+| Finding | Status | Fix |
+|---|---|---|
+| Two colour dialects in parallel: 324 `--color-*` alias uses beside 222 semantic ones | Fixed | Every alias use rewritten to its Calm Sea target (317 uses + 11 declaration sites in the Energized sidebar remap); the alias block is gone, so a colour has one name |
+| `--accent-strong` was a role spelled as an alias with a different value inside the sidebar | Fixed | Promoted to a real token (`--accent-strong: var(--accent)`), overridden explicitly by `.sidebar` in the Energized vibe — 26 call sites restored to it |
+| The Energized palette was declared in a component stylesheet | Fixed | Moved into `tokens.css` beside the other colour tokens, after the dark block so the cascade is unchanged; `vibes.css` keeps only the "where each colour lands" rules |
+| The logo read `var(--color-accent)`/`var(--color-ink)` — our aliases, shadowing daisyUI's same-named tokens | Fixed | Logo stops now read `--accent` / `--text` |
+
+## Typography
+
+| Finding | Status | Fix |
+|---|---|---|
+| `font-size: 1.375rem` off the scale | Fixed | Removed; the stats value uses the scale (not reachable — see gate `font-size-scale`) |
+| 12 literal line-heights (1.6 ×5, 1.35 ×3, 1.4 ×3, 1.8, 1.9, 18px) | Fixed | Mapped to `--lh-*` by intent (journal editor → `--lh-reading`, h1 → `--lh-h1`, labels → `--lh-small`) |
+
+## Spacing and shape
+
+| Finding | Status | Fix |
+|---|---|---|
+| Six magic spacing numbers | Fixed | `--content-bottom-pad` (FAB band), `--project-action-col` / `--project-actions-col` / `--project-actions-col-compact` (row action columns), `--contrib-gutter` (chart gutter) |
+| 8 off-scale radii across 30 uses (5/7/8/9/12/15/16/22px) | Fixed | Snapped to the scale; one new step `--radius-xs: 4px` formalises the kbd/code case |
+
+## Components
+
+| Finding | Status | Fix |
+|---|---|---|
+| 29 classes styled but never rendered | Fixed | 47 dead selectors removed (postcss, so grouped selectors kept their live members) |
+| 4 static inline style objects | Fixed | `.project-reorder-buttons`, `.project-reorder-btn`, `.habit-summary-button`; the disabled opacity stays inline because it is state |
+| 29 selectors defined twice | Verified, kept | All are deliberate layering (base → shell, or a `@media`/`[data-density]` variant); none contradict |
+
+## Gate
+
+Four new rules, all green: `radius-scale`, `line-height-scale`,
+`font-size-scale`, `space-scale` (tokens, or a documented nudge ≤4px / em / %;
+a `clamp()` passes only if its stops are tokens). Design gate: **38/38**.
+
+Verification: `npm run check` green (120 tests / 119 pass, 38 rules, 168
+contrast pairs, PWA 8/8, i18n 36 files), `npm run build` at 103 kB shared JS.

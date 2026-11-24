@@ -16,6 +16,7 @@ export type TaskListViewProps = {
   project?: Project;
   today: string;
   query?: string;
+  onClearSearch?: () => void;
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
   onStart: (id: string) => void;
@@ -36,6 +37,7 @@ export function TaskListView({
   project,
   today,
   query = '',
+  onClearSearch,
   onComplete,
   onDelete,
   onStart,
@@ -298,9 +300,19 @@ export function TaskListView({
         </div>
       ) : filtersActive ? (
         <div className="empty-page">
-          <h3>{t('لا نتائج مطابقة')}</h3>
-          <p>{t('جرّب كلمة أخرى أو امسح عوامل التصفية.')}</p>
-          <button className="ghost-button" onClick={clearFilters}>{t('مسح عوامل التصفية')}</button>
+          {query.trim() ? (
+            <>
+              <h3>{t('لا شيء يطابق «{query}»', { query: query.trim() })}</h3>
+              <p>{t('جرّب كلمة أخرى، أو امسح البحث لترى كل المهام.')}</p>
+              <button className="ghost-button" onClick={onClearSearch ?? clearFilters}>{t('مسح البحث')}</button>
+            </>
+          ) : (
+            <>
+              <h3>{t('لا نتائج مطابقة')}</h3>
+              <p>{t('جرّب كلمة أخرى أو امسح عوامل التصفية.')}</p>
+              <button className="ghost-button" onClick={clearFilters}>{t('مسح عوامل التصفية')}</button>
+            </>
+          )}
         </div>
       ) : (
         <div className="empty-page">

@@ -7,11 +7,16 @@
  */
 import { useEffect } from 'react';
 import { AlertTriangle, Reset } from './icons';
+import { reportError } from './report-error';
 import { useLocale } from './locale';
 
 export default function ErrorBoundary({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const { t } = useLocale();
-  useEffect(() => { console.error('route error:', error); }, [error]);
+  useEffect(() => {
+    console.error('route error:', error);
+    // No-op until NEXT_PUBLIC_SENTRY_DSN is set; see instrumentation-client.ts.
+    reportError(error);
+  }, [error]);
   return (
     <main className="fallback-screen" role="alert">
       <span className="fallback-icon"><AlertTriangle size={24} /></span>

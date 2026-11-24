@@ -181,8 +181,7 @@ export function HabitsView({
                 </button>
                 <button
                   type="button"
-                  className="habit-summary-main"
-                  style={{ font: 'inherit', color: 'inherit', textAlign: 'start', padding: 0 }}
+                  className="habit-summary-main habit-summary-button"
                   aria-expanded={isExpanded}
                   aria-controls={`habit-details-${habit.id}`}
                   aria-label={t('تفاصيل عادة {name}', { name: habit.name })}

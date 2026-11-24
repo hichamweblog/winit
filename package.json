@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
     "dev:setup": "npm run db:migrate && npm run db:seed",
-    "build:migrate": "esbuild src/db/migrate.ts --bundle --platform=node --format=esm --outfile=scripts/migrate.mjs --external:postgres",
+    "build:migrate": "esbuild src/db/migrate.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/winit/migrate.mjs --external:postgres",
     "build": "npm run build:migrate && next build",
     "start": "next start -H 0.0.0.0",
     "bootstrap": "node scripts/bootstrap.mjs",
@@ -29,6 +29,7 @@
   "dependencies": {
     "@fontsource/noto-naskh-arabic": "^5.3.0",
     "@fontsource/tajawal": "^5.3.0",
+    "@sentry/nextjs": "^11.17.0",
     "@tabler/icons-react": "^3.50.0",
     "drizzle-orm": "^0.45.4",
     "next": "15.5.29",
