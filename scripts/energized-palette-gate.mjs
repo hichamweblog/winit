@@ -21,7 +21,9 @@ const contrast = (a, b) => {
 };
 
 const base = read('src/app/tokens.css');
-const vibe = read('src/app/vibes.css');
+// The Energized palette lives in tokens.css with the rest of the colour tokens;
+// vibes.css only says where each colour lands. Read both, in that order.
+const vibe = base + '\n' + read('src/app/vibes.css');
 const selectedPalette = ['#3E3758', '#8AB946', '#B0CFDD', '#C1F0EC'];
 const missingPaletteColors = selectedPalette.filter((color) => !vibe.toLowerCase().includes(color.toLowerCase()));
 if (missingPaletteColors.length) throw new Error(`Selected palette color(s) missing from app theme: ${missingPaletteColors.join(', ')}`);

@@ -5,7 +5,7 @@ import type { CSSProperties } from 'react';
 /**
  * Winit standalone brand icon in the purple, green, and mint palette.
  * Features theme-aware speed lines, a mint-to-green frame gradient, and a checkmark
- * that dynamically adapts to light/dark themes via var(--color-ink).
+ * that dynamically adapts to light/dark themes via var(--text).
  */
 export function WinItIcon({
   size = 32,
@@ -30,7 +30,7 @@ export function WinItIcon({
       <defs>
         <linearGradient id="winit-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="var(--color-primary, #3E3758)" />
-          <stop offset="50%" stopColor="var(--color-accent, #B0CFDD)" />
+          <stop offset="50%" stopColor="var(--accent, #B0CFDD)" />
           <stop offset="100%" stopColor="var(--color-secondary, #8AB946)" />
         </linearGradient>
       </defs>
@@ -59,7 +59,7 @@ export function WinItIcon({
       <path
         d="M 61,56 L 82,80 L 138,26"
         fill="none"
-        stroke="var(--color-ink, currentColor)"
+        stroke="var(--text, currentColor)"
         strokeWidth="15.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -99,7 +99,7 @@ export function WinItLogo({
         <defs>
           <linearGradient id="winit-logo-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="var(--color-primary, #3E3758)" />
-            <stop offset="50%" stopColor="var(--color-accent, #B0CFDD)" />
+            <stop offset="50%" stopColor="var(--accent, #B0CFDD)" />
             <stop offset="100%" stopColor="var(--color-secondary, #8AB946)" />
           </linearGradient>
         </defs>
@@ -127,7 +127,7 @@ export function WinItLogo({
           <path
             d="M 61,56 L 82,80 L 138,26"
             fill="none"
-            stroke="var(--color-ink, currentColor)"
+            stroke="var(--text, currentColor)"
             strokeWidth="15.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -143,7 +143,7 @@ export function WinItLogo({
           fontWeight="800"
           letterSpacing="-1px"
         >
-          <tspan fill="var(--color-ink, #ffffff)">win</tspan>
+          <tspan fill="var(--text, #ffffff)">win</tspan>
           <tspan fill="var(--color-primary, #3E3758)">It</tspan>
         </text>
       </svg>

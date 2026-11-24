@@ -39,6 +39,7 @@
   --screen-pad: var(--space-4);
 
   /* ---- shape ---- */
+  --radius-xs: 4px;                                            /* kbd, code and the tiniest chips */
   --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
   --radius-xl: 20px; --radius-full: 999px;
 
@@ -49,6 +50,11 @@
   /* ---- layout ---- */
   --sidebar-collapsed: 72px; --sidebar-expanded: 240px;              /* C6 */
   --bottom-bar-h: 56px;
+  /* Reserved bands the layout has to keep clear, named so they are not magic
+     numbers in a rule: the add button's footprint, and the project row's two
+     action columns. */
+  --content-bottom-pad: 104px;
+  --project-action-col: 28px; --project-actions-col: 92px; --project-actions-col-compact: 48px;
   --content-max-list: 720px; --content-max-dashboard: 1040px; --content-max-reading: 36rem;
   /* Media queries cannot read var(): compact <768 · medium 768–1099 · expanded >=1100 */
   --bp-medium: 768px; --bp-expanded: 1100px;
@@ -167,33 +173,16 @@
 }
 
 /* ============================================================================
-   Legacy aliases — the pre-existing component layer keeps working.
-   Declared once; var() resolves against the active theme.
+   Readable aliases: size, radius, duration and typography keep a second,
+   shorter name. Colour does not — it has exactly one name now (the Calm Sea
+   semantic token above), so a colour cannot be spelled two ways.
    ========================================================================= */
 :root {
-  --color-paper: var(--bg);
-  --color-paper-2: var(--surface-sunken);
-  --color-paper-3: var(--surface);
-  --color-white: var(--surface-raised);
-  --color-ink: var(--text);
-  --color-ink-2: var(--text-muted);
-  --color-muted: var(--text-muted);
-  --color-rule: var(--line);
-  --color-edge: var(--line-strong);
-  --color-card-edge: var(--line);
-  --color-accent: var(--accent);
-  --color-accent-deep: var(--accent-hover);
-  --color-accent-strong: var(--accent);
-  --color-accent-2: var(--accent-2);
-  --color-accent-ink: var(--on-accent);
-  --color-accent-2-ink: var(--on-accent-2);
-  --color-focus: var(--accent);
-  --color-success: var(--success);
-  --color-error: var(--danger);
-  /* §4.4: priority is weight + icon, not a separate colour family */
-  --color-priority-high: var(--accent-2-strong);
-  --color-priority-medium: var(--accent);
-  --color-priority-low: var(--text-muted);
+  /* Colour note: the --color-* aliases that used to lead this block were
+     removed together with every use of them. */
+     --color-* aliases that used to sit here were removed with every use of
+     them, so a colour cannot be spelled two ways. Size, radius and duration
+     keep their readable aliases (--space-md, --radius-card, --dur-short). */
 
   /* §3.3 rule 3: Naskh never in chrome. --font-small now means "small UI text". */
   --font-display: var(--font-heading);
@@ -205,6 +194,10 @@
   --text-section: var(--text-h2);
   --text-title: var(--text-h3);
   --text-lead: var(--text-body-lg);
+
+  /* The strong-text role. It follows the accent unless a theme or a scope
+     (the Energized sidebar) points it somewhere else. */
+  --accent-strong: var(--accent);
 
   --radius-card: var(--radius-lg);
   --radius-pill: var(--radius-full);
@@ -257,4 +250,128 @@
     transition-property: opacity, color, background-color, border-color !important;
     scroll-behavior: auto !important;
   }
+}
+
+
+/* ===== Energized vibe: the palette itself, kept beside the Calm Sea tokens
+   so a colour is never born in a component stylesheet. Usage rules stay in
+   vibes.css. ===== */
+/* Winit custom four-color palette, tuned for legible text in both modes.
+   Purple is the primary/action color; green is paired with dark ink; the two
+   pale colors are surfaces and accents, never low-contrast foreground text. */
+:root[data-vibe="energy"] {
+  --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
+  --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+  --bg: #F4F7F8;
+  --surface: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #C1F0EC;
+  --text: #1D2E38;
+  --text-muted: #303A40;
+  --text-disabled: #687A83;
+  --line: #CFD8DD;
+  --line-strong: #56646B;
+  --accent: #3E3758;
+  --accent-hover: #332D49;
+  --accent-pressed: #28233A;
+  --accent-soft: #C1F0EC;
+  --on-accent: #FFFFFF;
+  --accent-gradient: linear-gradient(125deg, #3E3758 0%, #3E3758 100%);
+  --accent-2: #8AB946;
+  --accent-2-strong: #425E1F;
+  --accent-2-soft: #B0CFDD;
+  --on-accent-2: #17272F;
+  --accent-2-on-soft: #3E3758;
+  --accent-2-line: #3E3758;
+  --toast-action: #C1F0EC;
+  --success: #168052;
+  --success-bg: #DDF4E9;
+  --success-text: #176744;
+  --on-success: #FFFFFF;
+  --warning: #916100;
+  --warning-bg: #FFF1C9;
+  --warning-text: #7D5400;
+  --on-warning: #FFFFFF;
+  --info: #3E3758;
+  --info-bg: #E7E4EF;
+  --info-text: #3E3758;
+  --on-info: #FFFFFF;
+  --energy-sidebar-bg: #3E3758;
+  --energy-sidebar-hover: #332D49;
+  --energy-sidebar-active: #C1F0EC;
+  --energy-sidebar-accent: #8AB946;
+  --energy-sidebar-text: #FFFFFF;
+  --energy-sidebar-muted: #E5E1F0;
+  --energy-sidebar-active-text: #1D2E38;
+  --energy-sidebar-border: #716A88;
+  --energy-card-blue: #B0CFDD;
+  --energy-card-mint: #C1F0EC;
+  --energy-card-green: #8AB946;
+  --energy-hero-bg: #3E3758;
+  --energy-hero-text: #FFFFFF;
+  --energy-hero-muted: #C1F0EC;
+  --shadow-1: 0 1px 2px rgba(29, 46, 56, .08);
+  --shadow-2: 0 8px 24px rgba(62, 55, 88, .12);
+  --shadow-3: 0 18px 48px rgba(29, 46, 56, .18);
+}
+
+
+
+:root[data-vibe="energy"][data-mode="dark"],
+:root[data-vibe="energy"][data-theme="dark"] {
+  --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
+  --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+  --bg: #11101B;
+  --surface: #1B1A28;
+  --surface-raised: #262437;
+  --surface-sunken: #0C0C14;
+  --text: #F4F2FA;
+  --text-muted: #C4C0D1;
+  --text-disabled: #8A849B;
+  --line: #383549;
+  --line-strong: #817C96;
+  --accent: #C1F0EC;
+  --accent-hover: #D6FAF6;
+  --accent-pressed: #ECFFFD;
+  --accent-soft: #2A2A3B;
+  --on-accent: #17272F;
+  --accent-gradient: linear-gradient(125deg, #C1F0EC 0%, #C1F0EC 100%);
+  --accent-2: #8AB946;
+  --accent-2-strong: #B0CFDD;
+  --accent-2-soft: #2B3529;
+  --on-accent-2: #17272F;
+  --accent-2-on-soft: #C1F0EC;
+  --accent-2-line: #8AB946;
+  --toast-action: #3E3758;
+  --success: #63D6A0;
+  --success-bg: #1D3D36;
+  --success-text: #73D9A6;
+  --on-success: #09271A;
+  --warning: #F3C867;
+  --warning-bg: #423A25;
+  --warning-text: #F1C65A;
+  --on-warning: #30220B;
+  --info: #B0CFDD;
+  --info-bg: #293744;
+  --info-text: #B0CFDD;
+  --on-info: #17272F;
+  --energy-sidebar-bg: #211E30;
+  --energy-sidebar-hover: #302C40;
+  --energy-sidebar-active: #C1F0EC;
+  --energy-sidebar-accent: #8AB946;
+  --energy-sidebar-text: #F4F2FA;
+  --energy-sidebar-muted: #D5D0E2;
+  --energy-sidebar-active-text: #1D2E38;
+  --energy-sidebar-border: #4C465F;
+  --energy-card-blue: #263645;
+  --energy-card-mint: #213A3C;
+  --energy-card-green: #3D4D2A;
+  --energy-hero-bg: #3E3758;
+  --energy-hero-text: #FFFFFF;
+  --energy-hero-muted: #C1F0EC;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-2: 0 8px 26px rgba(0, 0, 0, .4);
+  --shadow-3: 0 18px 52px rgba(0, 0, 0, .55);
 }

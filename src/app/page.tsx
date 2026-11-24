@@ -810,7 +810,7 @@ function WinitApp() {
                 >
                   <GripVertical size={13} />
                 </span>
-                <span className="project-reorder-buttons" style={{ display: 'inline-flex', flexDirection: 'column', gap: '1px', flex: 'none' }}>
+                <span className="project-reorder-buttons">
                   <button
                     type="button"
                     className="icon-button project-reorder-btn"
@@ -818,7 +818,7 @@ function WinitApp() {
                     disabled={index === 0}
                     aria-label={t('تحريك مشروع {name} لأعلى', { name: project.name })}
                     title={t('تحريك لأعلى')}
-                    style={{ width: '18px', height: '16px', minWidth: '18px', minHeight: '16px', padding: 0, opacity: index === 0 ? 0.25 : 0.75 }}
+                    style={{ opacity: index === 0 ? 0.25 : 0.75 }}
                   >
                     <ArrowUp size={11} />
                   </button>
@@ -829,7 +829,7 @@ function WinitApp() {
                     disabled={index === projects.length - 1}
                     aria-label={t('تحريك مشروع {name} لأسفل', { name: project.name })}
                     title={t('تحريك لأسفل')}
-                    style={{ width: '18px', height: '16px', minWidth: '18px', minHeight: '16px', padding: 0, opacity: index === projects.length - 1 ? 0.25 : 0.75 }}
+                    style={{ opacity: index === projects.length - 1 ? 0.25 : 0.75 }}
                   >
                     <ArrowDown size={11} />
                   </button>

@@ -253,6 +253,56 @@ else ok('goal-palette', 'entity colours resolve through goalStyle()');
   else ok('no-emoji', 'no emoji or pictographic characters in src/');
 }
 
+/* ------------------------------------------------- scale enforcement
+   Four rules that stop the drift the audit found: a radius, a line-height, a
+   font size and a spacing value each have exactly one legal spelling — a
+   token, or a value the design system explicitly allows. */
+{
+  const declarations = [];
+  for (const file of ['src/app/ui-shell.css','src/app/ui-components.css','src/app/ui-views.css','src/app/ui-responsive.css','src/app/base.css','src/app/vibes.css']) {
+    const css = read(file);
+    css.split('\n').forEach((line, i) => {
+      const m = line.match(/^\s*([a-z-]+)\s*:\s*([^;]+);/);
+      if (m) declarations.push({ file, line: i + 1, prop: m[1], value: m[2].trim(), text: line.trim() });
+    });
+  }
+
+  const offenders = (test) => declarations.filter((d) => test(d));
+
+  // border-radius: a --radius-* token, a var(), 50%, 0 or inherit.
+  const badRadius = offenders((d) => d.prop === 'border-radius'
+    && d.value.split(/\s+/).some((v) => !/^var\(--radius-|^50%$|^0$|^inherit$/.test(v)));
+  if (badRadius.length) fail('radius-scale', badRadius.map((d) => `${d.file}:${d.line} ${d.value}`).join(' · '));
+  else ok('radius-scale', 'every radius resolves to a --radius-* token');
+
+  // line-height: a --lh-* token or a bare 1 (numeric displays).
+  const badLh = offenders((d) => d.prop === 'line-height'
+    && !/^var\(--lh-/.test(d.value) && d.value !== '1');
+  if (badLh.length) fail('line-height-scale', badLh.map((d) => `${d.file}:${d.line} ${d.value}`).join(' · '));
+  else ok('line-height-scale', 'every line-height is a --lh-* token or 1');
+
+  // font-size: a --text-* token (base.css may keep 100% to honour the root).
+  const badSize = offenders((d) => d.prop === 'font-size'
+    && !/^var\(--text-/.test(d.value) && d.value !== '100%');
+  if (badSize.length) fail('font-size-scale', badSize.map((d) => `${d.file}:${d.line} ${d.value}`).join(' · '));
+  else ok('font-size-scale', 'every font-size resolves to a --text-* token');
+
+  // spacing: tokens only, or the nudges the system allows (≤4px, em, %).
+  const SPACING = /^(padding|margin|gap|row-gap|column-gap)(-(block|inline)(-(start|end))?)?$/;
+  const spaceOk = (v) => /^var\(|^0$|^auto$|^inherit$|^unset$|^initial$/.test(v)
+    || /^-?[0-4](\.\d+)?px$/.test(v)
+    || /em$|%$/.test(v);
+  const badSpace = offenders((d) => {
+    if (!SPACING.test(d.prop)) return false;
+    // A clamp()/calc() is fine as long as its stops are tokens; a bare clamp
+    // of pixel literals is exactly the drift this rule exists to catch.
+    if (/^(clamp|calc|min|max)\(/.test(d.value)) return !d.value.includes('var(');
+    return d.value.split(/\s+/).some((v) => !spaceOk(v));
+  });
+  if (badSpace.length) fail('space-scale', badSpace.map((d) => `${d.file}:${d.line} ${d.prop}: ${d.value}`).join(' · '));
+  else ok('space-scale', 'spacing is a token or a documented nudge');
+}
+
 /* -------------------------------------------------------------- report */
 const passed = checks.filter((c) => c.pass).length;
 console.log(`Design-system gate: ${passed}/${checks.length} checks passed, ${pairCount} contrast pairs`);
