@@ -52,7 +52,6 @@ const CACHE_TTL_MS = 60_000;
 
 /** Invalidate habit history cache. Clears all entries if habitId is omitted, or only entries for the given habit. */
 export function clearCache(habitId?: string): void {
-  const { t } = useLocale();
   if (habitId) {
     for (const key of Array.from(cache.keys())) {
       if (key.startsWith(`${habitId}:`)) {
@@ -161,11 +160,6 @@ export default function HabitHistory({
     const negativeRtl = el.scrollLeft <= 0;
     el.scrollLeft = rtl ? (negativeRtl ? -overflow : overflow) : overflow;
   }, [grid, rangeId]);
-
-  const cellAt = useCallback(
-    (row: number, col: number): HistoryCell | null => grid?.weeks[col]?.cells[row] ?? null,
-    [grid],
-  );
 
   const announce = useCallback((cell: HistoryCell | null) => {
     if (!cell || !cell.inRange || !payload) { setReadout(null); setTip(null); return; }

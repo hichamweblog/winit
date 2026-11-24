@@ -51,7 +51,7 @@ export function FocusDock({ session, tasks, busy, onFinish, onStop, onExpand }: 
         {t('تركيز')}
       </span>
       <span className="dock-title">{task?.title ?? t('جلسة تركيز مستقلة')}</span>
-      <b className="dock-timer">{display}</b>
+      <b className="dock-timer" role="timer" aria-live="off" aria-label={t('متبقي من جلسة التركيز')}>{display}</b>
       <button type="button" className="dock-expand" onClick={onExpand} title={t('تكبير المؤقت')} aria-label={t('تكبير المؤقت')}>
         <ChevronUp size={16} />
       </button>

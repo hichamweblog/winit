@@ -3,7 +3,6 @@
 import {
   ArrowDown,
   ArrowUp,
-  ChevronLeft,
   GripVertical,
   Logout,
   Menu,
@@ -31,14 +30,14 @@ import ProjectModal from './components/ProjectModal';
 import HabitModal from './components/HabitModal';
 import FocusModal from './components/FocusModal';
 import FocusDock from './components/FocusDock';
+import ShortcutHelp from './components/ShortcutHelp';
 import AuthGate, { useAuth } from './components/AuthGate';
 import { useLocale } from './locale';
 import { projectIconFor } from './project-icons';
-import { tasksLabel } from '@/lib/semantics';
 import { truncateWords } from '@/lib/label';
 import { api } from '@/lib/client-api';
-import type { FocusSession, Habit, JournalEntry, Log, Project, Task } from '@/lib/types';
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import type { Habit, JournalEntry, Log, Project, Task } from '@/lib/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, AR_LOCALE, localDateKey } from '@/lib/core';
 import { goalStyle } from '@/lib/goals';
 import {
@@ -50,6 +49,12 @@ import {
   type JournalPage,
   type View,
 } from './types';
+
+// i18n-exempt-start: navigation label data, rendered through t()
+const navGroups: { label: string; ids: View[] }[] = [
+  { label: 'مساحتي', ids: ['today', 'upcoming', 'inbox', 'all'] },
+  { label: 'المتابعة', ids: ['calendar', 'habits', 'journal', 'stats'] },
+]; // i18n-exempt-end
 
 function WinitApp() {
   const auth = useAuth();
@@ -87,6 +92,9 @@ function WinitApp() {
   const [journalTotal, setJournalTotal] = useState(0);
   const [journalNextCursor, setJournalNextCursor] = useState<string | null>(null);
   const [journalSearch, setJournalSearch] = useState('');
+  const [query, setQuery] = useState('');
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
   const [journalQuery, setJournalQuery] = useState('');
   const [journalLoading, setJournalLoading] = useState(false);
   const journalRequestId = useRef(0);
@@ -213,15 +221,33 @@ function WinitApp() {
   }, [mobileMenu, mobileLayout]);
   useEffect(() => {
     const handleGlobalKeys = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && mobileMenu) { closeMobileMenu(); return; }
-      if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey) || showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor) return;
       const target = event.target as HTMLElement | null;
-      if (target?.closest('[role="dialog"]') || target?.matches('input, textarea, select, [contenteditable="true"]')) return;
+      const typing = Boolean(target?.closest('input, textarea, select, [contenteditable="true"]'));
+      const inDialog = Boolean(target?.closest('[role="dialog"], [role="alertdialog"]'));
+      const modalOpen = showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor || showShortcuts || Boolean(confirmDialog);
+
+      if (event.key === 'Escape') {
+        if (mobileMenu) { closeMobileMenu(); return; }
+        if (!modalOpen && query) { setQuery(''); return; }
+      }
+      // Search is the one accelerator that must work while typing elsewhere.
+      if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+        return;
+      }
+      if (typing || inDialog || modalOpen) return;
+      if (event.key === '?') { event.preventDefault(); setShowShortcuts(true); return; }
+      if ((event.key === 'n' || event.key === 'N') && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        event.preventDefault(); setFocusTaskId(''); setEditingTask(null); setShowAdd(true); return;
+      }
+      if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey)) return;
       event.preventDefault(); setFocusTaskId(''); setShowAdd(true);
     };
     window.addEventListener('keydown', handleGlobalKeys);
     return () => window.removeEventListener('keydown', handleGlobalKeys);
-  }, [closeMobileMenu, mobileMenu, showAdd, showHabitAdd, showProjectAdd, showFocus, showJournalEditor]);
+  }, [closeMobileMenu, mobileMenu, showAdd, showHabitAdd, showProjectAdd, showFocus, showJournalEditor, showShortcuts, confirmDialog, query]);
   useEffect(() => {
     const mode = document.documentElement.dataset.mode ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     setDarkMode(mode === 'dark');
@@ -494,6 +520,27 @@ function WinitApp() {
     }
   };
 
+  /** Bulk actions run sequentially so the optimistic store never races itself. */
+  const bulkComplete = async (ids: string[]) => {
+    for (const id of ids) await completeTask(id);
+    notify(t('تم إكمال {count} مهمة', { count: ids.length }));
+  };
+
+  const bulkDelete = async (ids: string[]) => {
+    const okToDelete = await confirm({
+      title: t('حذف {count} مهمة', { count: ids.length }),
+      message: t('ستُحذف المهام المحددة نهائياً. لا يمكن التراجع عن هذا الإجراء.'),
+      confirmLabel: t('حذف'),
+    });
+    if (!okToDelete) return;
+    for (const id of ids) await mutate(`/api/tasks/${id}`, 'DELETE');
+  };
+
+  const bulkMove = async (ids: string[], projectId: string | null) => {
+    for (const id of ids) await mutate(`/api/tasks/${id}`, 'PATCH', { projectId });
+    notify(t('تم نقل {count} مهمة', { count: ids.length }));
+  };
+
   const toggleHabit = async (habit: Habit, existing?: Log) => {
     const value = existing && existing.value >= habit.targetValue ? 0 : (habit.recordType === 'check' ? 1 : habit.targetValue);
     setData((prev) => {
@@ -563,14 +610,19 @@ function WinitApp() {
   const startFocus = async (taskId?: string) => {
     const task = tasks.find((item) => item.id === (taskId || focusTaskId));
     const result = await mutate('/api/focus/start', 'POST', { taskId: task?.id ?? null, projectId: task?.projectId ?? null, mode: focusMode, plannedSeconds: focusMode === 'pomodoro' ? pomodoroMinutes * 60 : 4 * 60 * 60 });
-    if (result) setShowFocus(true);
+    if (result) { notify(t('بدأت جلسة التركيز')); setShowFocus(true); }
   };
   const finishFocus = async (completed: boolean) => {
     if (!activeSession) return;
     const elapsed = Math.max(0, Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000));
     const actualSeconds = activeSession.mode === 'pomodoro' ? Math.min(elapsed, activeSession.plannedSeconds) : elapsed;
     const finished = await mutate(`/api/focus/${activeSession.id}/finish`, 'POST', { actualSeconds, completed });
-    if (finished) setShowFocus(false);
+    if (finished) {
+      notify(completed
+        ? t('أُنجزت جلسة تركيز · {count} دقيقة', { count: Math.max(1, Math.round(actualSeconds / 60)) })
+        : t('أُنهيت الجلسة دون إكمال'));
+      setShowFocus(false);
+    }
   };
   const saveJournal = async (input: JournalInput, entryId?: string) => {
     setJournalSaving(true);
@@ -603,16 +655,18 @@ function WinitApp() {
 
   const headingArabic = selectedProject ? getProject(selectedProject)?.name ?? t('المشروع') : view === 'today' ? t('اليوم') : view === 'upcoming' ? t('القادم') : view === 'inbox' ? t('صندوق الوارد') : view === 'all' ? t('كل المهام') : view === 'stats' ? t('إحصائيات') : view === 'settings' ? t('الإعدادات') : view === 'calendar' ? t('التقويم') : view === 'habits' ? t('عاداتي') : view === 'journal' ? t('اليوميات') : t('المشروع');
   const heading = selectedProject ? headingArabic : t(headingArabic);
-  const filteredTasks = useMemo(() => {
-    const active = tasks.filter((task) => task.status !== 'completed');
-    if (selectedProject) return active.filter((task) => task.projectId === selectedProject);
-    if (view === 'today') return active.filter((task) => task.dueDate !== null && task.dueDate <= today);
-    if (view === 'upcoming') { const end = localDateKey(addDays(new Date(`${today}T12:00:00`), 7)); return active.filter((task) => task.dueDate && task.dueDate >= today && task.dueDate <= end); }
-    if (view === 'inbox') return active.filter((task) => !task.projectId);
-    if (view === 'all') return active;
-    return active;
+  /**
+   * Everything in the current view, completed tasks included. TaskListView owns
+   * the open/all/done filter, so the "مكتملة" filter can actually show something.
+   */
+  const scopedTasks = useMemo(() => {
+    if (selectedProject) return tasks.filter((task) => task.projectId === selectedProject);
+    if (view === 'today') return tasks.filter((task) => task.dueDate !== null && task.dueDate <= today);
+    if (view === 'upcoming') { const end = localDateKey(addDays(new Date(`${today}T12:00:00`), 7)); return tasks.filter((task) => task.dueDate && task.dueDate >= today && task.dueDate <= end); }
+    if (view === 'inbox') return tasks.filter((task) => !task.projectId);
+    return tasks;
   }, [tasks, view, selectedProject, today]);
-  const hasActiveModal = showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor || Boolean(confirmDialog);
+  const hasActiveModal = showAdd || showHabitAdd || showProjectAdd || showFocus || showJournalEditor || showShortcuts || Boolean(confirmDialog);
 
   if (!data && notice) return <div className="app-error"><h1>{t('تعذر فتح مساحتك.')}</h1><p>{notice.message}</p><button className="btn btn-primary primary-button" onClick={() => { setNotice(null); void refresh(); }}>{t('أعد المحاولة')}</button></div>;
   if (!data) return <div className="app-loading" aria-label={t('جارٍ تحميل مساحة العمل')}><div className="loading-skeleton loading-title" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-row" /><div className="loading-skeleton loading-panel" /></div>;
@@ -633,12 +687,26 @@ function WinitApp() {
       >
         <div className="brand-row"><WinItLogo height={32} /><button className="icon-button sidebar-close" onClick={() => closeMobileMenu()} aria-label={t('إغلاق القائمة')}><X size={18} /></button></div>
         <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? t('مساحة تجريبية') : auth.user?.name ?? t('حسابي')}</bdi></b><small><bdi>{auth.user?.demo ? t('مشتركة، غير خاصة') : auth.user?.email ?? t('نسخة خاصة بك')}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => { closeMobileMenu(); void auth.signOut(); }} aria-label={t('تسجيل الخروج')} title={t('تسجيل الخروج')}><Logout size={16} /></button>}</div>
+        {/* Four items per group instead of nine in one column: the sidebar
+            lists what you work on, then what you review. Settings sits alone. */}
         <nav className="main-nav" aria-label={t('التنقل بين الصفحات')}>
-          {views.map((item, index) => {
-            const Icon = item.icon; const active = view === item.id && !selectedProject;
-                         const count = index === 0 ? todayTasks.length : index === 2 ? tasks.filter((t) => t.status !== 'completed' && !t.projectId).length : null;
-            return <button key={item.id} className={`nav-item ${active ? 'nav-active' : ''}`} onClick={() => switchView(item.id)} aria-current={active ? 'page' : undefined}><Icon size={17} strokeWidth={1.8} /><span>{t(item.label)}</span>{count ? <i className="nav-count">{count}</i> : null}</button>;
-          })}
+          {navGroups.map((group) => (
+            <div className="nav-group" key={group.label}>
+              <div className="nav-label">{t(group.label)}</div>
+              {group.ids.map((id) => {
+                const item = views.find((option) => option.id === id);
+                if (!item) return null;
+                const Icon = item.icon;
+                const active = view === item.id && !selectedProject;
+                const count = id === 'today'
+                  ? todayTasks.length
+                  : id === 'inbox'
+                    ? tasks.filter((task) => task.status !== 'completed' && !task.projectId).length
+                    : null;
+                return <button key={item.id} className={`nav-item ${active ? 'nav-active' : ''}`} onClick={() => switchView(item.id)} aria-current={active ? 'page' : undefined}><Icon size={17} strokeWidth={1.8} /><span>{t(item.label)}</span>{count ? <i className="nav-count">{count}</i> : null}</button>;
+              })}
+            </div>
+          ))}
         </nav>
         <div className="project-head"><div className="nav-label">{t('المشاريع')}</div><button className="tiny-add" aria-label={t('إضافة مشروع')} onClick={() => { setEditingProject(null); setShowProjectAdd(true); }}><Plus size={16} /></button></div>
         <nav className="project-nav" aria-label={t('قائمة المشاريع')}>
@@ -738,16 +806,25 @@ function WinitApp() {
             );
           })}
         </nav>
+        <nav className="main-nav settings-nav" aria-label={t('الإعدادات')}>
+          {(() => {
+            const item = views.find((option) => option.id === 'settings');
+            if (!item) return null;
+            const Icon = item.icon;
+            const active = view === 'settings' && !selectedProject;
+            return <button className={`nav-item ${active ? 'nav-active' : ''}`} onClick={() => switchView('settings')} aria-current={active ? 'page' : undefined}><Icon size={17} strokeWidth={1.8} /><span>{t(item.label)}</span></button>;
+          })()}
+        </nav>
         <div className="sidebar-bottom"><div className="sidebar-quote"><p>{t('خطوة صغيرة كل يوم تصنع طريقاً عظيماً.')}</p><span>{t('استمر، أنت في الطريق الصحيح')}</span></div></div>
       </aside>
       {mobileMenu && <button className="mobile-scrim" aria-label={t('إغلاق القائمة')} onClick={() => closeMobileMenu()} />}
 
       <main id="main-content" tabIndex={-1} className="main-area" aria-hidden={mobileLayout && mobileMenu ? true : undefined} inert={mobileLayout && mobileMenu}>
-        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('فتح القائمة')} aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><span className="today-date" title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? t('التبديل إلى المظهر الفاتح') : t('التبديل إلى المظهر الداكن')} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
+        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('فتح القائمة')} aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><div className="topbar-search"><Search size={15} aria-hidden="true" /><input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('ابحث في المهام…')} aria-label={t('ابحث في المهام')} enterKeyHint="search" />{query ? <button type="button" className="icon-button" onClick={() => setQuery('')} aria-label={t('مسح البحث')}><X size={13} /></button> : <kbd aria-hidden="true">Ctrl+K</kbd>}</div><button className="icon-button shortcut-help-button" onClick={() => setShowShortcuts(true)} aria-label={t('اختصارات لوحة المفاتيح')} title={t('اختصارات لوحة المفاتيح')}><span aria-hidden="true">?</span></button><span className="today-date" title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? t('التبديل إلى المظهر الفاتح') : t('التبديل إلى المظهر الداكن')} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
         <div className="page-content">
           {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, pomodoroMinutes, userName: auth.user?.name, onOpenTimer: () => setShowFocus(true) }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} hasMore={journalNextCursor !== null} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalNextCursor, true)} />}
-          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={filteredTasks} projects={projects} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
+          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={scopedTasks} projects={projects} query={query} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onBulkComplete={(ids) => void bulkComplete(ids)} onBulkDelete={(ids) => void bulkDelete(ids)} onBulkMove={(ids, projectId) => void bulkMove(ids, projectId)} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
         </div>
         <footer className="app-footer"><span>{t('مصمّم لأيامك، لا لمزيد من الضجيج.')}</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
@@ -762,6 +839,7 @@ function WinitApp() {
       </main>
 
       {confirmDialog}
+      {showShortcuts && <ShortcutHelp onClose={() => setShowShortcuts(false)} />}
       {showAdd && <TaskModal key={editingTask?.id ?? 'new'} projects={projects} selectedProject={selectedProject} today={today} initialDueDate={taskInitialDueDate} task={editingTask} onClose={() => { setShowAdd(false); setEditingTask(null); setTaskInitialDueDate(undefined); }} onSubmit={addTask} busy={busy} />}
       {showHabitAdd && <HabitModal key={editingHabit?.id ?? 'new'} habit={editingHabit} onClose={() => { setShowHabitAdd(false); setEditingHabit(null); }} onSubmit={saveHabit} busy={busy} />}
       {showProjectAdd && <ProjectModal key={editingProject?.id ?? 'new'} project={editingProject} onClose={() => { setShowProjectAdd(false); setEditingProject(null); }} onSubmit={addProject} onDelete={(target) => { setShowProjectAdd(false); setEditingProject(null); void deleteProject(target); }} busy={busy} />}

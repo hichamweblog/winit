@@ -16,7 +16,7 @@
 import { useMemo, useState } from 'react';
 import { DayPicker, type DayButtonProps } from 'react-day-picker';
 import { ar, enGB } from 'react-day-picker/locale';
-import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus } from '../icons';
+import { ChevronLeft, ChevronRight, Pencil, Plus } from '../icons';
 import { PriorityFlag, RowActions, SessionCount } from './atoms';
 import { AR_LOCALE, formatArNumber, localDateKey } from '@/lib/core';
 import { tasksLabel } from '@/lib/semantics';

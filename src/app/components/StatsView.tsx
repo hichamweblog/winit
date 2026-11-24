@@ -13,7 +13,7 @@ import { useLocale } from '../locale';
 import { Check, Flame, Stopwatch, Target, TrendingUp, Trophy } from '../icons';
 import { PriorityFlag } from './atoms';
 import { habitIconFor } from '../habit-icons';
-import { AR_LOCALE, addDays, formatDuration, getWeekStart, localDateKey } from '@/lib/core';
+import { AR_LOCALE, addDays, formatDuration, formatNumber as formatNumberCore, getWeekStart, localDateKey } from '@/lib/core';
 import { goalStyle } from '@/lib/goals';
 import { PRIORITIES } from '@/lib/semantics';
 import {
@@ -46,7 +46,7 @@ export default function StatsView({ tasks, sessions, habits, logs, today }: {
   tasks: Task[]; sessions: FocusSession[]; habits: Habit[]; logs: Log[]; today: string;
 }) {
   const { language, t } = useLocale();
-  const formatNumber = (value: number) => new Intl.NumberFormat(language === 'en' ? 'en' : AR_LOCALE).format(value);
+  const formatNumber = (value: number) => formatNumberCore(value, language);
   const formatStatDuration = (seconds: number) => {
     if (language === 'ar') return formatDuration(seconds);
     const totalMinutes = Math.floor(Math.max(0, seconds) / 60);

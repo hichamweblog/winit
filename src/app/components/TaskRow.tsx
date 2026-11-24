@@ -18,6 +18,10 @@ export type TaskRowProps = {
   onDelete?: () => void;
   /** The top row on the dashboard: actions stay visible and the row sits higher. */
   featured?: boolean;
+  /** Bulk-selection mode: renders a leading checkbox and dims the row actions. */
+  selectable?: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
 };
 
 export const TaskRow = memo(function TaskRow({
@@ -29,12 +33,30 @@ export const TaskRow = memo(function TaskRow({
   onEdit,
   onDelete,
   featured = false,
+  selectable = false,
+  selected = false,
+  onSelect,
 }: TaskRowProps) {
   const { t } = useLocale();
   const isDone = task.status === 'completed';
 
   return (
-    <div className={`task-row row-interactive ${isDone ? 'task-done' : ''}`} data-featured={featured ? 'true' : undefined}>
+    <div
+      className={`task-row row-interactive ${isDone ? 'task-done' : ''} ${selectable ? 'task-row-selecting' : ''} ${selected ? 'task-row-selected' : ''}`}
+      data-featured={featured ? 'true' : undefined}
+    >
+      {selectable && (
+        <button
+          type="button"
+          className="task-select"
+          role="checkbox"
+          aria-checked={selected}
+          aria-label={t('تحديد {title}', { title: task.title })}
+          onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
+        >
+          {selected && <Check size={13} />}
+        </button>
+      )}
       <button
         type="button"
         className="task-check"

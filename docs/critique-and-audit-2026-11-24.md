@@ -147,3 +147,33 @@ Live URL scan, computed contrast in dark mode, real-device touch behaviour, 200 
 ---
 
 *Scored against the incumbent implementation because no `PRODUCT.md` / `DESIGN.md` exists yet. Running `/impeccable init` would let later critiques measure drift from stated intent instead of from the code itself.*
+
+---
+
+# Resolution log — 2026-11-24
+
+Everything in this report was acted on in the same session, at the user's
+request ("fix them all", scope "everything incl. P3 minors"). Goal-direction
+was deliberately deferred until `PRODUCT.md` exists.
+
+| Finding | Status | Where |
+|---|---|---|
+| P1 home screen stated false facts (hardcoded `25:00`, all-day "صباح الخير") | Fixed | `TodayDashboard` takes `pomodoroMinutes` + `userName`; `greetingFor(hour)` covers morning/afternoon/evening/night; countdown moved into `LiveTimer` so only that span re-renders |
+| P1 English mode half-translated (~57 text nodes, `aria-label`s bypassing `t()`) | Fixed | 156 literals wrapped by a TS-AST codemod; `t(key, vars)` now fills `{placeholders}`; 222 dictionary entries added; `scripts/i18n-gate.mjs` fails the build on Arabic outside `t()` (wired into `npm run check`) |
+| P1 no search, filters or bulk actions on tasks | Fixed | Header search (Ctrl/⌘+K), status + priority filters, count + clear, selection mode with bulk complete / move / delete (sequential, confirmed) |
+| P2 اليوم hierarchy + dead-end CTA | Fixed | Three stat cards → one line; tasks panel elevated with the next task expanded; timer became a compact card whose CTA *opens* the dock; quote moved to the journal; footer reduced to one line |
+| P2 task-row `aria-label` swallowed row context; no skip link; flat 9-item nav; silent countdown | Fixed | `aria-label` removed from `.task-body`; skip link + `#main-content`; sidebar grouped مساحتي / المشاريع / المتابعة + settings; `role="timer"` on the dock and start/end toasts |
+| Font payload: 18 faces for 3 used weights | Fixed | Per-weight, per-subset imports: **18 → 8 files, 384 KB → 180 KB** |
+| Manifest: portrait lock, `lang: 'en'`, static theme colour | Fixed (partially) | Portrait lock removed, `lang` set to `ar`; `theme_color` must stay static per spec |
+| 34 px row actions on fine pointers | Fixed | 40 px on fine pointers, 44 px on `pointer: coarse` |
+| Two number formatters | Fixed | `formatNumber(value, language)` in `core`; StatsView binds it to the active language |
+| Dead code (unused `Search`, `Logout`, `CalendarDays`, `ChevronLeft`, `cellAt`, stray `useLocale()` in `clearCache`) | Fixed | `noUnusedLocals` now enabled in `tsconfig.json` |
+| `.stat-card` / `.quote-banner` CSS left behind by the redesign | Cleaned | Dead `.quote-banner` rules removed; `.stat-card` kept because the Statistics page composes it with `.kpi-card` |
+
+Verification after the changes: `npm run check` → 119/120 tests (0 failing),
+design gate 25/25 + 168 contrast pairs, PWA gate 8/8, i18n gate 32 files;
+`npm run build` succeeds at 103 kB shared JS.
+
+Still open by design: the goal layer (deferred), `react-day-picker` vs
+`AR_LOCALE` date formatting (two date systems, cosmetic), nonce-based CSP
+(behind `WINIT_STRICT_CSP=1`), password reset and email verification.

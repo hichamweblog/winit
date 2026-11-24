@@ -60,8 +60,14 @@ function walk(dir) {
 
     const lines = fs.readFileSync(full, 'utf8').split('\n');
     let inBlockComment = false;
+    let inExemptRegion = false;
 
     lines.forEach((line, index) => {
+      // A region between i18n-exempt-start / i18n-exempt-end is label data that
+      // the render site passes through t().
+      if (line.includes('i18n-exempt-start')) { inExemptRegion = true; return; }
+      if (line.includes('i18n-exempt-end')) { inExemptRegion = false; return; }
+      if (inExemptRegion) return;
       // `i18n-exempt` covers its own line and the line after it, so a reason can
       // sit above the statement it explains.
       if (line.includes('i18n-exempt') || (lines[index - 1] ?? '').includes('i18n-exempt')) return;

@@ -12,7 +12,7 @@
  */
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { api, ApiClientError, UNAUTHENTICATED_EVENT } from '@/lib/client-api';
-import { AlertTriangle, ArrowNarrowLeft, Eye, EyeOff, Loader, Lock, Logout, Mail, User } from '../icons';
+import { AlertTriangle, ArrowNarrowLeft, Eye, EyeOff, Loader, Lock, Mail, User } from '../icons';
 import { WinItLogo } from './Logo';
 import { useLocale } from '../locale';
 
