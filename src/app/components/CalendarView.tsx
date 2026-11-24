@@ -16,7 +16,7 @@
 import { useMemo, useState } from 'react';
 import { DayPicker, type DayButtonProps } from 'react-day-picker';
 import { ar, enGB } from 'react-day-picker/locale';
-import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus } from '../icons';
+import { ChevronLeft, ChevronRight, Pencil, Plus } from '../icons';
 import { PriorityFlag, RowActions, SessionCount } from './atoms';
 import { AR_LOCALE, formatArNumber, localDateKey } from '@/lib/core';
 import { tasksLabel } from '@/lib/semantics';
@@ -74,7 +74,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
     return (
       <button
         {...buttonProps}
-        aria-label={count ? `${label}، ${tasksLabel(count)}` : label}
+        aria-label={count ? t('{day}، {tasks}', { day: label, tasks: tasksLabel(count) }) : label}
         data-count={count || undefined}
         data-today={modifiers.today ? 'true' : undefined}
       >
@@ -100,11 +100,11 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
         <section className="panel calendar-panel" aria-label={t('اختيار يوم')}>
           <div className="calendar-toolbar">
             <div className="calendar-nav">
-              <button className="icon-button" onClick={() => shiftMonth(-1)} aria-label="الشهر السابق"><ChevronRight size={18} /></button>
+              <button className="icon-button" onClick={() => shiftMonth(-1)} aria-label={t('الشهر السابق')}><ChevronRight size={18} /></button>
               <h2 className="calendar-month-label" aria-live="polite">{monthLabel}</h2>
-              <button className="icon-button" onClick={() => shiftMonth(1)} aria-label="الشهر التالي"><ChevronLeft size={18} /></button>
+              <button className="icon-button" onClick={() => shiftMonth(1)} aria-label={t('الشهر التالي')}><ChevronLeft size={18} /></button>
             </div>
-            <button className="ghost-button calendar-today" onClick={goToday}>اليوم</button>
+            <button className="ghost-button calendar-today" onClick={goToday}>{t('اليوم')}</button>
           </div>
 
           <DayPicker
@@ -141,7 +141,7 @@ export default function CalendarView({ tasks, projects, today, month, setMonth, 
               // Western digits everywhere, per the app's numeral rule.
               formatWeekdayName: (date) => language === 'en'
                 ? new Intl.DateTimeFormat('en-GB', { weekday: 'short' }).format(date)
-                : ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'][date.getDay()],
+                : [t('ح'), t('ن'), t('ث'), t('ر'), t('خ'), t('ج'), t('س')][date.getDay()],
             }}
             components={{ DayButton: DayCell }}
           />

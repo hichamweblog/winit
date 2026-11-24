@@ -78,6 +78,15 @@ export function formatArNumber(value: number): string {
   return new Intl.NumberFormat(AR_LOCALE).format(value);
 }
 
+/**
+ * Same thing, switching locale with the UI language. The statistics page had
+ * grown a private copy of this; one helper keeps Arabic and English digits,
+ * separators and percent signs from drifting apart.
+ */
+export function formatNumber(value: number, language: 'ar' | 'en' = 'ar'): string {
+  return new Intl.NumberFormat(language === 'en' ? 'en' : AR_LOCALE).format(value);
+}
+
 export function getRemainingSeconds(
   startedAtMs: number,
   plannedSeconds: number,

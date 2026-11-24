@@ -21,7 +21,8 @@
     "test": "tsx --test src/lib/*.test.ts src/lib/server/*.test.ts",
     "typecheck": "tsc --noEmit",
     "test:design": "node scripts/design-system-gate.mjs && node scripts/energized-palette-gate.mjs && node scripts/pwa-gate.mjs",
-    "check": "npm run typecheck && npm test && npm run test:design",
+    "test:i18n": "node scripts/i18n-gate.mjs",
+    "check": "npm run typecheck && npm test && npm run test:design && npm run test:i18n",
     "test:api": "node scripts/api-smoke.mjs",
     "db:clean-demo": "node scripts/clean-demo.mjs"
   },

@@ -14,6 +14,7 @@ import { DEFAULT_GOAL_KEY, GOAL_SLOTS, goalStyle } from '@/lib/goals';
 import { formatArNumber } from '@/lib/core';
 import { useConfirm } from './ConfirmDialog';
 import useDialogFocus from './useDialogFocus';
+import { useLocale } from '../locale';
 
 export type ProjectModalProps = {
   project: Project | null;
@@ -24,6 +25,7 @@ export type ProjectModalProps = {
 };
 
 export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: ProjectModalProps) {
+  const { t } = useLocale();
   // §4.3: a fixed palette, not a free colour picker. Legacy values still render
   // (goalStyle resolves them) but new choices come from the fixed slots.
   // An unknown legacy icon is preselected as an extra option so editing a
@@ -53,10 +55,10 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
     if (busy) return;
     if (dirty) {
       const discard = await confirm({
-        title: 'تغييرات غير محفوظة',
-        message: 'لديك تغييرات لم تُحفظ في هذا المشروع. هل تريد إغلاق النافذة وتجاهل التعديلات؟',
-        confirmLabel: 'تجاهل التغييرات',
-        cancelLabel: 'متابعة التعديل',
+        title: t('تغييرات غير محفوظة'),
+        message: t('لديك تغييرات لم تُحفظ في هذا المشروع. هل تريد إغلاق النافذة وتجاهل التعديلات؟'),
+        confirmLabel: t('تجاهل التغييرات'),
+        cancelLabel: t('متابعة التعديل'),
       });
       if (!discard) return;
     }
@@ -86,14 +88,13 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
           <span className="modal-icon">
             <FolderKanban size={17} />
           </span>
-          <span id="project-editor-heading">{project ? 'تعديل المشروع' : 'مشروع جديد'}</span>
-          <button type="button" className="icon-button" onClick={close} aria-label="إغلاق">
+          <span id="project-editor-heading">{project ? t('تعديل المشروع') : t('مشروع جديد')}</span>
+          <button type="button" className="icon-button" onClick={close} aria-label={t('إغلاق')}>
             <X size={18} />
           </button>
         </div>
         <label className="journal-field-label" htmlFor="project-name">
-          اسم المشروع
-        </label>
+           {t('اسم المشروع')} </label>
         <input
           id="project-name"
           className="task-title-input"
@@ -104,11 +105,10 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
           maxLength={100}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="مثلاً: تعلّم البرمجة"
+          placeholder={t('مثلاً: تعلّم البرمجة')}
         />
         <label className="journal-field-label" htmlFor="project-description">
-          وصف قصير، اختياري
-        </label>
+           {t('وصف قصير، اختياري')} </label>
         <textarea
           id="project-description"
           className="task-notes-input"
@@ -118,11 +118,11 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
           rows={2}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="ما الذي تريد إنجازه في هذا المشروع؟"
+          placeholder={t('ما الذي تريد إنجازه في هذا المشروع؟')}
         />
         <div className="modal-fields">
           <label>
-            <span>هدف التركيز الأسبوعي بالدقائق</span>
+            <span>{t('هدف التركيز الأسبوعي بالدقائق')}</span>
             <input
               name="targetWeeklyMinutes"
               type="number"
@@ -135,7 +135,7 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
           </label>
         </div>
         <fieldset className="project-icon-field">
-          <legend>أيقونة المشروع</legend>
+          <legend>{t('أيقونة المشروع')}</legend>
           {legacyIcon && (
             <div className="picker-legacy">
               <label className="project-icon-choice">
@@ -145,13 +145,13 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
                   value={legacyIcon}
                   checked={icon === legacyIcon}
                   onChange={() => setIcon(legacyIcon)}
-                  aria-label="الأيقونة الحالية"
+                  aria-label={t('الأيقونة الحالية')}
                 />
                 <span>
                   <FolderKanban size={17} />
                 </span>
               </label>
-              <small>الأيقونة الحالية</small>
+              <small>{t('الأيقونة الحالية')}</small>
             </div>
           )}
           {PROJECT_ICON_GROUPS.map((group) => (
@@ -182,11 +182,11 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
           ))}
         </fieldset>
         <fieldset className="project-color-field">
-          <legend>لون المشروع</legend>
+          <legend>{t('لون المشروع')}</legend>
           <div className="picker-grid picker-grid--color">
             {colors.map((value) => {
               const slot = GOAL_SLOTS.find((item) => item.key === value);
-              const label = slot?.label ?? 'اللون الحالي';
+              const label = slot?.label ?? t('اللون الحالي');
               return (
                 <label key={value} className="project-color-choice" title={label}>
                   <input
@@ -203,8 +203,7 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
             })}
           </div>
           <p className="picker-hint">
-            {formatArNumber(GOAL_SLOTS.length)} لوناً ثابتاً، لكل منها اسم حتى لا يكون اللون هو الإشارة الوحيدة.
-          </p>
+            {formatArNumber(GOAL_SLOTS.length)}  {t('لوناً ثابتاً، لكل منها اسم حتى لا يكون اللون هو الإشارة الوحيدة.')} </p>
         </fieldset>
         <div className="modal-footer">
           {project ? (
@@ -215,13 +214,12 @@ export function ProjectModal({ project, onClose, onSubmit, onDelete, busy }: Pro
               disabled={busy}
             >
               <Trash2 size={15} />
-              حذف المشروع
-            </button>
+               {t('حذف المشروع')} </button>
           ) : (
-            <span>يمكنك تعديل المشروع لاحقاً</span>
+            <span>{t('يمكنك تعديل المشروع لاحقاً')}</span>
           )}
           <button className="btn btn-primary primary-button" type="submit" disabled={busy}>
-            {busy ? 'جارٍ الحفظ…' : project ? 'حفظ التعديلات' : 'إنشاء المشروع'}
+            {busy ? t('جارٍ الحفظ…') : project ? t('حفظ التعديلات') : t('إنشاء المشروع')}
           </button>
         </div>
       </form>

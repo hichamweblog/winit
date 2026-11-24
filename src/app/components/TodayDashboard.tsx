@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale } from '../locale';
-import type { FocusSession, Habit, Log, Project, Task } from '@/lib/types';
+import type { FocusSession } from '@/lib/types';
+import type { Log, Habit, Project, Task } from '@/lib/types';
 import type { View } from '../types';
-import { ArrowLeft, NotebookPen, Play, Plus, Timer } from '../icons';
+import { ArrowLeft, Check, NotebookPen, Play, Plus, Timer } from '../icons';
 import { CountBadge, SessionCount } from './atoms';
 import { TaskRow } from './TaskRow';
 import { HabitRow } from './HabitRow';
+import { LiveTimer } from './LiveTimer';
 import {
   addDays,
   formatClock,
   formatDuration,
-  getRemainingSeconds,
   getWeekStart,
   localDateKey,
   PRIORITY_ORDER,
@@ -28,9 +29,12 @@ export type DashboardProps = {
   todayFocusSeconds: number;
   completedToday: number;
   activeSession?: FocusSession;
+  pomodoroMinutes: number;
+  userName?: string;
   startFocus: (id?: string) => Promise<void>;
   finishFocus: (completed: boolean) => Promise<void>;
   setShowFocus: (show: boolean) => void;
+  onOpenTimer: () => void;
   setShowAdd: (show: boolean) => void;
   setFocusTaskId: (id: string) => void;
   setView: (view: View) => void;
@@ -44,6 +48,15 @@ export type DashboardProps = {
   onDeleteTask?: (taskId: string) => void;
 };
 
+/** Greeting follows the clock so the first thing on screen is never a lie. */
+function greetingFor(hour: number): string {
+  // i18n-exempt: returned into t() at the call site.
+  if (hour >= 5 && hour < 12) return 'صباح الخير، لنصنع يوماً جميلاً.';
+  if (hour >= 12 && hour < 17) return 'طاب يومك، لنصنع يوماً جميلاً.'; // i18n-exempt
+  if (hour >= 17 && hour < 22) return 'مساء الخير، لنصنع يوماً جميلاً.'; // i18n-exempt
+  return 'ليلة هادئة، لنصنع يوماً جميلاً.'; // i18n-exempt
+}
+
 export function TodayDashboard(props: DashboardProps) {
   const {
     today,
@@ -54,74 +67,73 @@ export function TodayDashboard(props: DashboardProps) {
     todayFocusSeconds,
     completedToday,
     activeSession,
-    startFocus,
+    pomodoroMinutes,
+    userName,
     setShowFocus,
+    onOpenTimer,
     setShowAdd,
     setFocusTaskId,
     setView,
     switchView,
     toggleHabit,
     completeTask,
+    startFocus,
     sessions,
     onEditTask,
     onDeleteTask,
   } = props;
 
-  const { t, language } = useLocale();
-  const [clockNow, setClockNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!activeSession) return;
-    setClockNow(Date.now());
-    const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [activeSession?.id]);
+  const { t } = useLocale();
+  // Rendered at hydration time; the server-rendered greeting is the Arabic
+  // morning one, so the first paint is stable and the correction is invisible.
+  const [hour, setHour] = useState<number | null>(null);
+  useEffect(() => { setHour(new Date().getHours()); }, []);
 
   const sorted = [...todayTasks].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
   const doneHabits = todayLogs.filter(({ habit, log }) => log && log.value >= habit.targetValue).length;
   const weekStartDate = getWeekStart(new Date(`${today}T12:00:00`));
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStartDate, i));
   const currentProject = (id: string | null) => projects.find((project) => project.id === id);
+  const plannedMinutes = Math.round(pomodoroMinutes);
+  const weekSeconds = sessions
+    .filter(
+      (s) =>
+        localDateKey(new Date(s.startedAt)) >= localDateKey(weekStartDate) &&
+        localDateKey(new Date(s.startedAt)) <= today
+    )
+    .reduce((acc, s) => acc + s.actualSeconds, 0);
 
   return (
     <>
       <section className="welcome-row">
         <div>
-          <h1>{t('صباح الخير، لنصنع يوماً جميلاً.')}</h1>
+          {userName && <span className="welcome-name">{t('أهلاً')} <bdi>{userName}</bdi></span>}
+          <h1>{t(hour === null ? 'صباح الخير، لنصنع يوماً جميلاً.' : greetingFor(hour))}</h1>
           <p>{t('رتّب أفكارك، خذ نفساً عميقاً، وابدأ بما يهمّ حقاً.')}</p>
         </div>
       </section>
 
-      <section className="stats-grid" aria-label="ملخص اليوم">
-        <div className="stat-card">
-          <span className="stat-label">{t('المهام المكتملة')}</span>
-          <strong className="stat-value">
-            {completedToday}
-            <small> {t('من')} {completedToday + todayTasks.length}</small>
-          </strong>
-        </div>
-        <div className="stat-card">
-          <span className="stat-label">{t('وقت التركيز')}</span>
-          <strong className="stat-value">
-            {formatDuration(todayFocusSeconds)}
-            <small> {t('اليوم')}</small>
-          </strong>
-        </div>
-        <div className="stat-card">
-          <span className="stat-label">{t('العادات المكتملة')}</span>
-          <strong className="stat-value">
-            {doneHabits}
-            <small> {t('من')} {habits.length}</small>
-          </strong>
-        </div>
-      </section>
+      {/* One quiet line instead of three cards: the numbers are context, not the point. */}
+      <div className="stat-line" aria-label={t('ملخص اليوم')}>
+        <span><b>{completedToday}</b> {t('من')} <b>{completedToday + todayTasks.length}</b> {t('مهام')}</span>
+        <i className="stat-line-dot" aria-hidden="true" />
+        <span><b>{formatDuration(todayFocusSeconds)}</b> {t('تركيز')}</span>
+        <i className="stat-line-dot" aria-hidden="true" />
+        <span><b>{doneHabits}</b> {t('من')} <b>{habits.length}</b> {t('عادات')}</span>
+      </div>
 
       <div className="dashboard-grid">
-        <section className="panel tasks-panel">
+        <section className="panel tasks-panel tasks-hero" aria-labelledby="today-tasks-heading">
           <div className="panel-heading">
             <div>
-              <h2>
+              <h2 id="today-tasks-heading">
                 {t('مهام اليوم')} <CountBadge count={todayTasks.length} />
               </h2>
+              {sorted.length > 0 && (
+                <p className="hero-next">
+                  {t('التالي:')} <bdi>{sorted[0].title}</bdi>
+                </p>
+              )}
             </div>
             <div className="panel-heading-actions">
               <button className="text-link" onClick={() => setView('all')}>
@@ -133,7 +145,8 @@ export function TodayDashboard(props: DashboardProps) {
                   setFocusTaskId('');
                   setShowAdd(true);
                 }}
-                aria-label="أضف مهمة جديدة"
+                aria-label={t('أضف مهمة جديدة')}
+                title={t('أضف مهمة جديدة')}
               >
                 <Plus size={16} />
               </button>
@@ -141,12 +154,13 @@ export function TodayDashboard(props: DashboardProps) {
           </div>
           {sorted.length ? (
             <div className="task-list">
-              {sorted.slice(0, 6).map((task) => (
+              {sorted.slice(0, 6).map((task, index) => (
                 <TaskRow
                   key={task.id}
                   task={task}
                   project={currentProject(task.projectId)}
                   today={today}
+                  featured={index === 0}
                   onComplete={() => void completeTask(task.id)}
                   onStart={() => {
                     setFocusTaskId(task.id);
@@ -165,14 +179,14 @@ export function TodayDashboard(props: DashboardProps) {
           )}
         </section>
 
-        <section className="panel habits-panel">
+        <section className="panel habits-panel" aria-labelledby="today-habits-heading">
           <div className="panel-heading">
             <div>
-              <h2>
-                عادات اليوم <span className="heading-count">{doneHabits}/{habits.length}</span>
+              <h2 id="today-habits-heading">
+                {t('عادات اليوم')} <span className="heading-count">{doneHabits}/{habits.length}</span>
               </h2>
             </div>
-            <button className="icon-button soft-button" onClick={() => setView('habits')} aria-label="عرض العادات">
+            <button className="icon-button soft-button" onClick={() => setView('habits')} aria-label={t('عرض العادات')} title={t('عرض العادات')}>
               <ArrowLeft size={16} />
             </button>
           </div>
@@ -180,6 +194,12 @@ export function TodayDashboard(props: DashboardProps) {
             {todayLogs.map(({ habit, log }) => (
               <HabitRow key={habit.id} habit={habit} log={log} onToggle={() => void toggleHabit(habit, log)} />
             ))}
+            {!todayLogs.length && (
+              <div className="empty-state">
+                <b>{t('ابدأ بعادة واحدة')}</b>
+                <span>{t('عادة صغيرة تتكرر أفضل من خطة كبيرة تنتظر.')}</span>
+              </div>
+            )}
           </div>
           <div className="habit-note">
             <span>{t('لا تبحث عن الكمال، فقط عُد كل يوم.')}</span>
@@ -188,51 +208,29 @@ export function TodayDashboard(props: DashboardProps) {
       </div>
 
       <div className="lower-grid">
-        <section className="panel focus-panel">
+        <section className="panel focus-panel focus-mini">
           <div className="focus-copy">
             <span className="focus-label">
-              {activeSession && <span className="live-dot" />} {activeSession ? 'جلسة تركيز جارية' : 'مؤقت التركيز'}
+              {activeSession && <span className="live-dot" />} {t(activeSession ? 'جلسة تركيز جارية' : 'مؤقت التركيز')}
             </span>
-            <h3>{activeSession ? 'أنت في قلب الإنجاز.' : 'امنح هدفك انتباهك.'}</h3>
-            <p>
-              {activeSession
-                ? 'اترك المشتتات جانباً، أنت تقوم بعمل رائع.'
-                : 'جلسة واحدة هادئة قد تغيّر شكل يومك.'}
-            </p>
+            <h3>{t(activeSession ? 'أنت في قلب الإنجاز.' : 'امنح هدفك انتباهك.')}</h3>
+            <p>{t(activeSession ? 'اترك المشتتات جانباً، أنت تقوم بعمل رائع.' : 'جلسة واحدة هادئة قد تغيّر شكل يومك.')}</p>
             <button
               className="btn btn-primary primary-button focus-cta-position"
-              disabled={Boolean(activeSession)}
-              onClick={() => {
-                if (!activeSession) setShowFocus(true);
-              }}
+              onClick={() => (activeSession ? onOpenTimer() : setShowFocus(true))}
             >
               <Play size={15} fill="currentColor" />
-              {activeSession ? 'جلسة جارية، تابعها من الشريط' : 'ابدأ جلسة تركيز'}
+              {t(activeSession ? 'افتح المؤقت' : 'ابدأ جلسة تركيز')}
             </button>
           </div>
-          <div className="focus-visual">
-            <div className="timer-halo halo-outer" />
-            <div className="timer-halo halo-inner" />
-            <div className="timer-center">
-              <Timer size={23} />
-              <span>
-                {activeSession
-                  ? activeSession.mode === 'stopwatch'
-                    ? formatClock(
-                        Math.floor((clockNow - new Date(activeSession.startedAt).getTime()) / 1000)
-                      )
-                    : formatClock(
-                        getRemainingSeconds(
-                          new Date(activeSession.startedAt).getTime(),
-                          activeSession.plannedSeconds,
-                          0,
-                          clockNow
-                        )
-                      )
-                  : '25:00'}
-              </span>
-            </div>
-            <span className="focus-orbit-dot" />
+          <div className="focus-mini-clock">
+            <Timer size={18} />
+            {activeSession ? (
+              <LiveTimer session={activeSession} />
+            ) : (
+              <span className="focus-mini-value">{formatClock(plannedMinutes * 60)}</span>
+            )}
+            <small>{t('مدة الجلسة')} · {plannedMinutes} {t('دقيقة')}</small>
           </div>
         </section>
 
@@ -242,7 +240,7 @@ export function TodayDashboard(props: DashboardProps) {
               <h3>{t('التركيز خلال الأسبوع')}</h3>
             </div>
             <button className="text-link" onClick={() => setView('calendar')}>
-              التقويم
+              {t('التقويم')}
             </button>
           </div>
           <div className="week-bars">
@@ -254,52 +252,39 @@ export function TodayDashboard(props: DashboardProps) {
               const height = Math.min(48, Math.max(count ? 12 : 5, (count / 60) * 1.3));
               return (
                 <div className={`week-day ${key === today ? 'week-day-current' : ''}`} key={key}>
-                  <span className="week-bar-track">
+                  <span className="week-bar-track" aria-hidden="true">
                     <i style={{ height: `${height}px` }} />
                   </span>
-                  <span className="week-day-label">{['س', 'ح', 'ن', 'ث', 'ر', 'خ', 'ج'][index]}</span>
+                  <span className="week-day-label">{[t('س'), t('ح'), t('ن'), t('ث'), t('ر'), t('خ'), t('ج')][index]}</span>
+                  <span className="visually-hidden">
+                    {new Intl.DateTimeFormat('ar', { weekday: 'long' }).format(day)}: {formatDuration(count)}
+                  </span>
                 </div>
               );
             })}
           </div>
           <div className="week-summary">
             <span>
-              {formatDuration(
-                sessions
-                  .filter(
-                    (s) =>
-                      localDateKey(new Date(s.startedAt)) >= localDateKey(weekStartDate) &&
-                      localDateKey(new Date(s.startedAt)) <= today
-                  )
-                  .reduce((acc, s) => acc + s.actualSeconds, 0)
-              )}{' '}
-              تركيز هذا الأسبوع
+              {formatDuration(weekSeconds)} {t('تركيز هذا الأسبوع')}
             </span>
             <SessionCount
-              count={
-                sessions.filter(
-                  (s) =>
-                    s.isCompleted &&
-                    localDateKey(new Date(s.startedAt)) >= localDateKey(weekStartDate) &&
-                    localDateKey(new Date(s.startedAt)) <= today
-                ).length
-              }
+              count={sessions.filter((s) => s.isCompleted && localDateKey(new Date(s.startedAt)) >= localDateKey(weekStartDate) && localDateKey(new Date(s.startedAt)) <= today).length}
               size={13}
             />
           </div>
         </section>
       </div>
 
-      <section className="quote-banner">
-        <div>
-          <p>{language === 'en' ? 'Small steps, repeated consistently, create lasting progress.' : '«أحب الأعمال إلى الله أدومها وإن قل»'}</p>
-          <span>{t('تذكير لطيف: الثبات أجمل من السرعة.')}</span>
-        </div>
+      <div className="journal-strip">
+        <span className="journal-strip-copy">
+          <Check size={14} aria-hidden="true" />
+          {t('تذكير لطيف: الثبات أجمل من السرعة.')}
+        </span>
         <button className="journal-quick-link" onClick={() => switchView('journal')}>
           <NotebookPen size={15} />
-          دوّن فكرة
+          {t('دوّن فكرة')}
         </button>
-      </section>
+      </div>
     </>
   );
 }

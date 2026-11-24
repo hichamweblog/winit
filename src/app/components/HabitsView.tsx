@@ -19,6 +19,7 @@ import HabitHistory from './HabitHistory';
 import { habitIconFor } from '../habit-icons';
 import { addDays, getWeekStart, localDateKey } from '@/lib/core';
 import { goalStyle } from '@/lib/goals';
+import { useLocale } from '../locale';
 
 export type HabitsViewProps = {
   habits: Habit[];
@@ -45,6 +46,7 @@ export function HabitsView({
   onReorder,
   invalidationToken,
 }: HabitsViewProps) {
+  const { t } = useLocale();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [values, setValues] = useState<Record<string, string>>({});
   const [draggedHabitId, setDraggedHabitId] = useState<string | null>(null);
@@ -80,8 +82,8 @@ export function HabitsView({
     <section className="list-page habits-page" aria-labelledby="habits-heading">
       <div className="page-title-row">
         <div>
-          <h1 id="habits-heading">مساحة العادات</h1>
-          <p>تابع تقدّمك من دون ضغط؛ كل عودة هي بداية جديدة.</p>
+          <h1 id="habits-heading">{t('مساحة العادات')}</h1>
+          <p>{t('تابع تقدّمك من دون ضغط؛ كل عودة هي بداية جديدة.')}</p>
         </div>
         <div className="page-title-actions">
           {habits.length > 0 && (
@@ -89,16 +91,15 @@ export function HabitsView({
               type="button"
               className="ghost-button habit-expand-all-btn"
               onClick={toggleAll}
-              aria-label={allExpanded ? 'طي كل التفاصيل' : 'عرض كل التفاصيل'}
+              aria-label={allExpanded ? t('طي كل التفاصيل') : t('عرض كل التفاصيل')}
             >
               {allExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              <span>{allExpanded ? 'طي التفاصيل' : 'عرض التفاصيل'}</span>
+              <span>{allExpanded ? t('طي التفاصيل') : t('عرض التفاصيل')}</span>
             </button>
           )}
           <button className="btn btn-primary primary-button" onClick={onAdd}>
             <Plus size={17} />
-            عادة جديدة
-          </button>
+             {t('عادة جديدة')} </button>
         </div>
       </div>
       <div className="habit-dashboard-list">
@@ -116,10 +117,10 @@ export function HabitsView({
               : Math.min(100, Math.round(((log?.value ?? 0) / habit.targetValue) * 100));
           const kind =
             habit.recordType === 'duration'
-              ? 'مدة يومية'
+              ? t('مدة يومية')
               : habit.recordType === 'quantity'
-              ? 'هدف يومي'
-              : 'إنجاز يومي';
+              ? t('هدف يومي')
+              : t('إنجاز يومي');
           const isExpanded = Boolean(expanded[habit.id]);
           const isDragging = draggedHabitId === habit.id;
           const isOver = dragOverHabitId === habit.id;
@@ -163,8 +164,8 @@ export function HabitsView({
                 <button
                   type="button"
                   className="habit-drag-handle"
-                  aria-label={`إعادة ترتيب عادة ${habit.name}`}
-                  title="اسحب لإعادة الترتيب (أو الأسهم)"
+                  aria-label={t('إعادة ترتيب عادة {name}', { name: habit.name })}
+                  title={t('اسحب لإعادة الترتيب (أو الأسهم)')}
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => {
                     if (e.key === 'ArrowUp') {
@@ -184,7 +185,7 @@ export function HabitsView({
                   style={{ font: 'inherit', color: 'inherit', textAlign: 'start', padding: 0 }}
                   aria-expanded={isExpanded}
                   aria-controls={`habit-details-${habit.id}`}
-                  aria-label={`تفاصيل عادة ${habit.name}`}
+                  aria-label={t('تفاصيل عادة {name}', { name: habit.name })}
                   onClick={() => toggleExpand(habit.id)}
                 >
                   <span
@@ -200,15 +201,13 @@ export function HabitsView({
                     <span className="habit-summary-meta-row">
                       {done ? (
                         <span className="habit-summary-badge habit-badge-done">
-                          <Check size={12} /> اكتمل هدف اليوم
-                        </span>
+                          <Check size={12} />  {t('اكتمل هدف اليوم')} </span>
                       ) : habit.recordType === 'check' ? (
                         <span className="habit-summary-badge">
-                          {habit.targetValue} {habit.unit} كل يوم
-                        </span>
+                          {habit.targetValue} {habit.unit}  {t('كل يوم')} </span>
                       ) : (
                         <span className="habit-summary-badge">
-                          {log ? `${log.value} من ${habit.targetValue} ${habit.unit}` : `هدف اليوم: ${habit.targetValue} ${habit.unit}`}{' '}
+                          {log ? t('{value} من {target} {unit}', { value: log.value, target: habit.targetValue, unit: habit.unit }) : t('هدف اليوم: {target} {unit}', { target: habit.targetValue, unit: habit.unit })}{' '}
                           ({progress}%)
                         </span>
                       )}
@@ -227,8 +226,8 @@ export function HabitsView({
                       type="button"
                       className="icon-button row-action"
                       onClick={() => onEdit(habit)}
-                      aria-label={`تعديل عادة ${habit.name}`}
-                      title="تعديل"
+                      aria-label={t('تعديل عادة {name}', { name: habit.name })}
+                      title={t('تعديل')}
                     >
                       <Pencil size={15} />
                     </button>
@@ -236,8 +235,8 @@ export function HabitsView({
                       type="button"
                       className="icon-button row-action row-action-danger"
                       onClick={() => onDelete(habit)}
-                      aria-label={`حذف عادة ${habit.name}`}
-                      title="حذف"
+                      aria-label={t('حذف عادة {name}', { name: habit.name })}
+                      title={t('حذف')}
                     >
                       <Trash2 size={15} />
                     </button>
@@ -246,7 +245,7 @@ export function HabitsView({
                     <button
                       className={`habit-toggle habit-toggle-large ${done ? 'done' : ''}`}
                       onClick={() => onToggle(habit, log)}
-                      aria-label={`تسجيل عادة ${habit.name}`}
+                      aria-label={t('تسجيل عادة {name}', { name: habit.name })}
                     >
                       {done && <Check size={14} />}
                     </button>
@@ -277,8 +276,8 @@ export function HabitsView({
                         className="icon-button"
                         onClick={() => moveHabit(index, 'up')}
                         disabled={index === 0}
-                        aria-label={`تحريك عادة ${habit.name} لأعلى`}
-                        title="تحريك لأعلى"
+                        aria-label={t('تحريك عادة {name} لأعلى', { name: habit.name })}
+                        title={t('تحريك لأعلى')}
                       >
                         <ArrowUp size={16} />
                       </button>
@@ -287,8 +286,8 @@ export function HabitsView({
                         className="icon-button"
                         onClick={() => moveHabit(index, 'down')}
                         disabled={index === habits.length - 1}
-                        aria-label={`تحريك عادة ${habit.name} لأسفل`}
-                        title="تحريك لأسفل"
+                        aria-label={t('تحريك عادة {name} لأسفل', { name: habit.name })}
+                        title={t('تحريك لأسفل')}
                       >
                         <ArrowDown size={16} />
                       </button>
@@ -296,8 +295,8 @@ export function HabitsView({
                         type="button"
                         className="icon-button"
                         onClick={() => onEdit(habit)}
-                        aria-label={`تعديل عادة ${habit.name}`}
-                        title="تعديل"
+                        aria-label={t('تعديل عادة {name}', { name: habit.name })}
+                        title={t('تعديل')}
                       >
                         <Pencil size={16} />
                       </button>
@@ -305,8 +304,8 @@ export function HabitsView({
                         type="button"
                         className="icon-button row-action-danger"
                         onClick={() => onDelete(habit)}
-                        aria-label={`حذف عادة ${habit.name}`}
-                        title="حذف"
+                        aria-label={t('حذف عادة {name}', { name: habit.name })}
+                        title={t('حذف')}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -315,10 +314,10 @@ export function HabitsView({
                   <div className="habit-progress-copy">
                     <span>
                       {done
-                        ? 'اكتمل هدف اليوم'
+                        ? t('اكتمل هدف اليوم')
                         : log
-                        ? `${log.value} من ${habit.targetValue} ${habit.unit}`
-                        : `هدف اليوم: ${habit.targetValue} ${habit.unit}`}
+                        ? t('{value} من {target} {unit}', { value: log.value, target: habit.targetValue, unit: habit.unit })
+                        : t('هدف اليوم: {target} {unit}', { target: habit.targetValue, unit: habit.unit })}
                     </span>
                     <b>
                       <bdi>{progress}%</bdi>
@@ -327,7 +326,7 @@ export function HabitsView({
                   <div
                     className="habit-progress-track"
                     role="progressbar"
-                    aria-label={`تقدم ${habit.name} اليوم`}
+                    aria-label={t('تقدم {name} اليوم', { name: habit.name })}
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={progress}
@@ -345,8 +344,8 @@ export function HabitsView({
                       const entry = logs.find((item) => item.habitId === habit.id && item.logDate === key);
                       const met = (entry?.value ?? 0) >= habit.targetValue;
                       const state = met ? 'done' : key >= today ? 'future' : 'missed';
-                      const label = `${['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'][i]}: ${
-                        met ? 'اكتمل' : key > today ? 'قادم' : 'لم يسجّل'
+                      const label = `${[t('السبت'), t('الأحد'), t('الاثنين'), t('الثلاثاء'), t('الأربعاء'), t('الخميس'), t('الجمعة')][i]}: ${
+                        met ? t('اكتمل') : key > today ? t('قادم') : t('لم يسجّل')
                       }`;
                       return (
                         <span
@@ -373,10 +372,10 @@ export function HabitsView({
                   />
                   <div className="habit-card-bottom">
                     {habit.recordType === 'check' ? (
-                      <span>تسجيل بنقرة واحدة</span>
+                      <span>{t('تسجيل بنقرة واحدة')}</span>
                     ) : (
                       <div className="habit-log-editor">
-                        <label htmlFor={`habit-value-${habit.id}`}>قيمة اليوم</label>
+                        <label htmlFor={`habit-value-${habit.id}`}>{t('قيمة اليوم')}</label>
                         <input
                           id={`habit-value-${habit.id}`}
                           type="number"
@@ -391,7 +390,7 @@ export function HabitsView({
                           className="habit-action"
                           onClick={() => onSetValue(habit, Math.max(0, Number(values[habit.id] ?? log?.value ?? 0)))}
                         >
-                          {log ? 'تحديث' : 'حفظ'}
+                          {log ? t('تحديث') : t('حفظ')}
                         </button>
                       </div>
                     )}
@@ -404,13 +403,11 @@ export function HabitsView({
                         {done ? (
                           <>
                             <Check size={14} />
-                            تم اليوم
-                          </>
+                             {t('تم اليوم')} </>
                         ) : (
                           <>
                             <Plus size={14} />
-                            تسجيل اليوم
-                          </>
+                             {t('تسجيل اليوم')} </>
                         )}
                       </button>
                     )}
@@ -418,7 +415,7 @@ export function HabitsView({
                   {habit.reminderTime && (
                     <div className="habit-reminder">
                       <Clock3 size={13} />
-                      تذكير يومي {habit.reminderTime}
+                       {t('تذكير يومي')} {habit.reminderTime}
                     </div>
                   )}
                 </div>
@@ -428,11 +425,10 @@ export function HabitsView({
         })}
         {!habits.length && (
           <div className="empty-page">
-            <h3>ابدأ بعادة واحدة</h3>
-            <p>القرآن، الحركة، أو أي شيء تريد الاستمرار عليه.</p>
+            <h3>{t('ابدأ بعادة واحدة')}</h3>
+            <p>{t('القرآن، الحركة، أو أي شيء تريد الاستمرار عليه.')}</p>
             <button className="btn btn-primary primary-button" onClick={onAdd}>
-              <Plus size={16} />أنشئ عادة
-            </button>
+              <Plus size={16} />{t('أنشئ عادة')} </button>
           </div>
         )}
       </div>

@@ -19,6 +19,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { AlertTriangle, Info, X } from '../icons';
 import useDialogFocus from './useDialogFocus';
+import { useLocale } from '../locale';
 
 export type ConfirmOptions = {
   title: string;
@@ -58,6 +59,7 @@ export function useConfirm() {
 }
 
 function ConfirmDialog({ options, onResult }: { options: Pending; onResult: (ok: boolean) => void }) {
+  const { t } = useLocale();
   const { title, message, confirmLabel, cancelLabel, tone = 'danger' } = options;
   const dialogRef = useDialogFocus<HTMLDivElement>(() => onResult(false));
   const danger = tone === 'danger';
@@ -81,7 +83,7 @@ function ConfirmDialog({ options, onResult }: { options: Pending; onResult: (ok:
             {danger ? <AlertTriangle size={17} /> : <Info size={17} />}
           </span>
           <span id="confirm-title">{title}</span>
-          <button type="button" className="icon-button" onClick={() => onResult(false)} aria-label="إغلاق"><X size={18} /></button>
+          <button type="button" className="icon-button" onClick={() => onResult(false)} aria-label={t('إغلاق')}><X size={18} /></button>
         </div>
         <p id="confirm-message" className="confirm-message" dir="auto">{message}</p>
         <div className="modal-footer confirm-footer">
@@ -90,13 +92,13 @@ function ConfirmDialog({ options, onResult }: { options: Pending; onResult: (ok:
             className="ghost-button"
             data-autofocus={danger ? '' : undefined}
             onClick={() => onResult(false)}
-          >{cancelLabel ?? 'إلغاء'}</button>
+          >{cancelLabel ?? t('إلغاء')}</button>
           <button
             type="button"
             className={`btn btn-primary primary-button ${danger ? 'danger-solid-button' : ''}`}
             data-autofocus={danger ? undefined : ''}
             onClick={() => onResult(true)}
-          >{confirmLabel ?? (danger ? 'حذف' : 'تأكيد')}</button>
+          >{confirmLabel ?? (danger ? t('حذف') : t('تأكيد'))}</button>
         </div>
       </div>
     </div>

@@ -114,7 +114,7 @@ export default function SettingsView({
                 key={minutes}
                 className={pomodoroMinutes === minutes ? 'segment-active' : ''}
                 aria-pressed={pomodoroMinutes === minutes}
-                aria-label={`${minutes} دقيقة`}
+                aria-label={t('{count} دقيقة', { count: minutes })}
                 onClick={() => onPomodoroChange(minutes)}
               ><bdi>{formatArNumber(minutes)}</bdi></button>
             ))}

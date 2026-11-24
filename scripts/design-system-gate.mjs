@@ -175,6 +175,13 @@ if (/\.toast\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto/s.test(
 else fail('toast-layout', 'notifications need a compact non-obstructive row layout');
 if (/\.sidebar\s*\{[^}]*font-weight:\s*600/s.test(globals) && /\.nav-item, \.project-item\s*\{[^}]*font-weight:\s*600/s.test(globals)) ok('sidebar-weight', 'sidebar navigation and project labels are semibold');
 else fail('sidebar-weight', 'sidebar navigation and project labels must be semibold');
+// The closed drawer used to paint a sliver over the page gutter in the energy
+// palette, and page headers used to push their actions past the gutter on a
+// phone. Both showed up as clipped controls in the review screenshots.
+if (/\.sidebar\s*\{[^}]*visibility:\s*hidden/s.test(globals)) ok('drawer-offcanvas', 'the closed drawer is not rendered over the page');
+else fail('drawer-offcanvas', 'the closed mobile drawer must be fully off-canvas (visibility: hidden)');
+if (/\.page-title-row\s*\{[^}]*flex-wrap:\s*wrap/s.test(globals) && /@media \(max-width: 600px\)[\s\S]*\.list-page \.page-title-row\s*\{[^}]*display:\s*grid/s.test(globals)) ok('header-actions-fit', 'page headers wrap their actions instead of overflowing the gutter');
+else fail('header-actions-fit', 'page headers need a wrapping row and a stacked phone layout');
 
 const base = read('src/app/base.css');
 if (!/\.reading-body\s*\{[^}]*--font-reading/.test(base)) fail('reading-body', '.reading-body must own --font-reading');
