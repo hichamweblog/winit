@@ -3,8 +3,8 @@
 import type { CSSProperties } from 'react';
 
 /**
- * Winit standalone brand icon in the Coastal Sky palette.
- * Features blue speed lines, a Fun Blue-to-Malibu frame gradient, and a checkmark
+ * Winit standalone brand icon in the purple, green, and mint palette.
+ * Features theme-aware speed lines, a mint-to-green frame gradient, and a checkmark
  * that dynamically adapts to light/dark themes via var(--color-ink).
  */
 export function WinItIcon({
@@ -29,14 +29,14 @@ export function WinItIcon({
     >
       <defs>
         <linearGradient id="winit-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1A6DAD" />
-          <stop offset="50%" stopColor="#46B4D2" />
-          <stop offset="100%" stopColor="#7ADAF5" />
+          <stop offset="0%" stopColor="var(--color-primary, #3E3758)" />
+          <stop offset="50%" stopColor="var(--color-accent, #B0CFDD)" />
+          <stop offset="100%" stopColor="var(--color-secondary, #8AB946)" />
         </linearGradient>
       </defs>
-      {/* Speed lines in the primary Coastal Sky blue */}
-      <rect x="16" y="41" width="28" height="8.5" rx="4.25" fill="#1A6DAD" />
-      <rect x="3" y="59" width="41" height="8.5" rx="4.25" fill="#1A6DAD" />
+      {/* Speed lines in the theme primary color */}
+      <rect x="16" y="41" width="28" height="8.5" rx="4.25" fill="var(--color-primary, #3E3758)" />
+      <rect x="3" y="59" width="41" height="8.5" rx="4.25" fill="var(--color-primary, #3E3758)" />
       {/* Top-left arc of frame */}
       <path
         d="M 120,11 H 59 A 22,22 0 0 0 37,33 V 35"
@@ -98,16 +98,16 @@ export function WinItLogo({
       >
         <defs>
           <linearGradient id="winit-logo-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1A6DAD" />
-            <stop offset="50%" stopColor="#46B4D2" />
-            <stop offset="100%" stopColor="#7ADAF5" />
+            <stop offset="0%" stopColor="var(--color-primary, #3E3758)" />
+            <stop offset="50%" stopColor="var(--color-accent, #B0CFDD)" />
+            <stop offset="100%" stopColor="var(--color-secondary, #8AB946)" />
           </linearGradient>
         </defs>
 
         {/* Icon Group */}
         <g transform="translate(0, 0)">
-          <rect x="16" y="41" width="28" height="8.5" rx="4.25" fill="#1A6DAD" />
-          <rect x="3" y="59" width="41" height="8.5" rx="4.25" fill="#1A6DAD" />
+          <rect x="16" y="41" width="28" height="8.5" rx="4.25" fill="var(--color-primary, #3E3758)" />
+          <rect x="3" y="59" width="41" height="8.5" rx="4.25" fill="var(--color-primary, #3E3758)" />
           <path
             d="M 120,11 H 59 A 22,22 0 0 0 37,33 V 35"
             fill="none"
@@ -134,7 +134,7 @@ export function WinItLogo({
           />
         </g>
 
-        {/* Wordmark: theme ink plus accessible primary blue in both color modes */}
+        {/* Wordmark: theme ink plus accessible primary color in both color modes */}
         <text
           x="170"
           y="94"
@@ -144,7 +144,7 @@ export function WinItLogo({
           letterSpacing="-1px"
         >
           <tspan fill="var(--color-ink, #ffffff)">win</tspan>
-          <tspan fill="var(--color-primary, #1A6DAD)">It</tspan>
+          <tspan fill="var(--color-primary, #3E3758)">It</tspan>
         </text>
       </svg>
     </div>

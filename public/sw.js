@@ -1,5 +1,5 @@
 /* Winit PWA worker: cache the public app shell only, never account/API responses. */
-const CACHE_NAME = 'winit-shell-v3';
+const CACHE_NAME = 'winit-shell-v4';
 const PRECACHE_ASSETS = [
   '/offline.html',
   '/favicon.ico',

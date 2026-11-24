@@ -22,6 +22,10 @@ const contrast = (a, b) => {
 
 const base = read('src/app/tokens.css');
 const vibe = read('src/app/vibes.css');
+const selectedPalette = ['#3E3758', '#8AB946', '#B0CFDD', '#C1F0EC'];
+const missingPaletteColors = selectedPalette.filter((color) => !vibe.toLowerCase().includes(color.toLowerCase()));
+if (missingPaletteColors.length) throw new Error(`Selected palette color(s) missing from app theme: ${missingPaletteColors.join(', ')}`);
+console.log(`Selected four-color palette is present: ${selectedPalette.join(' / ')}`);
 const lightBase = varsFor(base, ':root {');
 const darkBase = { ...lightBase, ...varsFor(base, ':root[data-mode="dark"]') };
 const themes = {
@@ -41,7 +45,7 @@ const pairs = [
   ['--energy-sidebar-active-text', '--energy-sidebar-active', 4.5],
   ['--energy-sidebar-muted', '--energy-sidebar-hover', 4.5],
   ['--energy-sidebar-active-text', '--energy-sidebar-accent', 4.5],
-  ['--text', '--energy-card-onahau', 4.5], ['--text', '--energy-card-malibu', 4.5], ['--text', '--energy-card-colonial', 4.5],
+  ['--text', '--energy-card-blue', 4.5], ['--text', '--energy-card-mint', 4.5], ['--text', '--energy-card-green', 4.5],
   ['--energy-hero-text', '--energy-hero-bg', 4.5],
   ['--energy-hero-muted', '--energy-hero-bg', 4.5],
 ];
