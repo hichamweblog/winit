@@ -70,7 +70,9 @@ for (const [name, values] of Object.entries(themes)) {
   } else console.log(`${name} Energized palette: ${pairs.length}/${pairs.length} contrast pairs pass`);
 }
 
-const appCss = read('src/app/globals.css');
+const readCssBundle = (entry) =>
+  read(entry).replace(/@import "\.\/([^"]+)";/g, (_, file) => read(`src/app/${file}`));
+const appCss = readCssBundle('src/app/globals.css');
 const layout = read('src/app/layout.tsx');
 const app = read('src/app/page.tsx');
 const locale = read('src/app/locale.tsx');
@@ -102,5 +104,5 @@ if (!layout.includes("dataset.theme=d?'winit-energy-dark':'winit-energy'")) thro
 if (!app.includes("dataset.theme = nextMode === 'dark' ? 'winit-energy-dark' : 'winit-energy'")) throw new Error('DaisyUI theme does not follow the appearance toggle');
 if (!layout.includes('document.documentElement.dataset.language=l')) throw new Error('Saved language is not exposed before first paint');
 if (!locale.includes("document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'")) throw new Error('Locale does not set the root text direction');
-if (!read('src/app/globals.css').includes(':root[data-language="en"] .sidebar { transform: translateX(-105%); }')) throw new Error('English sidebar does not open from the LTR inline-start edge');
+if (!readCssBundle('src/app/globals.css').includes(':root[data-language="en"] .sidebar { transform: translateX(-105%); }')) throw new Error('English sidebar does not open from the LTR inline-start edge');
 console.log('DaisyUI theme switching and English LTR layout checks pass');

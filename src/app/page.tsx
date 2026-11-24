@@ -4,6 +4,7 @@ import {
   ArrowDown,
   ArrowUp,
   GripVertical,
+  Languages,
   Logout,
   Menu,
   Moon,
@@ -31,7 +32,9 @@ import HabitModal from './components/HabitModal';
 import FocusModal from './components/FocusModal';
 import FocusDock from './components/FocusDock';
 import ShortcutHelp from './components/ShortcutHelp';
+import OfflineNotice from './components/OfflineNotice';
 import AuthGate, { useAuth } from './components/AuthGate';
+import Link from 'next/link';
 import { useLocale } from './locale';
 import { projectIconFor } from './project-icons';
 import { truncateWords } from '@/lib/label';
@@ -58,7 +61,7 @@ const navGroups: { label: string; ids: View[] }[] = [
 
 function WinitApp() {
   const auth = useAuth();
-  const { language, t } = useLocale();
+  const { language, setLanguage, t } = useLocale();
   const avatarLetter = (auth.user?.name ?? 'و').trim().charAt(0) || 'و'; // i18n-exempt: fallback glyph
   const [data, setData] = useState<Dataset | null>(null);
   const [view, setViewState] = useState<View>('today');
@@ -75,6 +78,7 @@ function WinitApp() {
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null);
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
   const [mobileViews, setMobileViews] = useState<View[]>(defaultMobileViews);
+  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
   const [pomodoroMinutes, setPomodoroMinutes] = useState(25);
   const [showFocus, setShowFocus] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -86,6 +90,7 @@ function WinitApp() {
   const [focusTaskId, setFocusTaskId] = useState('');
   const [focusMode, setFocusMode] = useState<'pomodoro' | 'stopwatch'>('pomodoro');
   const [busy, setBusy] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const { confirm, confirmDialog } = useConfirm();
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
@@ -259,6 +264,11 @@ function WinitApp() {
       }
       const minutes = Number(window.localStorage.getItem('winit-pomodoro-minutes'));
       if (Number.isInteger(minutes) && minutes >= 5 && minutes <= 90) setPomodoroMinutes(minutes);
+      const storedDensity = window.localStorage.getItem('winit-density');
+      if (storedDensity === 'compact' || storedDensity === 'comfortable') {
+        setDensity(storedDensity);
+        document.documentElement.dataset.density = storedDensity;
+      }
     } catch { /* retain defaults if browser storage is unavailable */ }
   }, []);
   useEffect(() => {
@@ -294,6 +304,11 @@ function WinitApp() {
     try { window.localStorage.setItem('winit-mode', nextMode); } catch { /* keep the current-page choice if storage is unavailable */ }
     setDarkMode(nextMode === 'dark');
   };
+  const changeDensity = (next: 'comfortable' | 'compact') => {
+    setDensity(next);
+    document.documentElement.dataset.density = next;
+    try { window.localStorage.setItem('winit-density', next); } catch { /* keep this session's choice */ }
+  };
 
   const mutate = async (url: string, method: string, body?: unknown) => {
     setBusy(true);
@@ -305,6 +320,30 @@ function WinitApp() {
     finally { setBusy(false); }
   };
 
+  /**
+   * A first run used to be a blank pane with no way to see what the app looks
+   * like populated. This writes three real tasks through the same endpoint the
+   * editor uses, so nothing is special-cased in the database.
+   */
+  const seedDemoData = async () => {
+    setSeeding(true);
+    try {
+      const samples = [
+        { title: t('مراجعة الأسبوع في عشر دقائق'), priority: 'medium', estimatedPomodoros: 2 },
+        { title: t('قراءة عشرين صفحة'), priority: 'low', estimatedPomodoros: 1 },
+        { title: t('مكالمة مع العائلة'), priority: 'high', estimatedPomodoros: 1 },
+      ];
+      for (const sample of samples) {
+        await api('/api/tasks', { method: 'POST', body: { ...sample, dueDate: today } });
+      }
+      await refresh();
+      notify(t('أضفنا ثلاث مهام لتبدأ منها.'));
+    } catch (error) {
+      notify(error instanceof Error ? error.message : t('تعذر إضافة البيانات التجريبية'), 'error');
+    } finally {
+      setSeeding(false);
+    }
+  };
   const openTaskEditor = (task: Task | null = null, initialDueDate?: string) => {
     setEditingTask(task);
     setTaskInitialDueDate(initialDueDate);
@@ -686,7 +725,7 @@ function WinitApp() {
         tabIndex={-1}
       >
         <div className="brand-row"><WinItLogo height={32} /><button className="icon-button sidebar-close" onClick={() => closeMobileMenu()} aria-label={t('إغلاق القائمة')}><X size={18} /></button></div>
-        <div className="workspace-switch"><span className="workspace-avatar" aria-hidden="true">{avatarLetter}</span><span className="workspace-txt"><b><bdi>{auth.user?.demo ? t('مساحة تجريبية') : auth.user?.name ?? t('حسابي')}</bdi></b><small><bdi>{auth.user?.demo ? t('مشتركة، غير خاصة') : auth.user?.email ?? t('نسخة خاصة بك')}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => { closeMobileMenu(); void auth.signOut(); }} aria-label={t('تسجيل الخروج')} title={t('تسجيل الخروج')}><Logout size={16} /></button>}</div>
+        <div className="workspace-switch"><button type="button" className="workspace-avatar" onClick={() => { closeMobileMenu(false); setView('settings'); }} aria-label={t('فتح الإعدادات')} title={t('فتح الإعدادات')}>{avatarLetter}</button><span className="workspace-txt"><b><bdi>{auth.user?.demo ? t('مساحة تجريبية') : auth.user?.name ?? t('حسابي')}</bdi></b><small><bdi>{auth.user?.demo ? t('مشتركة، غير خاصة') : auth.user?.email ?? t('نسخة خاصة بك')}</bdi></small></span>{!auth.user?.demo && <button type="button" className="icon-button sign-out" onClick={() => { closeMobileMenu(); void auth.signOut(); }} aria-label={t('تسجيل الخروج')} title={t('تسجيل الخروج')}><Logout size={16} /></button>}</div>
         {/* Four items per group instead of nine in one column: the sidebar
             lists what you work on, then what you review. Settings sits alone. */}
         <nav className="main-nav" aria-label={t('التنقل بين الصفحات')}>
@@ -820,6 +859,7 @@ function WinitApp() {
       {mobileMenu && <button className="mobile-scrim" aria-label={t('إغلاق القائمة')} onClick={() => closeMobileMenu()} />}
 
       <main id="main-content" tabIndex={-1} className="main-area" aria-hidden={mobileLayout && mobileMenu ? true : undefined} inert={mobileLayout && mobileMenu}>
+        <OfflineNotice />
         <header className="topbar">
           <div className="topbar-start">
             <button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('فتح القائمة')} aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button>
@@ -833,20 +873,27 @@ function WinitApp() {
               : <kbd aria-hidden="true">Ctrl+K</kbd>}
           </div>
           <div className="topbar-end">
-            <span className="today-date" title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span>
+            <button type="button" className="today-date" onClick={() => setView('calendar')} title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`} aria-label={t('فتح التقويم')}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></button>
             <button className="icon-button shortcut-help-button" onClick={() => setShowShortcuts(true)} aria-label={t('اختصارات لوحة المفاتيح')} title={t('اختصارات لوحة المفاتيح')}><span aria-hidden="true">?</span></button>
+            <button className="icon-button language-toggle" onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')} aria-label={t('تغيير اللغة')} title={t('تغيير اللغة')}><Languages size={18} /></button>
             <button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? t('التبديل إلى المظهر الفاتح') : t('التبديل إلى المظهر الداكن')} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button>
           </div>
         </header>
         <div className="page-content">
-          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, pomodoroMinutes, userName: auth.user?.name, onOpenTimer: () => setShowFocus(true) }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
+          {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, pomodoroMinutes, userName: auth.user?.name, onOpenTimer: () => setShowFocus(true) }} onSeedDemo={() => void seedDemoData()} seeding={seeding} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} hasMore={journalNextCursor !== null} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalNextCursor, true)} />}
-          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={scopedTasks} projects={projects} query={query} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onBulkComplete={(ids) => void bulkComplete(ids)} onBulkDelete={(ids) => void bulkDelete(ids)} onBulkMove={(ids, projectId) => void bulkMove(ids, projectId)} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} />)}
+          {view !== 'today' && view !== 'journal' && (view === 'stats' ? <StatsView tasks={tasks} sessions={sessions} habits={habits} logs={logs} today={today} /> : view === 'settings' ? <SettingsView darkMode={darkMode} onToggleTheme={toggleTheme} pomodoroMinutes={pomodoroMinutes} onPomodoroChange={setTimerMinutes} mobileViews={mobileViews} mobileViewOptions={mobileViewOptions} onMobileViewsChange={(next) => saveMobileViews(next as View[])} density={density} onDensityChange={changeDensity} onExportData={exportAccountData} onDeleteAccount={deleteAccount} /> : view === 'calendar' ? <CalendarView tasks={tasks} projects={projects} today={today} month={calendarMonth} setMonth={setCalendarMonth} onEdit={openTaskEditor} onAdd={(date) => openTaskEditor(null, date)} /> : view === 'habits' ? <HabitsView habits={habits} logs={logs} today={today} invalidationToken={habitMutationCount} onToggle={toggleHabit} onSetValue={async (habit, value) => { const ok = await mutate(`/api/habits/${habit.id}/log`, 'POST', { date: today, value }); if (ok) setHabitMutationCount((c) => c + 1); }} onEdit={(habit) => { setEditingHabit(habit); setShowHabitAdd(true); }} onDelete={(habit) => void deleteHabit(habit)} onAdd={() => { setEditingHabit(null); setShowHabitAdd(true); }} onReorder={(next) => void reorderHabits(next)} /> : <TaskListView title={heading} tasks={scopedTasks} projects={projects} query={query} project={selectedProject ? projects.find((item) => item.id === selectedProject) : undefined} today={today} onBulkComplete={(ids) => void bulkComplete(ids)} onBulkDelete={(ids) => void bulkDelete(ids)} onBulkMove={(ids, projectId) => void bulkMove(ids, projectId)} onComplete={(id) => void completeTask(id)} onDelete={(id) => void deleteTask(id)} onStart={(id) => { setFocusTaskId(id); void startFocus(id); }} onEdit={openTaskEditor} onAdd={() => openTaskEditor()} onClearSearch={() => setQuery('')} />)}
         </div>
-        <footer className="app-footer"><span>{t('مصمّم لأيامك، لا لمزيد من الضجيج.')}</span></footer>
+        <footer className="app-footer">
+          <span>{t('مصمّم لأيامك، لا لمزيد من الضجيج.')}</span>
+          <nav className="app-footer-links" aria-label={t('صفحات قانونية')}>
+            <Link href="/privacy">{t('الخصوصية')}</Link>
+            <Link href="/terms">{t('الشروط')}</Link>
+          </nav>
+        </footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
             keyboard shortcut hint. Hidden on views that have their own add. */}
-        {(view === 'today' || view === 'upcoming' || view === 'inbox' || view === 'all' || selectedProject) && scopedTasks.length > 0 && (
+        {(view === 'today' || view === 'upcoming' || view === 'inbox' || view === 'all' || selectedProject) && scopedTasks.length > 0 && !activeSession && (
           <button className="fab-add" onClick={() => openTaskEditor()} aria-label={t('أضف مهمة جديدة')}><Plus size={24} /></button>
         )}
         <nav className="mobile-tabs" aria-label={t('التنقل الرئيسي')} style={{ gridTemplateColumns: `repeat(${mobileViews.length + 1}, minmax(0, 1fr))` }}>

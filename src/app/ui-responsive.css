@@ -1,0 +1,253 @@
+/* Split out of globals.css so no stylesheet runs past 1,000 lines.
+   The import order in globals.css preserves the original cascade. */
+/* ============================================================================
+   Today dashboard — decision-first layout
+   ----------------------------------------------------------------------------
+   Critique 2026-11-24: three stat cards became one quiet line, the task panel
+   became the hero, and the timer shrank to a card that opens the dock. The
+   .stat-card / .stats-grid rules above stay for the Statistics page, which
+   overrides them under .stats-page.
+   ========================================================================= */
+.welcome-name { display: block; margin-block-end: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); font-weight: 600; }
+
+.stat-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin-block-end: var(--space-md); padding-block-end: var(--space-sm); border-block-end: 1px solid var(--line); color: var(--color-ink-2); font-size: var(--text-small); }
+.stat-line b { color: var(--color-ink); font-size: var(--text-ui); font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-line-dot { inline-size: 3px; block-size: 3px; border-radius: 50%; background: var(--color-muted); opacity: .6; }
+
+.tasks-hero { padding: var(--space-md); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); }
+.tasks-hero .panel-heading { margin-block-end: var(--space-sm); }
+.tasks-hero .panel-heading h2 { font-size: var(--text-h2); }
+.hero-next { margin-block-start: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); }
+.hero-next bdi { color: var(--color-ink); font-weight: 600; }
+.task-row[data-featured='true'] { background: var(--color-paper-2); border-radius: var(--radius-md); }
+.task-row[data-featured='true'] .row-actions .row-action { opacity: 1; transform: none; }
+
+/* Compact timer card: the halos belong to the focus modal, not the dashboard. */
+.focus-mini { min-height: 0; padding: var(--space-md); align-items: flex-start; }
+.focus-mini h3 { font-size: var(--text-h3); }
+.focus-mini p { margin-block-start: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); }
+.focus-mini-clock { flex: none; display: flex; flex-direction: column; align-items: center; gap: var(--space-2xs); padding-inline-start: var(--space-md); color: var(--color-accent-strong); }
+.focus-mini-value,
+.focus-mini-clock span[role='timer'] { font-family: var(--font-ui); color: var(--color-ink); font-size: var(--text-stat); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.focus-mini-clock small { color: var(--color-ink-2); font-size: var(--text-micro); text-align: center; }
+
+.journal-strip { margin-block-start: var(--space-md); padding: var(--space-sm) var(--space-md); display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); }
+.journal-strip-copy { display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); }
+
+@media (max-width: 520px) {
+  .focus-mini { flex-direction: column; gap: var(--space-sm); }
+  .focus-mini-clock { flex-direction: row; align-items: baseline; gap: var(--space-xs); padding-inline-start: 0; }
+  .journal-strip { flex-direction: column; align-items: flex-start; }
+}
+
+/* ============================================================================
+   Search, list filters and bulk selection
+   ----------------------------------------------------------------------------
+   Critique 2026-11-24: tasks had no search, no filters and no batch actions
+   while the journal had all three. This block adds them without a new palette:
+   chips use surface tokens, the search field mirrors .auth-input, and the
+   selection bar reuses the card border used by every other panel.
+   ========================================================================= */
+.topbar-search {
+  flex: 0 1 300px;
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding-inline: var(--space-3) var(--space-2);
+  block-size: 40px;
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+}
+.topbar-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.topbar-search input {
+  inline-size: 190px;
+  min-inline-size: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: var(--text-small) / 1.4 var(--font-ui);
+}
+.topbar-search input::placeholder { color: var(--color-muted); }
+.topbar-search input:focus-visible { outline: none; }
+.topbar-search input::-webkit-search-cancel-button { display: none; }
+.topbar-search kbd {
+  padding: 1px var(--space-2xs);
+  color: var(--color-ink-2);
+  background: var(--color-paper);
+  border: 1px solid var(--color-edge);
+  border-radius: 4px;
+  font: var(--text-micro) / 1.4 var(--font-ui);
+}
+.shortcut-help-button { color: var(--color-ink-2); font: 600 var(--text-ui) / 1 var(--font-ui); }
+
+.list-toolbar {
+  margin-block-end: var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs) var(--space-sm);
+}
+.filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.chip {
+  min-block-size: 32px;
+  padding-inline: var(--space-3);
+  color: var(--color-ink-2);
+  background: transparent;
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-pill);
+  font: var(--text-small) / 1 var(--font-ui);
+  white-space: nowrap;
+}
+.chip:hover { color: var(--color-ink); background: var(--color-paper-2); }
+.chip-active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.filter-summary { display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); }
+.select-toggle-on { color: var(--accent); background: var(--accent-soft); }
+
+.selection-bar {
+  position: sticky;
+  inset-block-end: var(--space-2);
+  z-index: var(--z-sticky);
+  margin-block-end: var(--space-sm);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-card);
+}
+.selection-count { color: var(--color-ink); font-size: var(--text-small); font-weight: 600; }
+.selection-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2xs); }
+.selection-actions .ghost-button { min-height: 40px; padding-inline: var(--space-3); font-size: var(--text-small); }
+.selection-move select {
+  min-block-size: 40px;
+  padding-inline: var(--space-3);
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-md);
+  font: var(--text-small) / 1 var(--font-ui);
+}
+
+.task-select {
+  inline-size: 22px;
+  block-size: 22px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--on-accent);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-edge);
+  border-radius: 6px;
+}
+.task-select[aria-checked='true'] { background: var(--accent); border-color: var(--accent); }
+.task-row-selected { background: var(--accent-soft); border-radius: var(--radius-md); }
+.task-row-selecting .row-actions { opacity: 0.35; }
+
+.shortcut-modal { max-inline-size: 30rem; }
+.shortcut-list { margin: 0; display: grid; gap: var(--space-1); }
+.shortcut-row {
+  padding-block: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  border-block-end: 1px solid var(--color-rule);
+}
+.shortcut-row dt { color: var(--color-ink); font-size: var(--text-small); }
+.shortcut-row dd { margin: 0; display: inline-flex; gap: var(--space-1); }
+.shortcut-row kbd {
+  min-inline-size: 26px;
+  padding: var(--space-3xs) var(--space-2xs);
+  text-align: center;
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-edge);
+  border-radius: 4px;
+  font: var(--text-small) / 1.4 var(--font-ui);
+}
+.shortcut-note { margin-block-start: var(--space-3); color: var(--color-ink-2); font-size: var(--text-small); }
+
+@media (max-width: 900px) {
+  .topbar-search { flex: 0 1 200px; }
+  .topbar-search input { inline-size: 118px; }
+  .topbar-search kbd { display: none; }
+}
+
+/* Phone topbar: two rows. Title + theme on the first, search on the second.
+   The date and the shortcut sheet need a keyboard and a wide gutter; on a
+   phone they only squeezed the page title into an ellipsis. */
+@media (max-width: 720px) {
+  .topbar { flex-wrap: wrap; padding-block: var(--space-2); row-gap: var(--space-2); }
+  .topbar-start { flex: 1 1 auto; }
+  .topbar-end { order: 2; flex: none; }
+  .topbar-search { order: 3; flex: 1 1 100%; }
+  .topbar-search input { inline-size: 100%; }
+  .today-date,
+  .shortcut-help-button { display: none; }
+  .selection-bar { position: static; }
+
+  /* Filters: status stays one full-width row, priorities scroll sideways
+     instead of stacking into three. */
+  .list-toolbar .segmented-control { flex: 1 1 100%; }
+  .list-toolbar .segmented-control button { flex: 1; }
+  .filter-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .filter-chips::-webkit-scrollbar { display: none; }
+}
+@media (pointer: coarse) {
+  .chip { min-block-size: var(--tap-min); }
+  .task-select { inline-size: var(--tap-min); block-size: var(--tap-min); }
+}
+
+/* Sidebar grouping: four items per section, so the nav reads in two beats. */
+.nav-group { display: flex; flex-direction: column; gap: var(--space-2xs); }
+.nav-group > .nav-label { margin-block: var(--space-md) var(--space-2xs); }
+.nav-group:first-child > .nav-label { margin-block-start: 0; }
+.settings-nav { margin-block-start: var(--space-lg); padding-block-start: var(--space-2xs); border-block-start: 1px solid var(--line); }
+
+
+/* The search pill is 40px tall; the coarse-pointer floor of 48px on
+   .icon-button would burst it, so the clear button gets its own size. */
+.topbar-search .icon-button { inline-size: 28px; min-inline-size: 28px; min-block-size: 28px; padding: 0; border-radius: 50%; }
+@media (pointer: coarse) {
+  .topbar-search { block-size: 48px; padding-inline: var(--space-3) var(--space-2xs); }
+  .topbar-search .icon-button { inline-size: 40px; min-inline-size: 40px; min-block-size: 40px; }
+}
+
+/* ---- Phone: the first task is the first thing on screen ------------------
+   The greeting panel, its subtitle and the stat line added up to more than a
+   screen of context before the list. Below 720px the panel keeps the greeting
+   and the name, drops the supporting line, and tightens its padding. */
+@media (max-width: 720px) {
+  .welcome-row { margin-block-end: var(--space-md); }
+  .welcome-row h1 { font-size: var(--text-h3); line-height: var(--lh-h3); }
+  .welcome-row p { display: none; }
+  .welcome-name { margin-block-end: 0; }
+  :root[data-vibe="energy"] .welcome-row { padding: var(--space-md); border-radius: 16px; }
+  :root[data-vibe="energy"] .welcome-row h1 { font-size: var(--text-h3); }
+}
+
+/* ---- Phone: status and priority share one scrolling row ------------------
+   Two groups on two rows cost ~56px of list on every screen. They now travel
+   together, with a fade at the edges to say the row continues. */
+@media (max-width: 720px) {
+  .list-toolbar {
+    flex-wrap: nowrap;
+    align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-inline-end: var(--space-sm);
+    mask-image: linear-gradient(to left, transparent 0, #000 var(--space-md), #000 calc(100% - var(--space-md)), transparent 100%);
+  }
+  .list-toolbar::-webkit-scrollbar { display: none; }
+  .list-toolbar .segmented-control { flex: none; inline-size: auto; }
+  .list-toolbar .segmented-control button { flex: none; }
+  .filter-chips { flex: none; flex-wrap: nowrap; overflow: visible; }
+  .filter-summary { flex: none; }
+}

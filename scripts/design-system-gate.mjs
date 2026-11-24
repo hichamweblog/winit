@@ -25,6 +25,11 @@ const fail = (name, detail) => { checks.push({ name, pass: false, detail }); fai
 
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 
+// globals.css is now a small import manifest (no stylesheet may pass 1,000
+// lines), so follow its relative imports and hand the rules the whole bundle.
+const readCssBundle = (entry) =>
+  read(entry).replace(/@import "\.\/([^"]+)";/g, (_, file) => read(`src/app/${file}`));
+
 /* ---------------------------------------------------------- colour maths */
 const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const linear = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
@@ -118,7 +123,13 @@ if (fs.existsSync(path.join(ROOT, refPath))) {
 }
 
 /* ------------------------------------------------- structural CSS rules */
-const cssFiles = ['src/app/globals.css', 'src/app/base.css'];
+const cssFiles = [
+  'src/app/ui-shell.css',
+  'src/app/ui-components.css',
+  'src/app/ui-views.css',
+  'src/app/ui-responsive.css',
+  'src/app/base.css',
+];
 for (const file of cssFiles) {
   const css = read(file);
   const lines = css.split('\n');
@@ -149,7 +160,7 @@ for (const file of cssFiles) {
   else ok(`type-scale/${file}`, 'no hard-coded sub-12.5px sizes');
 }
 
-const globals = read('src/app/globals.css');
+const globals = readCssBundle('src/app/globals.css');
 const typography = read('src/app/tokens.css');
 const typeScale = [
   ['body', /--text-body:\s*1rem\s*;/],

@@ -19,6 +19,21 @@ export const metadata: Metadata = {
   description: 'مساحة هادئة تجمع أهدافك، عاداتك، ووقتك في مكان واحد.', // i18n-exempt: server metadata
   applicationName: 'Winit',
   manifest: '/manifest.webmanifest',
+  metadataBase: new URL('https://winit-dz.vercel.app'),
+  openGraph: {
+    type: 'website',
+    siteName: 'Winit',
+    locale: 'ar_DZ',
+    title: 'Winit — مساحتك للإنجاز', // i18n-exempt: server metadata
+    description: 'مساحة هادئة تجمع أهدافك، عاداتك، ووقتك في مكان واحد.', // i18n-exempt: server metadata
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Winit' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Winit — مساحتك للإنجاز', // i18n-exempt: server metadata
+    description: 'مساحة هادئة تجمع أهدافك، عاداتك، ووقتك في مكان واحد.', // i18n-exempt: server metadata
+    images: ['/og.png'],
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '32x32' },

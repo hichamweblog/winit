@@ -29,8 +29,11 @@ if (!hasMigrations) {
 }
 
 console.log('Applying database migrations...');
-if (fs.existsSync(path.join(process.cwd(), 'scripts', 'migrate.mjs'))) {
-  execFileSync(process.execPath, ['scripts/migrate.mjs'], { stdio: 'inherit' });
+// The bundle is build output, so it lives in node_modules/.cache: a generated
+// file outside the source tree, which is also why it is not committed.
+const bundle = path.join(process.cwd(), 'node_modules', '.cache', 'winit', 'migrate.mjs');
+if (fs.existsSync(bundle)) {
+  execFileSync(process.execPath, [bundle], { stdio: 'inherit' });
 } else {
   execFileSync(process.execPath, ['--import', 'tsx', 'src/db/migrate.ts'], { stdio: 'inherit' });
 }

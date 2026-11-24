@@ -50,7 +50,9 @@ npm run db:seed       # بيانات بداية — يرفض العمل في ا�
 npm run sessions:purge     # حذف الجلسات المنتهية (شغّله يومياً)
 ```
 
-اضبط `DATABASE_URL` على رابط PostgreSQL؛ مثال محلي: `postgresql://postgres:password@localhost:5432/winit`. أدوات النسخ الاحتياطي وإعادة الضبط وتنظيف بيانات العرض القديمة خاصة بملفات SQLite ولا تعمل مع PostgreSQL.
+اضبط `DATABASE_URL` على رابط PostgreSQL؛ مثال محلي: `postgresql://postgres:password@localhost:5432/winit`.
+
+تتبّع الأخطاء (Sentry) موصول لكنه نائم: بلا `NEXT_PUBLIC_SENTRY_DSN` لا يُحمَّل أي شيء ولا يخرج أي طلب من الجهاز. صفحتا `/privacy` و`/terms` مسودّتان تحتاجان مراجعتك قبل النشر. أدوات النسخ الاحتياطي وإعادة الضبط وتنظيف بيانات العرض القديمة خاصة بملفات SQLite ولا تعمل مع PostgreSQL.
 
 ## ما يعمل الآن
 

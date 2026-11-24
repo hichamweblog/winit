@@ -46,6 +46,8 @@ export type DashboardProps = {
   sessions: FocusSession[];
   onEditTask: (task: Task) => void;
   onDeleteTask?: (taskId: string) => void;
+  onSeedDemo?: () => void;
+  seeding?: boolean;
 };
 
 /** Greeting follows the clock so the first thing on screen is never a lie. */
@@ -81,6 +83,9 @@ export function TodayDashboard(props: DashboardProps) {
     sessions,
     onEditTask,
     onDeleteTask,
+    onSeedDemo,
+    seeding,
+    tasks,
   } = props;
 
   const { t } = useLocale();
@@ -175,6 +180,15 @@ export function TodayDashboard(props: DashboardProps) {
             <div className="empty-state">
               <b>{t('قائمتك هادئة الآن')}</b>
               <span>{t('لحظة جميلة لتضيف مهمة تخدم أهدافك.')}</span>
+              <button className="btn btn-primary primary-button" onClick={() => setShowAdd(true)}>
+                <Plus size={16} />
+                {t('أضف مهمة')}
+              </button>
+              {!tasks.length && onSeedDemo && (
+                <button type="button" className="text-link" onClick={onSeedDemo} disabled={seeding}>
+                  {seeding ? t('نضيف البيانات…') : t('أو ابدأ بثلاث مهام تجريبية')}
+                </button>
+              )}
             </div>
           )}
         </section>
@@ -198,6 +212,7 @@ export function TodayDashboard(props: DashboardProps) {
               <div className="empty-state">
                 <b>{t('ابدأ بعادة واحدة')}</b>
                 <span>{t('عادة صغيرة تتكرر أفضل من خطة كبيرة تنتظر.')}</span>
+                <button type="button" className="ghost-button" onClick={() => setView('habits')}>{t('أضف عادة')}</button>
               </div>
             )}
           </div>

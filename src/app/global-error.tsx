@@ -1,15 +1,18 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useLocale } from './locale';
+import { reportError } from './report-error';
 
 /**
  * Last-resort boundary for errors in the root layout itself. It replaces the
  * whole document, so it must render its own html/body and cannot rely on the
  * app's CSS being loaded.
  */
-export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   // No LocaleProvider above this boundary: the context default keeps copy as-is.
   const { t } = useLocale();
+  useEffect(() => { reportError(error); }, [error]);
   return (
     <html lang="ar" dir="rtl">
       <body style={{ margin: 0, minHeight: '100vh', display: 'grid', placeItems: 'center', background: '#EDF2F4', color: '#0E2A33', fontFamily: 'system-ui, sans-serif' }}>

@@ -13,7 +13,7 @@ import { useAuth } from './AuthGate';
 import { useLocale } from '../locale';
 import PwaInstall from './PwaInstall';
 import {
-  Check, DeviceMobile, Download, Languages, Logout, Moon, Stopwatch, Sun, Trash, User,
+  Check, DeviceMobile, Download, Languages, ListTodo, Logout, Moon, Stopwatch, Sun, Trash, User,
 } from '../icons';
 import type { AppIcon } from '../icons';
 import { formatArNumber } from '@/lib/core';
@@ -41,12 +41,14 @@ function SettingRow({ icon, title, description, children }: {
 export default function SettingsView({
   darkMode, onToggleTheme, pomodoroMinutes, onPomodoroChange,
   mobileViews, mobileViewOptions, onMobileViewsChange,
+  density, onDensityChange,
   onExportData, onDeleteAccount,
 }: {
   darkMode: boolean; onToggleTheme: () => void;
   pomodoroMinutes: number; onPomodoroChange: (minutes: number) => void;
   mobileViews: string[]; mobileViewOptions: SettingsViewOption[];
   onMobileViewsChange: (next: string[]) => void;
+  density: 'comfortable' | 'compact'; onDensityChange: (next: 'comfortable' | 'compact') => void;
   onExportData?: () => void;
   onDeleteAccount?: () => void;
 }) {
@@ -98,6 +100,16 @@ export default function SettingsView({
             aria-label={t('المظهر الداكن')}
             onClick={onToggleTheme}
           ><i /></button>
+        </SettingRow>
+        <SettingRow
+          icon={<ListTodo size={17} />}
+          title={t('كثافة القائمة')}
+          description={t('«مريحة» تعطي كل مهمة مساحة أكبر، و«كثيفة» تعرض مهام أكثر في الشاشة.')}
+        >
+          <div className="segmented-control density-control" role="group" aria-label={t('كثافة القائمة')}>
+            <button type="button" className={density === 'comfortable' ? 'segment-active' : ''} aria-pressed={density === 'comfortable'} onClick={() => onDensityChange('comfortable')}>{t('مريحة')}</button>
+            <button type="button" className={density === 'compact' ? 'segment-active' : ''} aria-pressed={density === 'compact'} onClick={() => onDensityChange('compact')}>{t('كثيفة')}</button>
+          </div>
         </SettingRow>
       </section>
 
