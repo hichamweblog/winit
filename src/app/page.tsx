@@ -820,7 +820,24 @@ function WinitApp() {
       {mobileMenu && <button className="mobile-scrim" aria-label={t('إغلاق القائمة')} onClick={() => closeMobileMenu()} />}
 
       <main id="main-content" tabIndex={-1} className="main-area" aria-hidden={mobileLayout && mobileMenu ? true : undefined} inert={mobileLayout && mobileMenu}>
-        <header className="topbar"><div className="topbar-start"><button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('فتح القائمة')} aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button><div className="breadcrumbs"><b>{heading}</b></div></div><div className="topbar-end"><div className="topbar-search"><Search size={15} aria-hidden="true" /><input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('ابحث في المهام…')} aria-label={t('ابحث في المهام')} enterKeyHint="search" />{query ? <button type="button" className="icon-button" onClick={() => setQuery('')} aria-label={t('مسح البحث')}><X size={13} /></button> : <kbd aria-hidden="true">Ctrl+K</kbd>}</div><button className="icon-button shortcut-help-button" onClick={() => setShowShortcuts(true)} aria-label={t('اختصارات لوحة المفاتيح')} title={t('اختصارات لوحة المفاتيح')}><span aria-hidden="true">?</span></button><span className="today-date" title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span><button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? t('التبديل إلى المظهر الفاتح') : t('التبديل إلى المظهر الداكن')} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><div className="top-avatar" aria-hidden="true">{avatarLetter}</div></div></header>
+        <header className="topbar">
+          <div className="topbar-start">
+            <button className="icon-button mobile-menu-button" onClick={(event) => openMobileMenu(event.currentTarget)} aria-label={t('فتح القائمة')} aria-expanded={mobileMenu} aria-controls="app-sidebar"><Menu size={20} /></button>
+            <div className="breadcrumbs" title={heading}><b>{heading}</b></div>
+          </div>
+          <div className="topbar-search">
+            <Search size={15} aria-hidden="true" />
+            <input ref={searchRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('ابحث في المهام…')} aria-label={t('ابحث في المهام')} enterKeyHint="search" />
+            {query
+              ? <button type="button" className="icon-button" onClick={() => setQuery('')} aria-label={t('مسح البحث')}><X size={13} /></button>
+              : <kbd aria-hidden="true">Ctrl+K</kbd>}
+          </div>
+          <div className="topbar-end">
+            <span className="today-date" title={`${gregorianDate} ${t('الموافق')} ${hijriDate}`}><span>{gregorianDate}</span><span className="today-date-separator" aria-hidden="true"> • </span><span className="today-date-hijri">{hijriDate}</span></span>
+            <button className="icon-button shortcut-help-button" onClick={() => setShowShortcuts(true)} aria-label={t('اختصارات لوحة المفاتيح')} title={t('اختصارات لوحة المفاتيح')}><span aria-hidden="true">?</span></button>
+            <button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={darkMode ? t('التبديل إلى المظهر الفاتح') : t('التبديل إلى المظهر الداكن')} aria-pressed={darkMode}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button>
+          </div>
+        </header>
         <div className="page-content">
           {view === 'today' && !selectedProject && <TodayDashboard {...{ today, todayTasks, tasks, projects, habits, todayLogs, todayFocusSeconds, completedToday, activeSession, startFocus, finishFocus, setShowFocus, setShowAdd, setFocusTaskId, setView, switchView, mutate, toggleHabit, completeTask, logs, sessions, pomodoroMinutes, userName: auth.user?.name, onOpenTimer: () => setShowFocus(true) }} setShowAdd={(show) => show ? openTaskEditor() : setShowAdd(false)} onEditTask={openTaskEditor} onDeleteTask={deleteTask} />}
           {view === 'journal' && <JournalView entries={journalEntries} total={journalTotal} hasMore={journalNextCursor !== null} search={journalSearch} loading={journalLoading} onSearch={setJournalSearch} onNew={() => { setEditingJournal(null); setShowJournalEditor(true); }} onEdit={(entry) => { setEditingJournal(entry); setShowJournalEditor(true); }} onDelete={(id) => void deleteJournal(id)} onLoadMore={() => void loadJournal(journalNextCursor, true)} />}
@@ -829,7 +846,7 @@ function WinitApp() {
         <footer className="app-footer"><span>{t('مصمّم لأيامك، لا لمزيد من الضجيج.')}</span></footer>
         {/* Phone-first add affordance: a thumb-reachable button instead of a
             keyboard shortcut hint. Hidden on views that have their own add. */}
-        {(view === 'today' || view === 'upcoming' || view === 'inbox' || view === 'all' || selectedProject) && (
+        {(view === 'today' || view === 'upcoming' || view === 'inbox' || view === 'all' || selectedProject) && scopedTasks.length > 0 && (
           <button className="fab-add" onClick={() => openTaskEditor()} aria-label={t('أضف مهمة جديدة')}><Plus size={24} /></button>
         )}
         <nav className="mobile-tabs" aria-label={t('التنقل الرئيسي')} style={{ gridTemplateColumns: `repeat(${mobileViews.length + 1}, minmax(0, 1fr))` }}>

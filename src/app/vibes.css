@@ -150,6 +150,7 @@
 }
 :root[data-vibe="energy"] .welcome-row h1 { color: var(--energy-hero-text); }
 :root[data-vibe="energy"] .welcome-row p { color: var(--energy-hero-muted); }
+:root[data-vibe="energy"] .welcome-row .welcome-name { color: var(--energy-hero-muted); }
 :root[data-vibe="energy"] .stat-card:nth-child(1) { background: var(--energy-card-blue); border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); }
 :root[data-vibe="energy"] .stat-card:nth-child(2) { background: var(--energy-card-green); border-color: color-mix(in srgb, var(--accent-2) 36%, var(--line)); }
 :root[data-vibe="energy"] .stat-card:nth-child(3) { background: var(--energy-card-mint); border-color: color-mix(in srgb, var(--accent-2) 32%, var(--line)); }

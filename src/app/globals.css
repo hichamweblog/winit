@@ -124,7 +124,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .brand-dot { color: var(--color-accent-strong); }
 .sidebar-close { margin-inline-start: auto; }
 .workspace-switch { min-height: 48px; width: 100%; padding: var(--space-2xs); display: flex; align-items: center; gap: var(--space-xs); text-align: start; border-block: 1px solid var(--color-rule); }
-.workspace-avatar, .profile-avatar, .top-avatar { width: 32px; height: 32px; display: grid; place-items: center; flex: none; border-radius: 50%; color: var(--color-accent-ink); background: var(--color-accent); font-size: var(--text-ui); font-weight: 700; }
+.workspace-avatar, .profile-avatar { width: 32px; height: 32px; display: grid; place-items: center; flex: none; border-radius: 50%; color: var(--color-accent-ink); background: var(--color-accent); font-size: var(--text-ui); font-weight: 700; }
 .workspace-txt, .profile-info { min-width: 0; display: flex; flex: 1; flex-direction: column; line-height: 1.5; }
 .workspace-txt b, .profile-info b { font-size: var(--text-ui); font-weight: 600; }
 .workspace-txt small, .profile-info span { color: var(--color-ink-2); font-size: var(--text-small); font-weight: 600; }
@@ -161,7 +161,8 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 }
 .topbar-start, .topbar-end, .breadcrumbs { min-width: 0; display: flex; align-items: center; }
 .topbar-start, .topbar-end { gap: var(--space-xs); }
-.breadcrumbs { gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); white-space: nowrap; }
+.breadcrumbs { flex: 1 1 auto; gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); white-space: nowrap; overflow: hidden; }
+.breadcrumbs b { overflow: hidden; text-overflow: ellipsis; }
 .breadcrumbs svg { color: var(--color-muted); }
 .today-date { display: inline-flex; align-items: center; gap: var(--space-2xs); color: var(--color-ink-2); font-size: var(--text-small); white-space: nowrap; }
 .today-date-separator { opacity: 0.5; user-select: none; }
@@ -174,7 +175,6 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 }
 .icon-button:focus-visible::before { content: ""; position: absolute; inset: 2px; border-radius: 7px; outline: 2px solid var(--color-focus); outline-offset: 2px; pointer-events: none; }
 .mobile-menu-button { display: grid; }
-.top-avatar { width: 32px; height: 32px; font-size: var(--text-ui); }
 .theme-toggle { color: var(--color-ink-2); border-radius: var(--radius-pill); }
 
 .page-content { width: min(100%, var(--container)); margin-inline: auto; padding: var(--space-lg) var(--gutter) 104px; flex: 1; }
@@ -419,7 +419,6 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   .mobile-tabs { padding-inline: var(--space-3xs); }
   .mobile-tabs button { font-size: var(--text-small); }
   .focus-dock { gap: var(--space-2xs); padding-inline: var(--space-2xs); }
-  .top-avatar { display: none; }
   .dock-stop { min-width: 40px; padding-inline: var(--space-2xs); }
   .dock-title { max-width: 54px; }
   .dock-live { min-width: 22px; padding-inline: 6px; font-size: 0; }
@@ -1399,6 +1398,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
    selection bar reuses the card border used by every other panel.
    ========================================================================= */
 .topbar-search {
+  flex: 0 1 300px;
   min-inline-size: 0;
   display: flex;
   align-items: center;
@@ -1523,14 +1523,30 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .shortcut-note { margin-block-start: var(--space-3); color: var(--color-ink-2); font-size: var(--text-small); }
 
 @media (max-width: 900px) {
-  .topbar-search input { inline-size: 130px; }
+  .topbar-search { flex: 0 1 200px; }
+  .topbar-search input { inline-size: 118px; }
   .topbar-search kbd { display: none; }
 }
-@media (max-width: 640px) {
-  .topbar-search { flex: 1 1 100%; order: 3; }
-  .topbar-end { flex-wrap: wrap; }
+
+/* Phone topbar: two rows. Title + theme on the first, search on the second.
+   The date and the shortcut sheet need a keyboard and a wide gutter; on a
+   phone they only squeezed the page title into an ellipsis. */
+@media (max-width: 720px) {
+  .topbar { flex-wrap: wrap; padding-block: var(--space-2); row-gap: var(--space-2); }
+  .topbar-start { flex: 1 1 auto; }
+  .topbar-end { order: 2; flex: none; }
+  .topbar-search { order: 3; flex: 1 1 100%; }
   .topbar-search input { inline-size: 100%; }
+  .today-date,
+  .shortcut-help-button { display: none; }
   .selection-bar { position: static; }
+
+  /* Filters: status stays one full-width row, priorities scroll sideways
+     instead of stacking into three. */
+  .list-toolbar .segmented-control { flex: 1 1 100%; }
+  .list-toolbar .segmented-control button { flex: 1; }
+  .filter-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .filter-chips::-webkit-scrollbar { display: none; }
 }
 @media (pointer: coarse) {
   .chip { min-block-size: var(--tap-min); }
@@ -1544,3 +1560,11 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .settings-nav { margin-block-start: var(--space-lg); padding-block-start: var(--space-2xs); border-block-start: 1px solid var(--line); }
 
 .journal-quote { margin-block: var(--space-sm) var(--space-md); color: var(--color-ink-2); font-size: var(--text-ui); font-weight: 600; }
+
+/* The search pill is 40px tall; the coarse-pointer floor of 48px on
+   .icon-button would burst it, so the clear button gets its own size. */
+.topbar-search .icon-button { inline-size: 28px; min-inline-size: 28px; min-block-size: 28px; padding: 0; border-radius: 50%; }
+@media (pointer: coarse) {
+  .topbar-search { block-size: 48px; padding-inline: var(--space-3) var(--space-2xs); }
+  .topbar-search .icon-button { inline-size: 40px; min-inline-size: 40px; min-block-size: 40px; }
+}
