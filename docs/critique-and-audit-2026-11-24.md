@@ -177,3 +177,54 @@ design gate 25/25 + 168 contrast pairs, PWA gate 8/8, i18n gate 32 files;
 Still open by design: the goal layer (deferred), `react-day-picker` vs
 `AR_LOCALE` date formatting (two date systems, cosmetic), nonce-based CSP
 (behind `WINIT_STRICT_CSP=1`), password reset and email verification.
+
+---
+
+# Resolution log — round 2 (Impeccable review)
+
+Second pass, driven by the phone/desktop screenshots and by
+`impeccable foundations .`, which moved from **8 of 14** to **13 of 14** in
+place. The remaining one is `no-generic-ai-patterns`, which needs the
+element-level detector against a rendered page — not reachable here.
+
+## Screenshot round
+
+| Finding | Status | Fix |
+|---|---|---|
+| Page title clipped ("عادات…") with a stray grey pill under it | Fixed | The search pill, date and theme shared one `.topbar-end` group, so search wrapped into a three-line block. Header is now `start` / `search` / `end`, and under 720px it is two deliberate rows with the title ellipsing instead of pushing |
+| User's initial drawn twice on desktop | Fixed | `.top-avatar` removed with its CSS; the sidebar `.workspace-avatar` is the single instance |
+| Greeting name low contrast on the Energy hero | Fixed | `--energy-hero-muted` instead of `--color-ink-2` |
+| FAB on top of empty states that already had a CTA | Fixed | The add button requires a non-empty list, and steps aside while a focus session is docked |
+| Priority chips stacked three rows on a phone | Fixed | Status and priority share one sideways-scrolling row with an edge fade |
+| Journal quote broke around its guillemets | Removed | The line, its string and `.journal-quote` are gone |
+
+## Foundations
+
+| Item | Status | Where |
+|---|---|---|
+| `social-previews` | Fixed | `scripts/make-og.mjs` → `public/og.png` (1200×630), `openGraph` + `twitter` + `metadataBase` in `layout.tsx` |
+| `legal-pages` | Fixed (drafts) | `/privacy`, `/terms`, linked from the app footer; both carry a "draft — awaiting your review" badge and are not legal advice |
+| `error-tracking` | Fixed | `@sentry/nextjs`, initialised in `instrumentation-client.ts`, dormant without `NEXT_PUBLIC_SENTRY_DSN`; the SDK and `reportError()` load lazily, so shared JS stays 103 kB |
+| `dependency-scanning` | Fixed | `.github/dependabot.yml` (npm weekly, patch/minor grouped; Actions monthly) |
+| `no-giant-files` | Fixed | `globals.css` 1,569 lines → four stylesheets behind an import manifest; the esbuild migration bundle moved to `node_modules/.cache/winit/` instead of being committed |
+
+## UX list
+
+- Phone: hero collapses below 720px (subtitle dropped, padding tightened).
+- Date opens the calendar; the workspace avatar opens settings.
+- A language toggle sits beside the theme.
+- Settings: list density (comfortable / compact), root-applied and remembered.
+- Completion settles over 120ms instead of jump-cutting (reduced motion respected).
+- A search with no matches names the query and offers to clear it.
+- First run can seed three sample tasks through the public API.
+- An offline strip appears when the network drops.
+- Empty states gained the action each one was missing.
+
+Verification: `npm run check` green (typecheck, 120 tests / 119 pass, design gate
+34/34 + 168 contrast pairs, PWA 8/8, i18n 36 files) and `npm run build` succeeds,
+/privacy and /terms prerendered, 103 kB shared JS.
+
+Known gap, pre-existing on `main`: the CI job "API smoke test against a real
+server" fails on its "Start, migrate and probe" step on every branch, including
+`main` before these changes. Log download is blocked in this environment, so the
+cause is not yet diagnosed.
