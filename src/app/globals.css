@@ -11,18 +11,18 @@
   default: true;
   color-scheme: light;
   --color-base-100: #FFFFFF;
-  --color-base-200: #D1F0FF;
-  --color-base-300: #B6E5F4;
-  --color-base-content: #123047;
-  --color-primary: #1A6DAD;
+  --color-base-200: #C1F0EC;
+  --color-base-300: #B0CFDD;
+  --color-base-content: #1D2E38;
+  --color-primary: #3E3758;
   --color-primary-content: #FFFFFF;
-  --color-secondary: #46B4D2;
-  --color-secondary-content: #123047;
-  --color-accent: #7ADAF5;
-  --color-accent-content: #123047;
-  --color-neutral: #104D7B;
+  --color-secondary: #8AB946;
+  --color-secondary-content: #17272F;
+  --color-accent: #B0CFDD;
+  --color-accent-content: #1D2E38;
+  --color-neutral: #3E3758;
   --color-neutral-content: #FFFFFF;
-  --color-info: #1A6DAD;
+  --color-info: #3E3758;
   --color-info-content: #FFFFFF;
   --color-success: #168052;
   --color-success-content: #FFFFFF;
@@ -39,20 +39,20 @@
   name: "winit-energy-dark";
   prefersdark: true;
   color-scheme: dark;
-  --color-base-100: #102D3B;
-  --color-base-200: #0B1F2B;
-  --color-base-300: #2A5265;
-  --color-base-content: #EDF9FE;
-  --color-primary: #7ADAF5;
-  --color-primary-content: #0B2D3F;
-  --color-secondary: #46B4D2;
-  --color-secondary-content: #062B3B;
-  --color-accent: #D1F0FF;
-  --color-accent-content: #123047;
-  --color-neutral: #173A4C;
-  --color-neutral-content: #EDF9FE;
-  --color-info: #7ADAF5;
-  --color-info-content: #0B2D3F;
+  --color-base-100: #1B1A28;
+  --color-base-200: #11101B;
+  --color-base-300: #35324A;
+  --color-base-content: #F4F2FA;
+  --color-primary: #C1F0EC;
+  --color-primary-content: #17272F;
+  --color-secondary: #8AB946;
+  --color-secondary-content: #17272F;
+  --color-accent: #B0CFDD;
+  --color-accent-content: #17272F;
+  --color-neutral: #3E3758;
+  --color-neutral-content: #F4F2FA;
+  --color-info: #B0CFDD;
+  --color-info-content: #17272F;
   --color-success: #63D6A0;
   --color-success-content: #09271A;
   --color-warning: #F3C867;
@@ -93,6 +93,7 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
   transform: translateX(105%);
   transition: transform var(--dur-short) var(--ease-out);
   direction: inherit;
+  font-weight: 600;
 }
 .sidebar-open { transform: translateX(0); }
 @media (max-width: 1099px) {
@@ -109,14 +110,14 @@ input, select, textarea { color: var(--color-ink); background: var(--color-paper
 .workspace-avatar, .profile-avatar, .top-avatar { width: 32px; height: 32px; display: grid; place-items: center; flex: none; border-radius: 50%; color: var(--color-accent-ink); background: var(--color-accent); font-size: var(--text-ui); font-weight: 700; }
 .workspace-txt, .profile-info { min-width: 0; display: flex; flex: 1; flex-direction: column; line-height: 1.5; }
 .workspace-txt b, .profile-info b { font-size: var(--text-ui); font-weight: 600; }
-.workspace-txt small, .profile-info span { color: var(--color-ink-2); font-size: var(--text-small); }
-.nav-label { margin-block: var(--space-lg) var(--space-xs); padding-inline: var(--space-xs); color: var(--color-muted); font-size: var(--text-small); }
+.workspace-txt small, .profile-info span { color: var(--color-ink-2); font-size: var(--text-small); font-weight: 600; }
+.nav-label { margin-block: var(--space-lg) var(--space-xs); padding-inline: var(--space-xs); color: var(--color-muted); font-size: var(--text-small); font-weight: 600; }
 .main-nav, .project-nav { display: flex; flex-direction: column; gap: var(--space-2xs); }
-.nav-item, .project-item { min-height: 44px; width: 100%; padding-inline: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs); border-radius: 8px; color: var(--color-ink-2); text-align: start; font-size: var(--text-ui); font-weight: 500; }
+.nav-item, .project-item { min-height: 44px; width: 100%; padding-inline: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs); border-radius: 8px; color: var(--color-ink-2); text-align: start; font-size: var(--text-ui); font-weight: 600; }
 .nav-item svg { color: var(--color-ink-2); }
-.nav-active, .project-active { color: var(--color-accent-strong); background: var(--color-paper-2); font-weight: 700; }
+.nav-active, .project-active { color: var(--color-accent-strong); background: var(--color-paper-2); font-weight: 600; }
 .nav-active svg { color: var(--color-accent-strong); }
-.nav-count, .project-count { margin-inline-start: auto; color: var(--color-ink-2); font-size: var(--text-small); font-variant-numeric: tabular-nums; }
+.nav-count, .project-count { margin-inline-start: auto; color: var(--color-ink-2); font-size: var(--text-small); font-weight: 600; font-variant-numeric: tabular-nums; }
 .project-head { display: flex; align-items: center; margin-block-start: var(--space-lg); }
 .project-head .nav-label { margin-block: 0 var(--space-xs); }
 .tiny-add { width: 44px; height: 44px; margin-inline-start: auto; display: grid; place-items: center; color: var(--color-ink-2); border-radius: 8px; }

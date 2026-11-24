@@ -173,6 +173,8 @@ if (/\.stats-page \.segmented-control\s*\{[^}]*width:\s*100%/s.test(globals) && 
 else fail('mobile-stats-controls', 'stats range controls need full-width phone layout and 44px targets');
 if (/\.toast\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto/s.test(globals)) ok('toast-layout', 'notifications keep message and close action on one compact row');
 else fail('toast-layout', 'notifications need a compact non-obstructive row layout');
+if (/\.sidebar\s*\{[^}]*font-weight:\s*600/s.test(globals) && /\.nav-item, \.project-item\s*\{[^}]*font-weight:\s*600/s.test(globals)) ok('sidebar-weight', 'sidebar navigation and project labels are semibold');
+else fail('sidebar-weight', 'sidebar navigation and project labels must be semibold');
 
 const base = read('src/app/base.css');
 if (!/\.reading-body\s*\{[^}]*--font-reading/.test(base)) fail('reading-body', '.reading-body must own --font-reading');

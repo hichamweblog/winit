@@ -1,32 +1,32 @@
-/* Winit Coastal Sky: the supplied five-color palette, tuned for readable text.
-   Fun Blue is reserved for white-on-color actions; brighter cyans are used with
-   dark ink; Onahau and Colonial White are calm surfaces, not text colors. */
+/* Winit custom four-color palette, tuned for legible text in both modes.
+   Purple is the primary/action color; green is paired with dark ink; the two
+   pale colors are surfaces and accents, never low-contrast foreground text. */
 :root[data-vibe="energy"] {
   --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
   --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
   color-scheme: light;
-  --bg: #F3FAFD;
+  --bg: #F4F7F8;
   --surface: #FFFFFF;
   --surface-raised: #FFFFFF;
-  --surface-sunken: #D1F0FF;
-  --text: #123047;
-  --text-muted: #415B6C;
-  --text-disabled: #738B98;
-  --line: #B8D8E5;
-  --line-strong: #4B7183;
-  --accent: #1A6DAD;
-  --accent-hover: #155A91;
-  --accent-pressed: #104D7B;
-  --accent-soft: #D1F0FF;
+  --surface-sunken: #C1F0EC;
+  --text: #1D2E38;
+  --text-muted: #303A40;
+  --text-disabled: #687A83;
+  --line: #CFD8DD;
+  --line-strong: #56646B;
+  --accent: #3E3758;
+  --accent-hover: #332D49;
+  --accent-pressed: #28233A;
+  --accent-soft: #C1F0EC;
   --on-accent: #FFFFFF;
-  --accent-gradient: linear-gradient(125deg, #1A6DAD 0%, #1A6DAD 100%);
-  --accent-2: #46B4D2;
-  --accent-2-strong: #155A75;
-  --accent-2-soft: #D1F0FF;
-  --on-accent-2: #123047;
-  --accent-2-on-soft: #104D7B;
-  --accent-2-line: #155A75;
-  --toast-action: #7ADAF5;
+  --accent-gradient: linear-gradient(125deg, #3E3758 0%, #3E3758 100%);
+  --accent-2: #8AB946;
+  --accent-2-strong: #425E1F;
+  --accent-2-soft: #B0CFDD;
+  --on-accent-2: #17272F;
+  --accent-2-on-soft: #3E3758;
+  --accent-2-line: #3E3758;
+  --toast-action: #C1F0EC;
   --success: #168052;
   --success-bg: #DDF4E9;
   --success-text: #176744;
@@ -35,27 +35,27 @@
   --warning-bg: #FFF1C9;
   --warning-text: #7D5400;
   --on-warning: #FFFFFF;
-  --info: #1A6DAD;
-  --info-bg: #D1F0FF;
-  --info-text: #104D7B;
+  --info: #3E3758;
+  --info-bg: #E7E4EF;
+  --info-text: #3E3758;
   --on-info: #FFFFFF;
-  --energy-sidebar-bg: #1A6DAD;
-  --energy-sidebar-hover: #155A91;
-  --energy-sidebar-active: #D1F0FF;
-  --energy-sidebar-accent: #7ADAF5;
+  --energy-sidebar-bg: #3E3758;
+  --energy-sidebar-hover: #332D49;
+  --energy-sidebar-active: #C1F0EC;
+  --energy-sidebar-accent: #8AB946;
   --energy-sidebar-text: #FFFFFF;
-  --energy-sidebar-muted: #D1F0FF;
-  --energy-sidebar-active-text: #104D7B;
-  --energy-sidebar-border: #46B4D2;
-  --energy-card-onahau: #D1F0FF;
-  --energy-card-malibu: #7ADAF5;
-  --energy-card-colonial: #FFECBD;
-  --energy-hero-bg: #1A6DAD;
+  --energy-sidebar-muted: #E5E1F0;
+  --energy-sidebar-active-text: #1D2E38;
+  --energy-sidebar-border: #716A88;
+  --energy-card-blue: #B0CFDD;
+  --energy-card-mint: #C1F0EC;
+  --energy-card-green: #8AB946;
+  --energy-hero-bg: #3E3758;
   --energy-hero-text: #FFFFFF;
-  --energy-hero-muted: #D1F0FF;
-  --shadow-1: 0 1px 2px rgba(18, 48, 71, .06);
-  --shadow-2: 0 8px 24px rgba(18, 69, 106, .10);
-  --shadow-3: 0 18px 48px rgba(18, 48, 71, .16);
+  --energy-hero-muted: #C1F0EC;
+  --shadow-1: 0 1px 2px rgba(29, 46, 56, .08);
+  --shadow-2: 0 8px 24px rgba(62, 55, 88, .12);
+  --shadow-3: 0 18px 48px rgba(29, 46, 56, .18);
 }
 
 :root[data-vibe="energy"][data-mode="dark"],
@@ -63,28 +63,28 @@
   --font-heading: "Tajawal", Tahoma, "Segoe UI", sans-serif;
   --font-ui: "Tajawal", Tahoma, "Segoe UI", system-ui, sans-serif;
   color-scheme: dark;
-  --bg: #081E2B;
-  --surface: #102D3B;
-  --surface-raised: #17394A;
-  --surface-sunken: #071824;
-  --text: #EDF9FE;
-  --text-muted: #B7CFD8;
-  --text-disabled: #78929B;
-  --line: #2A5265;
-  --line-strong: #74A6B8;
-  --accent: #7ADAF5;
-  --accent-hover: #9BE6F8;
-  --accent-pressed: #C1F0FA;
-  --accent-soft: #123B4D;
-  --on-accent: #0B2D3F;
-  --accent-gradient: linear-gradient(125deg, #7ADAF5 0%, #7ADAF5 100%);
-  --accent-2: #46B4D2;
-  --accent-2-strong: #7ADAF5;
-  --accent-2-soft: #123B4D;
-  --on-accent-2: #062B3B;
-  --accent-2-on-soft: #A5E9F8;
-  --accent-2-line: #7ADAF5;
-  --toast-action: #1A6DAD;
+  --bg: #11101B;
+  --surface: #1B1A28;
+  --surface-raised: #262437;
+  --surface-sunken: #0C0C14;
+  --text: #F4F2FA;
+  --text-muted: #C4C0D1;
+  --text-disabled: #8A849B;
+  --line: #383549;
+  --line-strong: #817C96;
+  --accent: #C1F0EC;
+  --accent-hover: #D6FAF6;
+  --accent-pressed: #ECFFFD;
+  --accent-soft: #2A2A3B;
+  --on-accent: #17272F;
+  --accent-gradient: linear-gradient(125deg, #C1F0EC 0%, #C1F0EC 100%);
+  --accent-2: #8AB946;
+  --accent-2-strong: #B0CFDD;
+  --accent-2-soft: #2B3529;
+  --on-accent-2: #17272F;
+  --accent-2-on-soft: #C1F0EC;
+  --accent-2-line: #8AB946;
+  --toast-action: #3E3758;
   --success: #63D6A0;
   --success-bg: #1D3D36;
   --success-text: #73D9A6;
@@ -93,27 +93,27 @@
   --warning-bg: #423A25;
   --warning-text: #F1C65A;
   --on-warning: #30220B;
-  --info: #7ADAF5;
-  --info-bg: #123B4D;
-  --info-text: #A5E9F8;
-  --on-info: #0B2D3F;
-  --energy-sidebar-bg: #0C344B;
-  --energy-sidebar-hover: #10445D;
-  --energy-sidebar-active: #D1F0FF;
-  --energy-sidebar-accent: #7ADAF5;
-  --energy-sidebar-text: #EDF9FE;
-  --energy-sidebar-muted: #D1F0FF;
-  --energy-sidebar-active-text: #104D7B;
-  --energy-sidebar-border: #285B70;
-  --energy-card-onahau: #153B4F;
-  --energy-card-malibu: #14465B;
-  --energy-card-colonial: #453B26;
-  --energy-hero-bg: #104D7B;
+  --info: #B0CFDD;
+  --info-bg: #293744;
+  --info-text: #B0CFDD;
+  --on-info: #17272F;
+  --energy-sidebar-bg: #211E30;
+  --energy-sidebar-hover: #302C40;
+  --energy-sidebar-active: #C1F0EC;
+  --energy-sidebar-accent: #8AB946;
+  --energy-sidebar-text: #F4F2FA;
+  --energy-sidebar-muted: #D5D0E2;
+  --energy-sidebar-active-text: #1D2E38;
+  --energy-sidebar-border: #4C465F;
+  --energy-card-blue: #263645;
+  --energy-card-mint: #213A3C;
+  --energy-card-green: #3D4D2A;
+  --energy-hero-bg: #3E3758;
   --energy-hero-text: #FFFFFF;
-  --energy-hero-muted: #D1F0FF;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, .38);
-  --shadow-2: 0 8px 26px rgba(0, 0, 0, .36);
-  --shadow-3: 0 18px 52px rgba(0, 0, 0, .5);
+  --energy-hero-muted: #C1F0EC;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-2: 0 8px 26px rgba(0, 0, 0, .4);
+  --shadow-3: 0 18px 52px rgba(0, 0, 0, .55);
 }
 
 :root[data-vibe="energy"] .sidebar {
@@ -126,8 +126,9 @@
   --color-rule: color-mix(in srgb, var(--energy-sidebar-text) 28%, transparent);
   --color-edge: var(--energy-sidebar-border);
   --color-accent: var(--energy-sidebar-accent);
+  --color-primary: var(--energy-sidebar-accent);
   --color-accent-strong: var(--energy-sidebar-text);
-  --color-accent-ink: #104D7B;
+  --color-accent-ink: #17272F;
   --line: var(--energy-sidebar-border);
   color: var(--energy-sidebar-text);
   background: var(--energy-sidebar-bg);
@@ -149,10 +150,10 @@
 }
 :root[data-vibe="energy"] .welcome-row h1 { color: var(--energy-hero-text); }
 :root[data-vibe="energy"] .welcome-row p { color: var(--energy-hero-muted); }
-:root[data-vibe="energy"] .stat-card:nth-child(1) { background: var(--energy-card-onahau); border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); }
-:root[data-vibe="energy"] .stat-card:nth-child(2) { background: var(--energy-card-colonial); border-color: color-mix(in srgb, #A06C16 28%, var(--line)); }
-:root[data-vibe="energy"] .stat-card:nth-child(3) { background: var(--energy-card-malibu); border-color: color-mix(in srgb, var(--accent-2) 32%, var(--line)); }
-:root[data-vibe="energy"] .primary-button { background: var(--accent); font-weight: 650; box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 23%, transparent); }
+:root[data-vibe="energy"] .stat-card:nth-child(1) { background: var(--energy-card-blue); border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); }
+:root[data-vibe="energy"] .stat-card:nth-child(2) { background: var(--energy-card-green); border-color: color-mix(in srgb, var(--accent-2) 36%, var(--line)); }
+:root[data-vibe="energy"] .stat-card:nth-child(3) { background: var(--energy-card-mint); border-color: color-mix(in srgb, var(--accent-2) 32%, var(--line)); }
+:root[data-vibe="energy"] .primary-button { background: var(--accent); font-weight: 600; box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 23%, transparent); }
 :root[data-vibe="energy"] .primary-button:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
 :root[data-vibe="energy"] .primary-button:disabled { opacity: 1; color: var(--text-muted); background: var(--surface-sunken); border: 1px solid var(--line-strong); box-shadow: none; }
 :root[data-vibe="energy"] .focus-dock { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); box-shadow: 0 12px 34px color-mix(in srgb, var(--accent) 16%, transparent); }
